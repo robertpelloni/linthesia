@@ -1,0 +1,3 @@
+[submodule "pianogame"]
+	path = pianogame
+	url = https://github.com/robertpelloni/pianogame.git
