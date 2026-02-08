@@ -31,15 +31,16 @@ void SelectTexture(unsigned int texture_id) {
 }
 
 
-Renderer::Renderer(SDL_Window* sdl_window) :
+Renderer::Renderer(GLContext glcontext, PGContext pangocontext) :
   m_xoffset(0),
   m_yoffset(0),
-  m_sdl_window(sdl_window) {
+  m_glcontext(glcontext),
+  m_pangocontext(pangocontext) {
 }
 
-SDL_Color Renderer::ToColor(int r, int g, int b, int a) {
+Color Renderer::ToColor(int r, int g, int b, int a) {
 
-  SDL_Color c;
+  Color c;
   c.r = r;
   c.g = g;
   c.b = b;
@@ -115,7 +116,7 @@ void Renderer::SetVSyncInterval(int interval) {
 }
 
 void Renderer::SwapBuffers() {
-  SDL_GL_SwapWindow(m_sdl_window);
+  //m_glcontext->get_gl_drawable()->swap_buffers();
 }
 
 void Renderer::ForceTexture(unsigned int texture_id) {
@@ -123,7 +124,7 @@ void Renderer::ForceTexture(unsigned int texture_id) {
   SelectTexture(texture_id);
 }
 
-void Renderer::SetColor(SDL_Color c) {
+void Renderer::SetColor(Color c) {
   SetColor(c.r, c.g, c.b, c.a);
 }
 
@@ -188,22 +189,4 @@ void Renderer::DrawStretchedTga(const Tga *tga, int x, int y, int w, int h,
   glTexCoord2d(tx+tw, ty+th); glVertex3i(sx+w, sy+h, 0);
   glTexCoord2d(tx+tw,    ty); glVertex3i(sx+w,   sy, 0);
   glEnd();
-}
-
-void Renderer::DrawCenteredTga(const Tga *tga, int cx, int cy, int max_w, int max_h) const {
-
-  double source_a = static_cast<double>(tga->GetWidth()) / tga->GetHeight();
-  double max_a = static_cast<double>(max_w) / max_h;
-  int w, h;
-  if (max_a <= source_a)
-  {
-    w = max_w;
-    h = max_w / source_a;
-  } else
-  {
-    h = max_h;
-    w = max_h * source_a;
-
-  }
-  DrawStretchedTga(tga, cx - w / 2, cy - h / 2, w, h);
 }

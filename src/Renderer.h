@@ -11,16 +11,22 @@
 
 #include "OSGraphics.h"
 #include "Tga.h"
-#include "SDL.h"
+
+typedef Glib::RefPtr<Gdk::GLContext> GLContext;
+typedef Glib::RefPtr<Pango::Context> PGContext;
+
+struct Color {
+  int r, g, b, a;
+};
 
 static bool m_vsync_initialized;
 
 class Renderer {
 public:
 
-  Renderer(SDL_Window* sdl_window);
+  Renderer(GLContext glcontext, PGContext pangocontext);
 
-  static SDL_Color ToColor(int r, int g, int b, int a = 0xFF);
+  static Color ToColor(int r, int g, int b, int a = 0xFF);
 
   void SwapBuffers();
 
@@ -37,7 +43,7 @@ public:
 
   void ForceTexture(unsigned int texture_id);
 
-  void SetColor(SDL_Color c);
+  void SetColor(Color c);
   void SetColor(int r, int g, int b, int a = 0xFF);
   void DrawQuad(int x, int y, int w, int h);
 
@@ -49,15 +55,6 @@ public:
   void DrawStretchedTga(const Tga *tga, int x, int y, int w, int h,
                         int src_x, int src_y, int src_w, int src_h) const;
 
-
-  /// @brief draws the tga centered limits to the width and height and keeping the aspect ratio of the tga
-  /// @param tga the image to draw
-  /// @param cx the center x of the tga to draw
-  /// @param cy the center y of the tga to draw
-  /// @param max_w the maximum width of the image
-  /// @param max_h the maximum height of the image
-  void DrawCenteredTga(const Tga *tga, int cx, int cy, int max_w, int max_h) const;
-
 private:
 
   // NOTE: These are used externally by the friend
@@ -65,7 +62,8 @@ private:
   int m_xoffset;
   int m_yoffset;
 
-  SDL_Window* m_sdl_window;
+  GLContext m_glcontext;
+  PGContext m_pangocontext;
 
   friend class Text;
   friend class TextWriter;

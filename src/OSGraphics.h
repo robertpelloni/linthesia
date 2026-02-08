@@ -12,7 +12,9 @@
 // only for 'Ms. pepis' debugging
 #include <iostream>
 
-#include <SDL.h>
-#include <SDL_opengl.h>
+#include <gtkmm.h>
+
+#include <GL/gl.h>
+#include <GL/glu.h>
 
 #endif // __OS_GRAPHICS_H
