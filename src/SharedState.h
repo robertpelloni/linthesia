@@ -28,7 +28,9 @@ struct SongStatistics {
     stray_notes(0),
     total_notes_user_pressed(0),
     longest_combo(0),
-    score(0) {
+    score(0),
+    perfect_hits(0),
+    good_hits(0) {
   }
 
   int total_note_count;
@@ -44,6 +46,8 @@ struct SongStatistics {
   int longest_combo;
   double score;
 
+  int perfect_hits;
+  int good_hits;
 };
 
 struct SharedState {

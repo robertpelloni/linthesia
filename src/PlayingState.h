@@ -19,6 +19,13 @@
 #include "KeyboardDisplay.h"
 #include "MidiComm.h"
 
+struct ScorePopup {
+  int x, y;
+  std::string text;
+  int r, g, b;
+  int life; // frames or ms
+};
+
 struct ActiveNote {
 
   bool operator()(const ActiveNote &lhs, const ActiveNote &rhs) const {
@@ -93,6 +100,7 @@ private:
   size_t m_look_ahead_you_play_note_count;
 
   ActiveNoteSet m_active_notes;
+  std::vector<ScorePopup> m_popups;
 
   bool m_first_update;
 
@@ -124,6 +132,9 @@ private:
   // Pause Menu
   ButtonState m_resume_button;
   ButtonState m_quit_button;
+
+  void UpdatePopups();
+  void DrawPopups(Renderer &renderer) const;
 
   // Loop
   microseconds_t m_loop_a;

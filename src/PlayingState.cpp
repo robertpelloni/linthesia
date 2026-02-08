@@ -358,6 +358,46 @@ void PlayingState::Listen() {
     if (closest_match != m_notes.end()) {
       note_color = m_state.track_properties[closest_match->track_id].color;
 
+      // Calculate precision
+      microseconds_t diff = 0;
+      if (cur_time > closest_match->start) diff = cur_time - closest_match->start;
+      else diff = closest_match->start - cur_time;
+
+      std::string judge_text = "";
+      int r = 255, g = 255, b = 255;
+
+      // Thresholds in microseconds (50ms, 100ms)
+      if (diff < 50000) {
+          m_state.stats.perfect_hits++;
+          judge_text = "Perfect!";
+          r = 100; g = 255; b = 100; // Green
+      } else if (diff < 100000) {
+          m_state.stats.good_hits++;
+          judge_text = "Good";
+          r = 100; g = 200; b = 255; // Blue-ish
+      } else {
+          // Miss logic usually handled when note scrolls past,
+          // but if they hit it late/early but validly, count it?
+          // For now, let's call it "Ok" if it's in the window but > 100ms
+          judge_text = "Ok";
+          r = 255; g = 255; b = 100; // Yellow
+      }
+
+      // Spawn Popup
+      // Calculate X position based on note key... hard without note position logic here.
+      // We can use note_number to guess X.
+      // m_keyboard has logic for X. But it's private.
+      // Let's just put it near the bottom center for now or try to estimate.
+      // Or make it follow the key? We have `note_name` and `m_keyboard->SetKeyActive` knows the position.
+      // Actually, we can just center it or put it above the keyboard.
+      ScorePopup p;
+      p.text = judge_text;
+      p.r = r; p.g = g; p.b = b;
+      p.life = 60; // 1 second roughly at 60fps
+      p.x = GetStateWidth() / 2; // Center for now
+      p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
+      m_popups.push_back(p);
+
       // "Open" this note so we can catch the close later and turn off
       // the note.
       ActiveNote n;
@@ -394,8 +434,16 @@ void PlayingState::Listen() {
       m_notes.insert(replacement);
     }
 
-    else
+    else {
       m_state.stats.stray_notes++;
+      ScorePopup p;
+      p.text = "Miss";
+      p.r = 255; p.g = 100; p.b = 100;
+      p.life = 40;
+      p.x = GetStateWidth() / 2;
+      p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
+      m_popups.push_back(p);
+    }
 
     m_state.stats.total_notes_user_pressed++;
     // Display a pressed key by an user
@@ -752,6 +800,8 @@ void PlayingState::Update() {
     return;
   }
 
+  UpdatePopups();
+
   // Metronome Logic
   if (m_metronome_on) {
      const MidiEventMicrosecondList& bars = m_state.midi->GetBarLines();
@@ -870,6 +920,8 @@ void PlayingState::Draw(Renderer &renderer) const {
      renderer.SetColor(255, 255, 0); // Yellow flash
      renderer.DrawQuad(x, y, size, size);
   }
+
+  DrawPopups(renderer);
 
   int text_y = CalcKeyboardHeight() + 42;
 
@@ -1003,12 +1055,27 @@ void PlayingState::filePressedKey(int note_number, bool active, size_t track_id)
         m_state.track_properties[track_id].mode == Track::ModeLearningSilently ||
         (m_should_wait_after_retry && isUserPlayableTrack(track_id)))
     {
+        // Chord Tolerance:
+        // Ideally, we want to allow the game to proceed if the user hits the notes *near* the time.
+        // However, this function is called when the MIDI *file* says a note starts.
+        // If we require this note immediately, the game pauses immediately.
+        // For chords, multiple calls happen sequentially in the same Update loop (usually).
+        // So m_required_notes will fill up with all notes starting at this tick.
+        // That seems correct.
+
         if (active && isNoteInPlayableRange(note_number))
         {
             m_required_notes.insert(note_number);
         }
-        else
+        else {
+            // Only remove if it was required.
+            // Note-off events shouldn't necessarily remove the requirement if it wasn't hit yet?
+            // Actually, if the note ends, we shouldn't be waiting for it anymore?
+            // "Wait mode" usually waits for the *start* of the note.
+            // If the note passes (without being hit?), we might be stuck?
+            // The current logic erases it on NoteOff.
             m_required_notes.erase(note_number);
+        }
     }
 }
 
@@ -1059,4 +1126,27 @@ NoteState PlayingState::findNodeState(const TranslatedNote& note, TranslatedNote
       return default_note_state;
 
   return n->state;
+}
+
+void PlayingState::UpdatePopups() {
+    for (auto it = m_popups.begin(); it != m_popups.end();) {
+        it->life--;
+        it->y -= 1; // Float up
+        if (it->life <= 0) {
+            it = m_popups.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void PlayingState::DrawPopups(Renderer &renderer) const {
+    for (const auto& p : m_popups) {
+        // Calculate alpha based on life
+        int alpha = 255;
+        if (p.life < 20) alpha = (p.life * 255) / 20;
+
+        TextWriter text(p.x, p.y, renderer, true, 18); // Centered
+        text << Text(p.text, Renderer::ToColor(p.r, p.g, p.b, alpha));
+    }
 }
