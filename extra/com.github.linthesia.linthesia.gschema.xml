@@ -37,5 +37,25 @@
       <default>""</default>
     </key>
 
+    <key name="lead-in-time" type="s">
+      <default>"5500000"</default>
+    </key>
+
+    <key name="lead-out-time" type="s">
+      <default>"1000000"</default>
+    </key>
+
+    <key name="scroll-speed" type="s">
+      <default>"3250000"</default>
+    </key>
+
+    <key name="metronome-on" type="s">
+      <default>"false"</default>
+    </key>
+
+    <key name="metronome-volume" type="s">
+      <default>"1.0"</default>
+    </key>
+
   </schema>
 </schemalist>

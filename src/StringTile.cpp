@@ -33,6 +33,10 @@ void StringTile::Draw(Renderer &renderer) const {
   TextWriter text(20, 46, renderer, false, 14);
   text << m_string;
 
+  TextWriter title(17, 15, renderer, false, 22, "FreeSerif.ttf");
+  title << Text(m_title, TextAttributes(Renderer::ToColor(0xD6, 0xD6, 0xD6),
+                                             Renderer::ToColor(0x32, 0x32, 0x32)));
+
   renderer.ResetOffset();
 }
 

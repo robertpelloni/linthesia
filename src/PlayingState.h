@@ -113,6 +113,11 @@ private:
   void eraseUntilTime(microseconds_t time);
 
   NoteState findNodeState(const TranslatedNote& note, TranslatedNoteSet& notes, NoteState default_note_state);
+
+  microseconds_t m_lead_in;
+  microseconds_t m_lead_out;
+  bool m_metronome_on;
+  double m_metronome_vol;
 };
 
 #endif // __PLAYING_STATE_H

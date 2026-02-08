@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string>
 #include <iomanip>
+#include <algorithm>
 
 #include "StringUtil.h"
 #include "MenuLayout.h"
@@ -64,15 +65,10 @@ void PlayingState::ResetSong() {
   if (m_state.midi_in)
     m_state.midi_in->Reset();
 
-  // TODO: These should be moved to a configuration file
-  // along with ALL other "const static something" variables.
-  const static microseconds_t LeadIn = 5500000;
-  const static microseconds_t LeadOut = 1000000;
-
   if (!m_state.midi)
     return;
 
-  m_state.midi->Reset(LeadIn, LeadOut);
+  m_state.midi->Reset(m_lead_in, m_lead_out);
 
   m_notes = m_state.midi->Notes();
   m_notes_history.clear();
@@ -126,6 +122,19 @@ void PlayingState::Init() {
     } 
   }
 
+  // Load User Settings
+  std::string lead_in_str = UserSetting::Get(LEAD_IN_TIME_KEY, "5500000");
+  try { m_lead_in = std::stoll(lead_in_str); } catch (...) { m_lead_in = 5500000; }
+
+  std::string lead_out_str = UserSetting::Get(LEAD_OUT_TIME_KEY, "1000000");
+  try { m_lead_out = std::stoll(lead_out_str); } catch (...) { m_lead_out = 1000000; }
+
+  std::string scroll_spd_str = UserSetting::Get(SCROLL_SPEED_KEY, "3250000");
+  try { m_show_duration = std::stoll(scroll_spd_str); } catch (...) { m_show_duration = 3250000; }
+
+  std::string met_on = UserSetting::Get(METRONOME_ON_KEY, "false");
+  m_metronome_on = (met_on == "true" || met_on == "1");
+
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
     MinPlayableNote = strtol(min_key.c_str(), NULL, 10);
@@ -136,11 +145,6 @@ void PlayingState::Init() {
     MaxPlayableNote = strtol(max_key.c_str(), NULL, 10);
     printf("Set maximal key to %d\n", MaxPlayableNote);
   }
-
-  // This many microseconds of the song will
-  // be shown on the screen at once
-  const static microseconds_t DefaultShowDurationMicroseconds = 3250000;
-  m_show_duration = DefaultShowDurationMicroseconds;
 
   m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
@@ -702,6 +706,59 @@ void PlayingState::Draw(Renderer &renderer) const {
     renderer.SetColor(c);
     const Tga *keys = GetTexture(PlayKeys, true);
     renderer.DrawCenteredTga(keys, GetStateWidth() / 2, GetStateHeight() / 2, GetStateWidth() / 2, GetStateHeight() / 3);
+
+    if (m_paused) {
+       int box_w = 600;
+       int box_h = 350;
+       int box_x = (GetStateWidth() - box_w) / 2;
+       int box_y = GetStateHeight() / 2 + 60; // Below the keys image
+
+       renderer.SetColor(0, 0, 0, 220);
+       renderer.DrawQuad(box_x, box_y, box_w, box_h);
+
+       renderer.SetColor(255, 255, 255);
+       TextWriter help(box_x + 20, box_y + 20, renderer, false, 16);
+       help << "Controls:";
+       help.y += 30;
+       help << "Space: Resume Game";
+       help.y += 25;
+       help << "Esc: Return to Menu";
+       help.y += 25;
+       help << "Left / Right: Adjust Speed (-/+ 10%)";
+       help.y += 25;
+       help << "Up / Down: Adjust Visible Duration";
+       help.y += 25;
+       help << "Keypad + / -: Volume Up / Down";
+       help.y += 25;
+       help << "< / >: Octave Shift Down / Up";
+       help.y += 25;
+       help << "Page Up / Down: Jump Backward / Forward 5s";
+       help.y += 25;
+       help << "F6: Toggle FPS";
+    }
+  }
+
+  if (m_metronome_on) {
+     const MidiEventMicrosecondList& bars = m_state.midi->GetBarLines();
+     microseconds_t cur = m_state.midi->GetSongPositionInMicroseconds();
+     bool on_beat = false;
+     // Optimization: Binary search or check near current time could be better,
+     // but linear scan of all bars is slow.
+     // However, bars are sorted. We can find lower_bound.
+     auto it = std::lower_bound(bars.begin(), bars.end(), cur - 50000);
+     if (it != bars.end()) {
+        if (abs((long long)*it - (long long)cur) < 50000) {
+           on_beat = true;
+        }
+     }
+
+     if (on_beat) {
+        int size = 30;
+        int x = GetStateWidth() - Layout::ScreenMarginX - size;
+        int y = 80;
+        renderer.SetColor(255, 255, 0); // Yellow flash
+        renderer.DrawQuad(x, y, size, size);
+     }
   }
 
   int text_y = CalcKeyboardHeight() + 42;

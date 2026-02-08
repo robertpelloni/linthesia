@@ -24,6 +24,12 @@
 #define SONG_LIB_DIR_SETTINGS_KEY "song-lib-last-dir"
 #define SONG_LIB_PATH_KEY "song-lib-path"
 
+#define LEAD_IN_TIME_KEY "lead-in-time"
+#define LEAD_OUT_TIME_KEY "lead-out-time"
+#define SCROLL_SPEED_KEY "scroll-speed"
+#define METRONOME_ON_KEY "metronome-on"
+#define METRONOME_VOLUME_KEY "metronome-volume"
+
 namespace UserSetting {
 
    // This must be called exactly once before any of the following will work
