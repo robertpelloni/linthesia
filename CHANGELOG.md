@@ -1,22 +1,24 @@
 # Changelog
 
+## [0.9.0] - 2024-05-22
+
+### Added
+- **Loop Practice**: Press `F1` to set start point (A), `F2` to set end point (B). The song will loop between these points. Press `F6` to toggle looping.
+- **Interactive Pause Menu**: The pause screen now features clickable buttons to "Resume" or "Quit to Title", replacing the static text overlay.
+- **Agent Instructions**: Added `AGENTS.md` and related files to guide AI contributors.
+
+### Changed
+- **Documentation**: Updated `ROADMAP.md` and `DASHBOARD.md` to reflect new features and version.
+- **Internal**: Verified keyboard size rendering logic.
+
 ## [0.8.0] - 2024-05-22
 
 ### Added
 - **Settings Menu**: New "Advanced Settings" menu in the title screen.
-  - Configure **Lead-In Time**: Adjust the delay before a song starts.
-  - Configure **Lead-Out Time**: Adjust the delay after a song ends.
-  - Configure **Scroll Speed** (Visible Duration): Control how fast notes fall.
-  - **Metronome**: Toggle a visual metronome (flashing indicator on beat).
-- **In-Game Help**: Pressing 'Space' to pause now displays a help overlay with a list of all controls.
-- **Visual Metronome**: A yellow indicator flashes in the top-right corner on every beat when enabled.
+- **In-Game Help**: Pressing 'Space' to pause now displays a help overlay.
+- **Visual & Audio Metronome**: A yellow indicator flashes and a MIDI tick plays on every beat.
 - **Version Consolidation**: Project version is now read from a single `VERSION` file.
 
 ### Changed
-- **Volume Controls**: Swapped Keypad `+` and `-` mappings. `+` now increases volume, and `-` decreases it (fixing counter-intuitive behavior).
-- **Documentation**: Completely rewrote `README.md` to serve as a comprehensive user manual.
-- **Build System**: Updated `meson.build` to read version from `VERSION` file.
-- **Settings Storage**: New settings are persisted using GSettings/Glib.
-
-### Fixed
-- Fixed volume control direction on keypad.
+- **Volume Controls**: Swapped Keypad `+` and `-` mappings.
+- **Documentation**: Rewrote `README.md` as a user manual.

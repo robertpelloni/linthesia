@@ -99,7 +99,8 @@ PlayingState::PlayingState(const SharedState &state) :
   m_state(state),
   m_lead_in(0), m_lead_out(0),
   m_metronome_on(false), m_metronome_vol(1.0),
-  m_metronome_was_on_beat(false), m_metronome_visual_flash(false) {
+  m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
+  m_loop_a(-1), m_loop_b(-1), m_looping(false) {
 }
 
 void PlayingState::Init() {
@@ -160,6 +161,13 @@ void PlayingState::Init() {
   ResetSong();
 
   m_state.dpms_thread->pauseScreensaver(true && !m_any_learning_track);
+
+  // Initialize Pause Menu Buttons
+  int center_x = GetStateWidth() / 2;
+  int center_y = GetStateHeight() / 2;
+  // Buttons positioned relative to the pause box center
+  m_resume_button = ButtonState(center_x - Layout::ButtonWidth - 10, center_y + 100, Layout::ButtonWidth, Layout::ButtonHeight);
+  m_quit_button = ButtonState(center_x + 10, center_y + 100, Layout::ButtonWidth, Layout::ButtonHeight);
 }
 
 void PlayingState::Finish() 
@@ -404,6 +412,13 @@ void PlayingState::Listen() {
 void PlayingState::Resize() {
     delete  m_keyboard;
     m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+
+    int center_x = GetStateWidth() / 2;
+    int center_y = GetStateHeight() / 2;
+    m_resume_button.x = center_x - Layout::ButtonWidth - 10;
+    m_resume_button.y = center_y + 120;
+    m_quit_button.x = center_x + 10;
+    m_quit_button.y = center_y + 120;
 }
 
 void PlayingState::Update() {
@@ -437,6 +452,23 @@ void PlayingState::Update() {
 
   if (m_paused)
     delta_microseconds = 0;
+
+  // Loop Check
+  if (m_looping && m_loop_a != -1 && m_loop_b != -1) {
+      if (cur_time >= m_loop_b) {
+          m_state.midi->GoTo(m_loop_a);
+          m_required_notes.clear();
+          if (m_state.midi_out) m_state.midi_out->Reset();
+          m_keyboard->ResetActiveKeys();
+          m_notes = m_state.midi->Notes();
+          m_notes_history.clear();
+          SetupNoteState();
+          eraseUntilTime(m_loop_a);
+          // Adjust delta to not skip frames? Or just reset.
+          // Resetting context is safer.
+          return;
+      }
+  }
 
   // Our delta milliseconds on the first frame after state start is extra
   // long because we just reset the MIDI.  By skipping the "Play" that
@@ -578,6 +610,28 @@ void PlayingState::Update() {
     m_should_wait_after_retry = false;
     m_retry_start = new_time;
   }
+
+  if (IsKeyPressed(KeyLoopA)) {
+      m_loop_a = cur_time;
+      m_looping = true;
+      if (m_loop_b != -1 && m_loop_a > m_loop_b) {
+          m_loop_b = -1; // Reset B if A is after it
+      }
+  }
+
+  if (IsKeyPressed(KeyLoopB)) {
+      m_loop_b = cur_time;
+      m_looping = true;
+      if (m_loop_a != -1 && m_loop_b < m_loop_a) {
+          std::swap(m_loop_a, m_loop_b);
+      }
+  }
+
+  if (IsKeyPressed(KeyF6)) {
+      // Toggle Loop on/off
+      m_looping = !m_looping;
+  }
+
   else
   {
     // Check retry conditions
@@ -648,15 +702,38 @@ void PlayingState::Update() {
     m_state.dpms_thread->pauseScreensaver(!m_any_learning_track && !m_paused);
   }
 
+  // Pause Menu Interaction
+  if (m_paused) {
+      MouseInfo mouse = Mouse();
+      m_resume_button.Update(mouse);
+      m_quit_button.Update(mouse);
+
+      if (m_resume_button.hit) {
+          m_paused = false;
+          m_state.dpms_thread->pauseScreensaver(!m_any_learning_track);
+      }
+
+      if (m_quit_button.hit) {
+          if (m_state.midi_out) m_state.midi_out->Reset();
+          if (m_state.midi_in) m_state.midi_in->Reset();
+          ChangeState(new TrackSelectionState(m_state));
+          return;
+      }
+  }
+
   if (IsKeyPressed(KeyEscape)) {
-    if (m_state.midi_out)
-      m_state.midi_out->Reset();
-
-    if (m_state.midi_in)
-      m_state.midi_in->Reset();
-
-    ChangeState(new TrackSelectionState(m_state));
-    return;
+    if (m_paused) {
+        // Resume if already paused? Or Quit? Standard is usually Quit or Toggle Menu.
+        // Let's make Escape toggle pause if playing, or quit if already paused?
+        // Or strictly Quit? The help text says "Return to Menu".
+        if (m_state.midi_out) m_state.midi_out->Reset();
+        if (m_state.midi_in) m_state.midi_in->Reset();
+        ChangeState(new TrackSelectionState(m_state));
+        return;
+    } else {
+        m_paused = true;
+        m_state.dpms_thread->pauseScreensaver(false);
+    }
   }
 
   if (m_state.midi->IsSongOver()) {
@@ -774,7 +851,14 @@ void PlayingState::Draw(Renderer &renderer) const {
        help.y += 25;
        help << "Page Up / Down: Jump Backward / Forward 5s";
        help.y += 25;
-       help << "F6: Toggle FPS";
+       help << "F1: Set Loop Start (A)";
+       help.y += 25;
+       help << "F2: Set Loop End (B)";
+       help.y += 25;
+       help << "F6: Toggle Loop Active";
+
+       Layout::DrawButton(renderer, m_resume_button, GetTexture(ButtonPlaySong));
+       Layout::DrawButton(renderer, m_quit_button, GetTexture(ButtonExit));
     }
   }
 

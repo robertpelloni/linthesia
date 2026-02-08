@@ -1,48 +1,40 @@
 # AI Agent Instructions for Linthesia
 
-These instructions are intended for AI agents (like Claude, ChatGPT, Google Jules) working on the Linthesia codebase.
+**This is the UNIVERSAL INSTRUCTIONS file for all AI models (Claude, ChatGPT, Gemini, Copilot, Jules, etc.) working on this project.**
 
-## Codebase Overview
-Linthesia is a C++14 project using the Meson build system. It relies heavily on SDL2 for graphics and input, and ALSA for MIDI communication.
+## Core Directives
+1.  **Project Goal**: Create the ultimate open-source piano learning software for Linux, mirroring and exceeding the features of Synthesia/Melodics.
+2.  **UI/UX**: Every feature must be "very well represented in full detail in UI". No hidden hotkeys without UI equivalents. Extensive tooltips, labels, and help screens.
+3.  **Documentation**:
+    *   Maintain `README.md` as a user manual.
+    *   Maintain `ROADMAP.md` for planning.
+    *   Maintain `DASHBOARD.md` for project structure/status.
+    *   Maintain `CHANGELOG.md` detailed history.
+4.  **Versioning**:
+    *   **Single Source of Truth**: The `VERSION` file in the root directory.
+    *   **Protocol**: Update `VERSION` and `CHANGELOG.md` with every significant feature set or build.
+    *   **Commit Message**: "Bump version to X.Y.Z" when updating version.
 
-### Key Directories
-*   `src/`: Main source code.
-*   `src/libmidi/`: MIDI parsing and handling logic.
-*   `graphics/`: TGA textures and font files.
-*   `extra/`: Linux desktop integration files (desktop entry, appdata, gschema).
-
-### Coding Conventions
+## Codebase Standards
 *   **Language**: C++14.
-*   **Style**: Use `snake_case` for variables/functions, `CamelCase` for classes.
-*   **Headers**: Use `#pragma once` or include guards.
-*   **Constants**: Avoid magic numbers. Use `const static` or `#define` in appropriate headers (e.g., `UserSettings.h`).
-*   **Error Handling**: Use `try-catch` blocks for file I/O and user input parsing.
-*   **Graphics**: Use `Renderer` class wrappers for SDL calls where possible.
-
-### Build System
-*   The project uses Meson.
-*   Always update `meson.build` when adding new source files.
-*   Version number is stored in the `VERSION` file at the root.
-
-### User Settings
-*   Use `UserSetting::Get` and `UserSetting::Set` for persistent configuration.
-*   Define new keys in `src/UserSettings.h` and `extra/com.github.linthesia.linthesia.gschema.xml`.
-
-### Versioning
-*   **Single Source of Truth**: The `VERSION` file in the root directory.
-*   **Bump Protocol**: When releasing a new version or significant feature set:
-    1.  Update `VERSION`.
-    2.  Update `CHANGELOG.md`.
-    3.  Commit with message "Bump version to X.Y.Z".
-
-### Roadmap & Tasks
-*   Refer to `ROADMAP.md` for planned features.
-*   Update `ROADMAP.md` as tasks are completed.
-*   Document submodules in `DASHBOARD.md`.
+*   **Build System**: Meson. Update `meson.build` when adding files.
+*   **Style**: Snake_case variables, CamelCase classes.
+*   **Settings**: Use `UserSetting` class (GSettings wrapper). Schema in `extra/`.
 
 ## Workflow
-1.  **Analyze**: Understand the requirement and existing code.
+1.  **Analyze**: Deeply understand requirements and existing code.
 2.  **Plan**: Create a step-by-step plan.
-3.  **Implement**: Write code, following conventions.
-4.  **Verify**: Ensure code compiles and features work as expected.
-5.  **Document**: Update relevant markdown files.
+3.  **Implement**: Write robust, tested code.
+4.  **Verify**: Ensure compilation and functionality.
+5.  **Document**: Update all relevant markdown files.
+6.  **Submodules**: Ensure `pianogame` (and others) are synced and documented.
+
+## Submodules
+*   `pianogame`: Original Synthesia source. Reference for missing features.
+*   **Protocol**: Always update submodules and merge upstream changes.
+
+## Model-Specific Notes
+*   **Claude**: Focus on detailed C++ logic and architecture.
+*   **Gemini**: Good for broad analysis and documentation.
+*   **ChatGPT**: effective for generating boilerplate and refactoring.
+*   **Jules**: The primary driver. Execute long-running tasks and deep integration.

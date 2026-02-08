@@ -120,6 +120,15 @@ private:
   double m_metronome_vol;
   bool m_metronome_was_on_beat;
   bool m_metronome_visual_flash;
+
+  // Pause Menu
+  ButtonState m_resume_button;
+  ButtonState m_quit_button;
+
+  // Loop
+  microseconds_t m_loop_a;
+  microseconds_t m_loop_b;
+  bool m_looping;
 };
 
 #endif // __PLAYING_STATE_H
