@@ -1,5 +1,5 @@
 project('linthesia', 'cpp',
-  version : '0.8.0',
+  version : run_command('cat', 'VERSION', check: true).stdout().strip(),
   meson_version: '>=0.57.0',
   default_options : ['warning_level=3', 'cpp_std=c++14'])
 

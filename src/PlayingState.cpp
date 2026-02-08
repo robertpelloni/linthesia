@@ -96,7 +96,10 @@ PlayingState::PlayingState(const SharedState &state) :
   m_should_retry(false),
   m_should_wait_after_retry(false),
   m_retry_start(0),
-  m_state(state) {
+  m_state(state),
+  m_lead_in(0), m_lead_out(0),
+  m_metronome_on(false), m_metronome_vol(1.0),
+  m_metronome_was_on_beat(false), m_metronome_visual_flash(false) {
 }
 
 void PlayingState::Init() {
@@ -134,6 +137,9 @@ void PlayingState::Init() {
 
   std::string met_on = UserSetting::Get(METRONOME_ON_KEY, "false");
   m_metronome_on = (met_on == "true" || met_on == "1");
+
+  std::string met_vol = UserSetting::Get(METRONOME_VOLUME_KEY, "1.0");
+  try { m_metronome_vol = std::stod(met_vol); } catch (...) { m_metronome_vol = 1.0; }
 
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
@@ -668,6 +674,40 @@ void PlayingState::Update() {
 
     return;
   }
+
+  // Metronome Logic
+  if (m_metronome_on) {
+     const MidiEventMicrosecondList& bars = m_state.midi->GetBarLines();
+     microseconds_t cur = m_state.midi->GetSongPositionInMicroseconds();
+     bool on_beat = false;
+
+     // Optimization: Binary search for lower_bound
+     auto it = std::lower_bound(bars.begin(), bars.end(), cur - 50000);
+     if (it != bars.end()) {
+        if (abs((long long)*it - (long long)cur) < 50000) {
+           on_beat = true;
+        }
+     }
+
+     m_metronome_visual_flash = on_beat;
+
+     if (on_beat) {
+        if (m_state.midi_out && !m_metronome_was_on_beat) {
+             // Use Channel 10 (Percussion), Note 76 (Low Woodblock)
+             int velocity = static_cast<int>(100 * m_metronome_vol);
+             if (velocity > 127) velocity = 127;
+             if (velocity > 0) {
+                 MidiEvent click = MidiEvent::NoteOn(9, 76, velocity);
+                 m_state.midi_out->Write(click);
+             }
+        }
+        m_metronome_was_on_beat = true;
+     } else {
+        m_metronome_was_on_beat = false;
+     }
+  } else {
+      m_metronome_visual_flash = false;
+  }
 }
 
 void PlayingState::Draw(Renderer &renderer) const {
@@ -738,27 +778,13 @@ void PlayingState::Draw(Renderer &renderer) const {
     }
   }
 
-  if (m_metronome_on) {
-     const MidiEventMicrosecondList& bars = m_state.midi->GetBarLines();
-     microseconds_t cur = m_state.midi->GetSongPositionInMicroseconds();
-     bool on_beat = false;
-     // Optimization: Binary search or check near current time could be better,
-     // but linear scan of all bars is slow.
-     // However, bars are sorted. We can find lower_bound.
-     auto it = std::lower_bound(bars.begin(), bars.end(), cur - 50000);
-     if (it != bars.end()) {
-        if (abs((long long)*it - (long long)cur) < 50000) {
-           on_beat = true;
-        }
-     }
-
-     if (on_beat) {
-        int size = 30;
-        int x = GetStateWidth() - Layout::ScreenMarginX - size;
-        int y = 80;
-        renderer.SetColor(255, 255, 0); // Yellow flash
-        renderer.DrawQuad(x, y, size, size);
-     }
+  // Draw Metronome Flash if active
+  if (m_metronome_visual_flash) {
+     int size = 30;
+     int x = GetStateWidth() - Layout::ScreenMarginX - size;
+     int y = 80;
+     renderer.SetColor(255, 255, 0); // Yellow flash
+     renderer.DrawQuad(x, y, size, size);
   }
 
   int text_y = CalcKeyboardHeight() + 42;

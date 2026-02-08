@@ -118,6 +118,8 @@ private:
   microseconds_t m_lead_out;
   bool m_metronome_on;
   double m_metronome_vol;
+  bool m_metronome_was_on_beat;
+  bool m_metronome_visual_flash;
 };
 
 #endif // __PLAYING_STATE_H

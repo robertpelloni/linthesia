@@ -222,7 +222,7 @@ void SettingsState::Update() {
   if (m_lead_out_tile && m_lead_out_tile->WholeTile().hovering) m_tooltip = "Time after song ends (Lead-Out).";
   if (m_scroll_speed_tile && m_scroll_speed_tile->WholeTile().hovering) m_tooltip = "Amount of time visible on screen (Scroll Speed).";
   if (m_metronome_on_tile && m_metronome_on_tile->WholeTile().hovering) m_tooltip = "Enable visual metronome.";
-  if (m_metronome_vol_tile && m_metronome_vol_tile->WholeTile().hovering) m_tooltip = "Adjust metronome volume (Not yet implemented for audio).";
+  if (m_metronome_vol_tile && m_metronome_vol_tile->WholeTile().hovering) m_tooltip = "Adjust metronome volume.";
 }
 
 void SettingsState::Draw(Renderer &renderer) const {
