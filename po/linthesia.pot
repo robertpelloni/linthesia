@@ -8,7 +8,11 @@ msgid ""
 msgstr ""
 "Project-Id-Version: linthesia\n"
 "Report-Msgid-Bugs-To: \n"
+<<<<<<< HEAD
 "POT-Creation-Date: 2022-02-03 22:01+0100\n"
+=======
+"POT-Creation-Date: 2022-01-15 00:43+0100\n"
+>>>>>>> origin/meson
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,7 +29,11 @@ msgstr ""
 msgid "Piano game"
 msgstr ""
 
+<<<<<<< HEAD
 #: extra/linthesia.desktop:6
+=======
+#: extra/linthesia.desktop:7
+>>>>>>> origin/meson
 msgid "Piano hero like game"
 msgstr ""
 
@@ -64,6 +72,7 @@ msgstr ""
 #: extra/linthesia.metainfo.xml:43
 msgid "Fixed \"Unable to load PangoFont\" bug on all platforms"
 msgstr ""
+<<<<<<< HEAD
 
 #: src/main.cpp:55
 msgid "Linthesia detected a"
@@ -190,3 +199,5 @@ msgstr ""
 #: src/main.cpp:706
 msgid "Linthesia detected an unknown problem and must close!"
 msgstr ""
+=======
+>>>>>>> origin/meson

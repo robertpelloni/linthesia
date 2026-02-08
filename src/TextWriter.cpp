@@ -14,7 +14,12 @@
 
 #include <map>
 #include <iostream>
+<<<<<<< HEAD
 #include <fontconfig/fontconfig.h>
+=======
+
+#include <SDL2/SDL_ttf.h>
+>>>>>>> origin/meson
 
 using namespace std;
 

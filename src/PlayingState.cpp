@@ -126,6 +126,7 @@ void PlayingState::Init() {
     } 
   }
 
+<<<<<<< HEAD
   // Load User Settings
   std::string lead_in_str = UserSetting::Get(LEAD_IN_TIME_KEY, "5500000");
   try { m_lead_in = std::stoll(lead_in_str); } catch (...) { m_lead_in = 5500000; }
@@ -142,6 +143,8 @@ void PlayingState::Init() {
   std::string met_vol = UserSetting::Get(METRONOME_VOLUME_KEY, "1.0");
   try { m_metronome_vol = std::stod(met_vol); } catch (...) { m_metronome_vol = 1.0; }
 
+=======
+>>>>>>> origin/meson
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
     MinPlayableNote = strtol(min_key.c_str(), NULL, 10);

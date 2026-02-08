@@ -451,6 +451,7 @@ int main(int argc, char *argv[]) {
     string file_opt("");
 
     UserSetting::Initialize();
+<<<<<<< HEAD
 
     int show_help_exit_status = 0;
     bool invalid_options = has_invalid_options(argc, argv);
@@ -467,6 +468,8 @@ int main(int argc, char *argv[]) {
       print_version();
       return 0;
     }
+=======
+>>>>>>> origin/meson
 
     if (cmdOptionExists(argv, argv+argc, "-f"))
       file_opt = string(getCmdOption(argv, argv + argc, "-f"));
@@ -636,7 +639,11 @@ int main(int argc, char *argv[]) {
     else {
       istringstream iss(user_rate);
       if (not (iss >> default_rate)) {
+<<<<<<< HEAD
         Compatible::ShowError(_("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload."));
+=======
+        Compatible::ShowError("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload.");
+>>>>>>> origin/meson
         UserSetting::Set(REFRESH_RATE_KEY, "");
       }
     }

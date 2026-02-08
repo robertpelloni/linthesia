@@ -37,6 +37,7 @@
       <default>""</default>
     </key>
 
+<<<<<<< HEAD
     <key name="lead-in-time" type="s">
       <default>"5500000"</default>
     </key>
@@ -57,5 +58,7 @@
       <default>"1.0"</default>
     </key>
 
+=======
+>>>>>>> origin/meson
   </schema>
 </schemalist>

@@ -21,8 +21,11 @@ install_data(
   install_dir: datadir / 'glib-2.0' / 'schemas'
 )
 
+<<<<<<< HEAD
 install_man(
   'linthesia.1',
 )
 
+=======
+>>>>>>> origin/meson
 install_data('linthesia.xpm', install_dir: datadir / project_name / 'icons')

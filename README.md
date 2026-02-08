@@ -8,6 +8,7 @@ This project uses the latest source from sourceforge (Synthesia 0.6.1a) and mode
 
 ## Installation
 
+<<<<<<< HEAD
 ### Dependencies
 To compile, you need a basic C++ toolchain and the following dependencies:
 *   alsa-lib
@@ -17,12 +18,16 @@ To compile, you need a basic C++ toolchain and the following dependencies:
 *   sdl2-ttf
 *   sqlite3
 *   meson & ninja
+=======
+## Build
+>>>>>>> origin/meson
 
 ### Build
     $ meson --prefix /usr build
     $ ninja -C build
     $ sudo ninja -C build install
 
+<<<<<<< HEAD
 ## Getting Started
 
 1.  Run `linthesia` from your terminal or application menu.
@@ -85,3 +90,14 @@ Once the synth is running, select it as the **Output Device** in Linthesia.
 ## Credits
 Based on Synthesia by Nicholas Piegdon.
 Linux port and improvements by the Linthesia team.
+=======
+    $ meson --prefix /usr build
+    $ ninja -C build
+    $ ninja -C build install #probably with sudo
+
+## Credits
+
+Visit https://github.com/linthesia/linthesia for more info.
+
+Join the chat at https://gitter.im/linthesia/linthesia
+>>>>>>> origin/meson

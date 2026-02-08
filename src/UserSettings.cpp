@@ -29,9 +29,15 @@ namespace UserSetting {
     if (!g_initialized) 
       return default_value;
 
+<<<<<<< HEAD
     string value = settings->get_string(Glib::ustring(setting)).raw();
 
     if (value == "")
+=======
+    const char* value = settings->get_string(Glib::ustring(setting)).data();
+
+    if (strcmp(value, "") == 0)
+>>>>>>> origin/meson
       return default_value;
     
     return value;

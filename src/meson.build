@@ -28,7 +28,10 @@ executable('linthesia',
            'UserSettings.cpp',
            'TextWriter.cpp',
            'EnumTile.cpp',
+<<<<<<< HEAD
            'SettingsState.cpp',
+=======
+>>>>>>> origin/meson
            'PlayingState.cpp',
            'KeyboardDisplay.cpp',
            'TrackSelectionState.cpp',
