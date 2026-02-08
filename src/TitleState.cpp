@@ -8,6 +8,7 @@
 
 #include "TitleState.h"
 #include "TrackSelectionState.h"
+#include "SettingsState.h"
 
 #include "Version.h"
 #include "CompatibleSystem.h"
@@ -36,6 +37,7 @@ TitleState::~TitleState() {
    if (m_input_tile) delete m_input_tile;
    if (m_file_tile) delete m_file_tile;
    if (m_keyboard_size_tile) delete m_keyboard_size_tile;
+   if (m_settings_tile) delete m_settings_tile;
 }
 
 void TitleState::Init() {
@@ -114,8 +116,8 @@ void TitleState::Init() {
    }
 
    const bool compress_height = (GetStateHeight() < 750);
-   const int initial_y = (compress_height ? 230 : 360);
-   const int each_y = (compress_height ? 94 : 100);
+   const int initial_y = (compress_height ? 160 : 300);
+   const int each_y = (compress_height ? 90 : 100);
 
    m_file_tile = new StringTile((GetStateWidth() - StringTileWidth) / 2,
                                 initial_y + each_y*0,
@@ -149,12 +151,19 @@ void TitleState::Init() {
                                  "Keyboard Size:",
                                  GetTexture(InterfaceButtons),
                                  GetTexture(EmptyBox));
+
+  m_settings_tile = new StringTile(
+                                 (GetStateWidth() - StringTileWidth) / 2,
+                                 initial_y + each_y*4,
+                                 GetTexture(EmptyBox));
+  m_settings_tile->SetTitle("Advanced Settings:");
+  m_settings_tile->SetString("Click to Configure...");
 }
 
 void TitleState::Resize() {
     const bool compress_height = (GetStateHeight() < 750);
-    const int initial_y = (compress_height ? 230 : 360);
-    const int each_y = (compress_height ? 94 : 100);
+    const int initial_y = (compress_height ? 160 : 300);
+    const int each_y = (compress_height ? 90 : 100);
 
     m_file_tile->SetX((GetStateWidth() - StringTileWidth) / 2);
     m_file_tile->SetY(initial_y + each_y * 0);
@@ -167,6 +176,9 @@ void TitleState::Resize() {
 
     m_keyboard_size_tile->SetX((GetStateWidth() - DeviceTileWidth) / 2);
     m_keyboard_size_tile->SetY(initial_y + each_y*3);
+
+    m_settings_tile->SetX((GetStateWidth() - StringTileWidth) / 2);
+    m_settings_tile->SetY(initial_y + each_y*4);
 
     m_back_button.SetX(Layout::ScreenMarginX);
     m_back_button.SetY(GetStateHeight() - Layout::ScreenMarginY / 2 - Layout::ButtonHeight / 2);
@@ -206,6 +218,11 @@ void TitleState::Update() {
   keyboard_size_mouse.y -= m_keyboard_size_tile->GetY();
   m_keyboard_size_tile->Update(keyboard_size_mouse);
 
+  MouseInfo settings_mouse(mouse);
+  settings_mouse.x -= m_settings_tile->GetX();
+  settings_mouse.y -= m_settings_tile->GetY();
+  m_settings_tile->Update(settings_mouse);
+
   MouseInfo file_mouse(mouse);
   file_mouse.x -= m_file_tile->GetX();
   file_mouse.y -= m_file_tile->GetY();
@@ -221,6 +238,11 @@ void TitleState::Update() {
     }
 
     ChangeState(new SongLibState(m_state));
+  }
+
+  if (m_settings_tile->Hit()) {
+    ChangeState(new SettingsState(m_state));
+    return;
   }
 
   // Check to see if we need to switch to a newly selected output device
@@ -394,6 +416,8 @@ void TitleState::Update() {
    if (m_keyboard_size_tile->ButtonRight().hovering)
      m_tooltip = "Cycle through keyboard sizes.";
 
+   if (m_settings_tile->WholeTile().hovering)
+     m_tooltip = "Click to configure advanced settings.";
 }
 
 void TitleState::PlayDevicePreview(microseconds_t delta_microseconds) {
@@ -441,6 +465,7 @@ void TitleState::Draw(Renderer &renderer) const {
   m_input_tile->Draw(renderer);
   m_file_tile->Draw(renderer);
   m_keyboard_size_tile->Draw(renderer);
+  m_settings_tile->Draw(renderer);
 
   if (m_input_tile->IsPreviewOn()) {
 

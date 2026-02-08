@@ -19,6 +19,13 @@
 #include "KeyboardDisplay.h"
 #include "MidiComm.h"
 
+struct ScorePopup {
+  int x, y;
+  std::string text;
+  int r, g, b;
+  int life; // frames or ms
+};
+
 struct ActiveNote {
 
   bool operator()(const ActiveNote &lhs, const ActiveNote &rhs) const {
@@ -93,6 +100,7 @@ private:
   size_t m_look_ahead_you_play_note_count;
 
   ActiveNoteSet m_active_notes;
+  std::vector<ScorePopup> m_popups;
 
   bool m_first_update;
 
@@ -113,6 +121,25 @@ private:
   void eraseUntilTime(microseconds_t time);
 
   NoteState findNodeState(const TranslatedNote& note, TranslatedNoteSet& notes, NoteState default_note_state);
+
+  microseconds_t m_lead_in;
+  microseconds_t m_lead_out;
+  bool m_metronome_on;
+  double m_metronome_vol;
+  bool m_metronome_was_on_beat;
+  bool m_metronome_visual_flash;
+
+  // Pause Menu
+  ButtonState m_resume_button;
+  ButtonState m_quit_button;
+
+  void UpdatePopups();
+  void DrawPopups(Renderer &renderer) const;
+
+  // Loop
+  microseconds_t m_loop_a;
+  microseconds_t m_loop_b;
+  bool m_looping;
 };
 
 #endif // __PLAYING_STATE_H

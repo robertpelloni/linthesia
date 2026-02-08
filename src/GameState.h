@@ -64,10 +64,10 @@ enum GameKey {
   KeyBackward = 0x0800,
 
   KeyVolumeUp    = 0x1000,
-  KeyVolumeDown  = 0x2000
+  KeyVolumeDown  = 0x2000,
 
-  // = 0x4000
-  // = 0x8000
+  KeyLoopA       = 0x4000,
+  KeyLoopB       = 0x8000
 };
 
 enum MouseButton {

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <string>
 #include <iomanip>
+#include <algorithm>
 
 #include "StringUtil.h"
 #include "MenuLayout.h"
@@ -64,15 +65,10 @@ void PlayingState::ResetSong() {
   if (m_state.midi_in)
     m_state.midi_in->Reset();
 
-  // TODO: These should be moved to a configuration file
-  // along with ALL other "const static something" variables.
-  const static microseconds_t LeadIn = 5500000;
-  const static microseconds_t LeadOut = 1000000;
-
   if (!m_state.midi)
     return;
 
-  m_state.midi->Reset(LeadIn, LeadOut);
+  m_state.midi->Reset(m_lead_in, m_lead_out);
 
   m_notes = m_state.midi->Notes();
   m_notes_history.clear();
@@ -100,7 +96,11 @@ PlayingState::PlayingState(const SharedState &state) :
   m_should_retry(false),
   m_should_wait_after_retry(false),
   m_retry_start(0),
-  m_state(state) {
+  m_state(state),
+  m_lead_in(0), m_lead_out(0),
+  m_metronome_on(false), m_metronome_vol(1.0),
+  m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
+  m_loop_a(-1), m_loop_b(-1), m_looping(false) {
 }
 
 void PlayingState::Init() {
@@ -126,6 +126,22 @@ void PlayingState::Init() {
     } 
   }
 
+  // Load User Settings
+  std::string lead_in_str = UserSetting::Get(LEAD_IN_TIME_KEY, "5500000");
+  try { m_lead_in = std::stoll(lead_in_str); } catch (...) { m_lead_in = 5500000; }
+
+  std::string lead_out_str = UserSetting::Get(LEAD_OUT_TIME_KEY, "1000000");
+  try { m_lead_out = std::stoll(lead_out_str); } catch (...) { m_lead_out = 1000000; }
+
+  std::string scroll_spd_str = UserSetting::Get(SCROLL_SPEED_KEY, "3250000");
+  try { m_show_duration = std::stoll(scroll_spd_str); } catch (...) { m_show_duration = 3250000; }
+
+  std::string met_on = UserSetting::Get(METRONOME_ON_KEY, "false");
+  m_metronome_on = (met_on == "true" || met_on == "1");
+
+  std::string met_vol = UserSetting::Get(METRONOME_VOLUME_KEY, "1.0");
+  try { m_metronome_vol = std::stod(met_vol); } catch (...) { m_metronome_vol = 1.0; }
+
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
     MinPlayableNote = strtol(min_key.c_str(), NULL, 10);
@@ -137,11 +153,6 @@ void PlayingState::Init() {
     printf("Set maximal key to %d\n", MaxPlayableNote);
   }
 
-  // This many microseconds of the song will
-  // be shown on the screen at once
-  const static microseconds_t DefaultShowDurationMicroseconds = 3250000;
-  m_show_duration = DefaultShowDurationMicroseconds;
-
   m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
   // Hide the mouse cursor while we're playing
@@ -150,6 +161,13 @@ void PlayingState::Init() {
   ResetSong();
 
   m_state.dpms_thread->pauseScreensaver(true && !m_any_learning_track);
+
+  // Initialize Pause Menu Buttons
+  int center_x = GetStateWidth() / 2;
+  int center_y = GetStateHeight() / 2;
+  // Buttons positioned relative to the pause box center
+  m_resume_button = ButtonState(center_x - Layout::ButtonWidth - 10, center_y + 100, Layout::ButtonWidth, Layout::ButtonHeight);
+  m_quit_button = ButtonState(center_x + 10, center_y + 100, Layout::ButtonWidth, Layout::ButtonHeight);
 }
 
 void PlayingState::Finish() 
@@ -340,6 +358,46 @@ void PlayingState::Listen() {
     if (closest_match != m_notes.end()) {
       note_color = m_state.track_properties[closest_match->track_id].color;
 
+      // Calculate precision
+      microseconds_t diff = 0;
+      if (cur_time > closest_match->start) diff = cur_time - closest_match->start;
+      else diff = closest_match->start - cur_time;
+
+      std::string judge_text = "";
+      int r = 255, g = 255, b = 255;
+
+      // Thresholds in microseconds (50ms, 100ms)
+      if (diff < 50000) {
+          m_state.stats.perfect_hits++;
+          judge_text = "Perfect!";
+          r = 100; g = 255; b = 100; // Green
+      } else if (diff < 100000) {
+          m_state.stats.good_hits++;
+          judge_text = "Good";
+          r = 100; g = 200; b = 255; // Blue-ish
+      } else {
+          // Miss logic usually handled when note scrolls past,
+          // but if they hit it late/early but validly, count it?
+          // For now, let's call it "Ok" if it's in the window but > 100ms
+          judge_text = "Ok";
+          r = 255; g = 255; b = 100; // Yellow
+      }
+
+      // Spawn Popup
+      // Calculate X position based on note key... hard without note position logic here.
+      // We can use note_number to guess X.
+      // m_keyboard has logic for X. But it's private.
+      // Let's just put it near the bottom center for now or try to estimate.
+      // Or make it follow the key? We have `note_name` and `m_keyboard->SetKeyActive` knows the position.
+      // Actually, we can just center it or put it above the keyboard.
+      ScorePopup p;
+      p.text = judge_text;
+      p.r = r; p.g = g; p.b = b;
+      p.life = 60; // 1 second roughly at 60fps
+      p.x = GetStateWidth() / 2; // Center for now
+      p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
+      m_popups.push_back(p);
+
       // "Open" this note so we can catch the close later and turn off
       // the note.
       ActiveNote n;
@@ -376,8 +434,16 @@ void PlayingState::Listen() {
       m_notes.insert(replacement);
     }
 
-    else
+    else {
       m_state.stats.stray_notes++;
+      ScorePopup p;
+      p.text = "Miss";
+      p.r = 255; p.g = 100; p.b = 100;
+      p.life = 40;
+      p.x = GetStateWidth() / 2;
+      p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
+      m_popups.push_back(p);
+    }
 
     m_state.stats.total_notes_user_pressed++;
     // Display a pressed key by an user
@@ -394,6 +460,13 @@ void PlayingState::Listen() {
 void PlayingState::Resize() {
     delete  m_keyboard;
     m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+
+    int center_x = GetStateWidth() / 2;
+    int center_y = GetStateHeight() / 2;
+    m_resume_button.x = center_x - Layout::ButtonWidth - 10;
+    m_resume_button.y = center_y + 120;
+    m_quit_button.x = center_x + 10;
+    m_quit_button.y = center_y + 120;
 }
 
 void PlayingState::Update() {
@@ -427,6 +500,23 @@ void PlayingState::Update() {
 
   if (m_paused)
     delta_microseconds = 0;
+
+  // Loop Check
+  if (m_looping && m_loop_a != -1 && m_loop_b != -1) {
+      if (cur_time >= m_loop_b) {
+          m_state.midi->GoTo(m_loop_a);
+          m_required_notes.clear();
+          if (m_state.midi_out) m_state.midi_out->Reset();
+          m_keyboard->ResetActiveKeys();
+          m_notes = m_state.midi->Notes();
+          m_notes_history.clear();
+          SetupNoteState();
+          eraseUntilTime(m_loop_a);
+          // Adjust delta to not skip frames? Or just reset.
+          // Resetting context is safer.
+          return;
+      }
+  }
 
   // Our delta milliseconds on the first frame after state start is extra
   // long because we just reset the MIDI.  By skipping the "Play" that
@@ -568,6 +658,28 @@ void PlayingState::Update() {
     m_should_wait_after_retry = false;
     m_retry_start = new_time;
   }
+
+  if (IsKeyPressed(KeyLoopA)) {
+      m_loop_a = cur_time;
+      m_looping = true;
+      if (m_loop_b != -1 && m_loop_a > m_loop_b) {
+          m_loop_b = -1; // Reset B if A is after it
+      }
+  }
+
+  if (IsKeyPressed(KeyLoopB)) {
+      m_loop_b = cur_time;
+      m_looping = true;
+      if (m_loop_a != -1 && m_loop_b < m_loop_a) {
+          std::swap(m_loop_a, m_loop_b);
+      }
+  }
+
+  if (IsKeyPressed(KeyF6)) {
+      // Toggle Loop on/off
+      m_looping = !m_looping;
+  }
+
   else
   {
     // Check retry conditions
@@ -638,15 +750,38 @@ void PlayingState::Update() {
     m_state.dpms_thread->pauseScreensaver(!m_any_learning_track && !m_paused);
   }
 
+  // Pause Menu Interaction
+  if (m_paused) {
+      MouseInfo mouse = Mouse();
+      m_resume_button.Update(mouse);
+      m_quit_button.Update(mouse);
+
+      if (m_resume_button.hit) {
+          m_paused = false;
+          m_state.dpms_thread->pauseScreensaver(!m_any_learning_track);
+      }
+
+      if (m_quit_button.hit) {
+          if (m_state.midi_out) m_state.midi_out->Reset();
+          if (m_state.midi_in) m_state.midi_in->Reset();
+          ChangeState(new TrackSelectionState(m_state));
+          return;
+      }
+  }
+
   if (IsKeyPressed(KeyEscape)) {
-    if (m_state.midi_out)
-      m_state.midi_out->Reset();
-
-    if (m_state.midi_in)
-      m_state.midi_in->Reset();
-
-    ChangeState(new TrackSelectionState(m_state));
-    return;
+    if (m_paused) {
+        // Resume if already paused? Or Quit? Standard is usually Quit or Toggle Menu.
+        // Let's make Escape toggle pause if playing, or quit if already paused?
+        // Or strictly Quit? The help text says "Return to Menu".
+        if (m_state.midi_out) m_state.midi_out->Reset();
+        if (m_state.midi_in) m_state.midi_in->Reset();
+        ChangeState(new TrackSelectionState(m_state));
+        return;
+    } else {
+        m_paused = true;
+        m_state.dpms_thread->pauseScreensaver(false);
+    }
   }
 
   if (m_state.midi->IsSongOver()) {
@@ -663,6 +798,42 @@ void PlayingState::Update() {
       ChangeState(new TrackSelectionState(m_state));
 
     return;
+  }
+
+  UpdatePopups();
+
+  // Metronome Logic
+  if (m_metronome_on) {
+     const MidiEventMicrosecondList& bars = m_state.midi->GetBarLines();
+     microseconds_t cur = m_state.midi->GetSongPositionInMicroseconds();
+     bool on_beat = false;
+
+     // Optimization: Binary search for lower_bound
+     auto it = std::lower_bound(bars.begin(), bars.end(), cur - 50000);
+     if (it != bars.end()) {
+        if (abs((long long)*it - (long long)cur) < 50000) {
+           on_beat = true;
+        }
+     }
+
+     m_metronome_visual_flash = on_beat;
+
+     if (on_beat) {
+        if (m_state.midi_out && !m_metronome_was_on_beat) {
+             // Use Channel 10 (Percussion), Note 76 (Low Woodblock)
+             int velocity = static_cast<int>(100 * m_metronome_vol);
+             if (velocity > 127) velocity = 127;
+             if (velocity > 0) {
+                 MidiEvent click = MidiEvent::NoteOn(9, 76, velocity);
+                 m_state.midi_out->Write(click);
+             }
+        }
+        m_metronome_was_on_beat = true;
+     } else {
+        m_metronome_was_on_beat = false;
+     }
+  } else {
+      m_metronome_visual_flash = false;
   }
 }
 
@@ -702,7 +873,55 @@ void PlayingState::Draw(Renderer &renderer) const {
     renderer.SetColor(c);
     const Tga *keys = GetTexture(PlayKeys, true);
     renderer.DrawCenteredTga(keys, GetStateWidth() / 2, GetStateHeight() / 2, GetStateWidth() / 2, GetStateHeight() / 3);
+
+    if (m_paused) {
+       int box_w = 600;
+       int box_h = 350;
+       int box_x = (GetStateWidth() - box_w) / 2;
+       int box_y = GetStateHeight() / 2 + 60; // Below the keys image
+
+       renderer.SetColor(0, 0, 0, 220);
+       renderer.DrawQuad(box_x, box_y, box_w, box_h);
+
+       renderer.SetColor(255, 255, 255);
+       TextWriter help(box_x + 20, box_y + 20, renderer, false, 16);
+       help << "Controls:";
+       help.y += 30;
+       help << "Space: Resume Game";
+       help.y += 25;
+       help << "Esc: Return to Menu";
+       help.y += 25;
+       help << "Left / Right: Adjust Speed (-/+ 10%)";
+       help.y += 25;
+       help << "Up / Down: Adjust Visible Duration";
+       help.y += 25;
+       help << "Keypad + / -: Volume Up / Down";
+       help.y += 25;
+       help << "< / >: Octave Shift Down / Up";
+       help.y += 25;
+       help << "Page Up / Down: Jump Backward / Forward 5s";
+       help.y += 25;
+       help << "F1: Set Loop Start (A)";
+       help.y += 25;
+       help << "F2: Set Loop End (B)";
+       help.y += 25;
+       help << "F6: Toggle Loop Active";
+
+       Layout::DrawButton(renderer, m_resume_button, GetTexture(ButtonPlaySong));
+       Layout::DrawButton(renderer, m_quit_button, GetTexture(ButtonExit));
+    }
   }
+
+  // Draw Metronome Flash if active
+  if (m_metronome_visual_flash) {
+     int size = 30;
+     int x = GetStateWidth() - Layout::ScreenMarginX - size;
+     int y = 80;
+     renderer.SetColor(255, 255, 0); // Yellow flash
+     renderer.DrawQuad(x, y, size, size);
+  }
+
+  DrawPopups(renderer);
 
   int text_y = CalcKeyboardHeight() + 42;
 
@@ -836,12 +1055,27 @@ void PlayingState::filePressedKey(int note_number, bool active, size_t track_id)
         m_state.track_properties[track_id].mode == Track::ModeLearningSilently ||
         (m_should_wait_after_retry && isUserPlayableTrack(track_id)))
     {
+        // Chord Tolerance:
+        // Ideally, we want to allow the game to proceed if the user hits the notes *near* the time.
+        // However, this function is called when the MIDI *file* says a note starts.
+        // If we require this note immediately, the game pauses immediately.
+        // For chords, multiple calls happen sequentially in the same Update loop (usually).
+        // So m_required_notes will fill up with all notes starting at this tick.
+        // That seems correct.
+
         if (active && isNoteInPlayableRange(note_number))
         {
             m_required_notes.insert(note_number);
         }
-        else
+        else {
+            // Only remove if it was required.
+            // Note-off events shouldn't necessarily remove the requirement if it wasn't hit yet?
+            // Actually, if the note ends, we shouldn't be waiting for it anymore?
+            // "Wait mode" usually waits for the *start* of the note.
+            // If the note passes (without being hit?), we might be stuck?
+            // The current logic erases it on NoteOff.
             m_required_notes.erase(note_number);
+        }
     }
 }
 
@@ -892,4 +1126,27 @@ NoteState PlayingState::findNodeState(const TranslatedNote& note, TranslatedNote
       return default_note_state;
 
   return n->state;
+}
+
+void PlayingState::UpdatePopups() {
+    for (auto it = m_popups.begin(); it != m_popups.end();) {
+        it->life--;
+        it->y -= 1; // Float up
+        if (it->life <= 0) {
+            it = m_popups.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
+void PlayingState::DrawPopups(Renderer &renderer) const {
+    for (const auto& p : m_popups) {
+        // Calculate alpha based on life
+        int alpha = 255;
+        if (p.life < 20) alpha = (p.life * 255) / 20;
+
+        TextWriter text(p.x, p.y, renderer, true, 18); // Centered
+        text << Text(p.text, Renderer::ToColor(p.r, p.g, p.b, alpha));
+    }
 }

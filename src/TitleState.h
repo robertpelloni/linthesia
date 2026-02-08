@@ -62,6 +62,7 @@ private:
 
   EnumTile *m_keyboard_size_tile;
   StringTile *m_file_tile;
+  StringTile *m_settings_tile;
 
   bool m_skip_next_mouse_up;
 };

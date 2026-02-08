@@ -301,8 +301,11 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
   case SDLK_PAGEDOWN: state_manager->KeyPress(KeyForward);  break;
   case SDLK_PAGEUP:   state_manager->KeyPress(KeyBackward); break;
 
-  case SDLK_KP_PLUS:  state_manager->KeyPress(KeyVolumeDown); break; // [
-  case SDLK_KP_MINUS: state_manager->KeyPress(KeyVolumeUp);   break; // ]
+  case SDLK_KP_PLUS:  state_manager->KeyPress(KeyVolumeUp);   break; // +
+  case SDLK_KP_MINUS: state_manager->KeyPress(KeyVolumeDown); break; // -
+
+  case SDLK_F1:       state_manager->KeyPress(KeyLoopA); break;
+  case SDLK_F2:       state_manager->KeyPress(KeyLoopB); break;
 
   default:
     return false;
