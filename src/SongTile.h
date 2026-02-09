@@ -17,6 +17,11 @@ public:
 
   SongTile(int x, int y, string path, string title, bool dir, Tga *frame_graphics);
 
+  void SetBestScore(int score, const string& grade) {
+      m_best_score = score;
+      m_best_grade = grade;
+  }
+
   void Update(const MouseInfo &translated_mouse);
   void Draw(Renderer &renderer) const;
 
@@ -76,6 +81,9 @@ private:
   string m_path;
   string m_name;
   string m_current_path;
+
+  int m_best_score;
+  string m_best_grade;
 
   Tga *m_frame_graphics;
 

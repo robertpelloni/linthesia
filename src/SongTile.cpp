@@ -13,6 +13,7 @@ SongTile::SongTile(int x, int y, string path, string title, bool dir, Tga *frame
   m_path(path),
   m_name(title),
   m_dir(dir),
+  m_best_score(0),
   m_frame_graphics(frame_graphics) {
 
   // Initialize the size and position of each button
@@ -35,6 +36,11 @@ void SongTile::Draw(Renderer &renderer) const {
   // Draw mode text
   TextWriter title(44, 49, renderer, false, Layout::ButtonFontSize);
   title << m_name.c_str();
+
+  if (m_best_score > 0) {
+      TextWriter score(300, 49, renderer, false, 20);
+      score << "Best: " << m_best_score << " (" << m_best_grade << ")";
+  }
 
   renderer.ResetOffset();
 }

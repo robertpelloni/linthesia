@@ -31,6 +31,7 @@ private:
   ButtonState m_back_button;
 
   std::string m_tooltip;
+  std::string m_grade;
 
   SharedState m_state;
 };

@@ -11,12 +11,45 @@
 #include "PlayingState.h"
 #include "Renderer.h"
 #include "Textures.h"
+#include "ScoreDB.h"
+#include "UserSettings.h"
 
 #include <iomanip>
 
 using namespace std;
 
 void StatsState::Init() {
+  // Calculate Grade
+  double hit_percent = 0.0;
+  if (m_state.stats.notes_user_could_have_played > 0) {
+    hit_percent = 100.0 * (m_state.stats.notes_user_actually_played / (m_state.stats.notes_user_could_have_played * 1.0));
+  }
+
+  string grade = "F";
+  if (hit_percent >= 50) grade = "D-";
+  if (hit_percent >= 55) grade = "D";
+  if (hit_percent >= 63) grade = "D+";
+  if (hit_percent >= 70) grade = "C-";
+  if (hit_percent >= 73) grade = "C";
+  if (hit_percent >= 77) grade = "C+";
+  if (hit_percent >= 80) grade = "B-";
+  if (hit_percent >= 83) grade = "B";
+  if (hit_percent >= 87) grade = "B+";
+  if (hit_percent >= 90) grade = "A-";
+  if (hit_percent >= 93) grade = "A";
+  if (hit_percent >= 97) grade = "A+";
+  if (hit_percent >= 99) grade = "S";
+  if (hit_percent >= 100) grade = "SS";
+
+  m_grade = grade;
+
+  // Save to DB
+  ScoreDB db;
+  string db_path = UserSetting::Get(SQLITE_DB_KEY, "");
+  if (!db_path.empty() && db.Open(db_path)) {
+      db.AddScore(m_state.song_path, static_cast<int>(m_state.stats.score), m_state.stats.max_streak, grade);
+  }
+
   m_back_button = ButtonState(
       Layout::ScreenMarginX,
       GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
@@ -88,22 +121,6 @@ void StatsState::Draw(Renderer &renderer) const {
     hit_percent = 100.0 * (s.notes_user_actually_played / (s.notes_user_could_have_played * 1.0));
   }
 
-  string grade = "F";
-  if (hit_percent >= 50) grade = "D-";
-  if (hit_percent >= 55) grade = "D";
-  if (hit_percent >= 63) grade = "D+";
-  if (hit_percent >= 70) grade = "C-";
-  if (hit_percent >= 73) grade = "C";
-  if (hit_percent >= 77) grade = "C+";
-  if (hit_percent >= 80) grade = "B-";
-  if (hit_percent >= 83) grade = "B";
-  if (hit_percent >= 87) grade = "B+";
-  if (hit_percent >= 90) grade = "A-";
-  if (hit_percent >= 93) grade = "A";
-  if (hit_percent >= 97) grade = "A+";
-  if (hit_percent >= 99) grade = "S";
-  if (hit_percent >= 100) grade = "SS";
-
   int stray_percent = 0;
   if (s.total_notes_user_pressed > 0)
     stray_percent = static_cast<int>((100.0 * s.stray_notes) / s.total_notes_user_pressed);
@@ -121,7 +138,7 @@ void StatsState::Draw(Renderer &renderer) const {
   const SDL_Color c = Renderer::ToColor(int(r*0xFF), int(g*0xFF), int(b*0xFF));
 
   TextWriter grade_text(left - 5, InstructionsY - 15, renderer, false, 100);
-  grade_text << Text(grade, c);
+  grade_text << Text(m_grade, c);
 
   TextWriter score(left, InstructionsY + 112, renderer, false, 28);
   score << STRING(static_cast<int>(s.score));

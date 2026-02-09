@@ -8,6 +8,8 @@
 #include "MenuLayout.h"
 #include "TitleState.h"
 #include "LinthesiaError.h"
+#include "ScoreDB.h"
+#include "UserSettings.h"
 
 #include "libmidi/Midi.h"
 
@@ -132,6 +134,10 @@ void SongLibState::UpdateSongTiles() {
         Tga* song_tile_graphics = GetTexture(SongBox);
         Tga* dir_tile_graphics = GetTexture(DirBox);
 
+        ScoreDB db;
+        string db_path = UserSetting::Get(SQLITE_DB_KEY, "");
+        if (!db_path.empty()) db.Open(db_path);
+
         while ((ent = readdir (dir)) != NULL) {
             string f_name = string(ent->d_name);
             if (f_name.compare(".") != 0 && f_name.compare("..") != 0) {
@@ -157,6 +163,14 @@ void SongLibState::UpdateSongTiles() {
                     SongTile song_tile = SongTile(0, 0, path, title,
                                         ent->d_type == DT_DIR,
                                         graphics);
+
+                    if (ent->d_type != DT_DIR) {
+                        SongScore s = db.GetBestScore(path);
+                        if (s.score > 0) {
+                            song_tile.SetBestScore(s.score, s.grade);
+                        }
+                    }
+
                     m_song_tiles.push_back(song_tile);
                 }
 
@@ -357,6 +371,7 @@ void SongLibState::OpenTitleState(string path) {
     if (midi) {
         m_state.midi = midi;
         m_state.song_title = FileSelector::TrimFilename(path.c_str());
+        m_state.song_path = path;
         ChangeState(new TitleState(m_state));
     }
 }

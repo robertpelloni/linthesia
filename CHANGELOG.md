@@ -1,8 +1,10 @@
 # Changelog
 
-## [1.1.0-dev] - 2024-05-22
+## [1.1.0] - 2024-05-22
 
 ### Added
+- **Score Persistence**: Implemented a local SQLite database to save song scores, grades, and streaks.
+- **Library Assessment**: The Song Library now displays your best score and grade for each song directly on the tile.
 - **MidiDriver**: Created `AlsaMidiDriver` class as part of the cross-platform refactoring effort.
 - **Advanced Scoring**: Added Streak tracking with visual popups (every 10 hits) and "S"/"SS" ranks for high accuracy.
 
