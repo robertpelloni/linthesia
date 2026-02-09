@@ -32,7 +32,9 @@ protected:
     virtual void Init();
     virtual void Update();
     virtual void Resize();
+    virtual void OnTextInput(const std::string& text) override;
     virtual void Draw(Renderer &renderer) const;
+    virtual void Finish() override;
 
 private:
 

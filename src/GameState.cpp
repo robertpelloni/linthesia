@@ -209,6 +209,12 @@ void GameStateManager::MouseMove(int x, int y) {
   m_mouse.y = y;
 }
 
+void GameStateManager::TextInput(const std::string& text) {
+  if (m_current_state) {
+    m_current_state->OnTextInput(text);
+  }
+}
+
 void GameStateManager::SetInitialState(GameState *first_state) {
 
   if (m_current_state)

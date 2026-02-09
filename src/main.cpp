@@ -154,6 +154,9 @@ void DrawingArea::PollEvent(SDL_Event& event)
     case SDL_KEYUP:
       on_key_release(event.key);
       break;
+    case SDL_TEXTINPUT:
+      state_manager->TextInput(event.text.text);
+      break;
     case SDL_WINDOWEVENT:
       on_window_event(event.window);
       break;
@@ -306,6 +309,8 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
 
   case SDLK_F1:       state_manager->KeyPress(KeyLoopA); break;
   case SDLK_F2:       state_manager->KeyPress(KeyLoopB); break;
+
+  case SDLK_BACKSPACE: state_manager->KeyPress(KeyBackspace); break;
 
   default:
     return false;

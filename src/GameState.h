@@ -67,7 +67,9 @@ enum GameKey {
   KeyVolumeDown  = 0x2000,
 
   KeyLoopA       = 0x4000,
-  KeyLoopB       = 0x8000
+  KeyLoopB       = 0x8000,
+
+  KeyBackspace   = 0x10000
 };
 
 enum MouseButton {
@@ -130,6 +132,9 @@ protected:
 
   // Called when the game state is finished
   virtual void Finish() {};
+
+  // Called when text input is received
+  virtual void OnTextInput(const std::string& text) {};
 
   // Called each frame.  Drawing bounds are [0,
   // GetStateWidth()) and [0, GetStateHeight())
@@ -217,6 +222,8 @@ public:
   void MouseRelease(MouseButton button);
   void MouseMove(int x, int y);
   const MouseInfo &Mouse() const { return m_mouse; }
+
+  void TextInput(const std::string& text);
 
   void Update(bool skip_this_update);
   void Draw(Renderer &renderer);

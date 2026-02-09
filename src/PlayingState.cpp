@@ -97,6 +97,8 @@ PlayingState::PlayingState(const SharedState &state) :
   m_should_wait_after_retry(false),
   m_retry_start(0),
   m_state(state),
+  m_wait_grace_timer(0),
+  m_in_wait_grace_period(false),
   m_lead_in(0), m_lead_out(0),
   m_metronome_on(false), m_metronome_vol(1.0),
   m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
@@ -522,13 +524,54 @@ void PlayingState::Update() {
   // long because we just reset the MIDI.  By skipping the "Play" that
   // update, we don't have an artificially fast-forwarded start.
   if (!m_first_update) {
-    if (areAllRequiredKeysPressed())
-    {
-      Play(delta_microseconds);
-//    m_should_wait_after_retry = false; // always reset onces pressed
+    bool keysPressed = areAllRequiredKeysPressed();
+
+    // Grace Period Logic
+    if (!keysPressed && !m_in_wait_grace_period) {
+        // If we are blocked, start grace timer?
+        // No, we need to know if we JUST got blocked.
+        // But logic is reversed: Play() calls filePressedKey which adds to m_required_notes.
+        // So Play() runs, adds notes, then next frame we check keysPressed.
+        // If we want to allow Play() to continue for a bit to gather more notes,
+        // we should do it inside Play() or allow Play() to run even if keysPressed is false for a bit.
     }
-    else {
-      m_current_combo = 0;
+
+    // New Logic:
+    // If not all keys pressed:
+    //   If grace timer active:
+    //     Continue Playing (Play(delta)) -> this gathers more notes into required list
+    //     Decrease timer.
+    //     If timer expired -> Pause (don't call Play)
+    //   Else (grace timer not active):
+    //     Pause.
+    // When do we activate grace timer?
+    //   When m_required_notes goes from empty to non-empty?
+
+    if (keysPressed) {
+        m_in_wait_grace_period = false;
+        m_wait_grace_timer = 0;
+        Play(delta_microseconds);
+    } else {
+        // We are blocked.
+        if (!m_in_wait_grace_period && m_wait_grace_timer == 0) {
+             // Just blocked. Start grace period.
+             m_in_wait_grace_period = true;
+             m_wait_grace_timer = 50000; // 50ms tolerance
+        }
+
+        if (m_in_wait_grace_period) {
+            m_wait_grace_timer -= delta_microseconds;
+            if (m_wait_grace_timer > 0) {
+                // Keep playing to catch rolled chords
+                Play(delta_microseconds);
+            } else {
+                // Time up, fully blocked
+                m_in_wait_grace_period = false;
+                m_current_combo = 0;
+            }
+        } else {
+            m_current_combo = 0;
+        }
     }
 
     Listen();
