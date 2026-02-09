@@ -101,8 +101,8 @@ void StatsState::Draw(Renderer &renderer) const {
   if (hit_percent >= 90) grade = "A-";
   if (hit_percent >= 93) grade = "A";
   if (hit_percent >= 97) grade = "A+";
-  if (hit_percent >= 99) grade = "A++";
-  if (hit_percent >= 100) grade = "A+++";
+  if (hit_percent >= 99) grade = "S";
+  if (hit_percent >= 100) grade = "SS";
 
   int stray_percent = 0;
   if (s.total_notes_user_pressed > 0)
@@ -148,6 +148,9 @@ void StatsState::Draw(Renderer &renderer) const {
 
   TextWriter good_txt(left, InstructionsY + 385, renderer, false, 22);
   good_txt << STRING("Good: " << s.good_hits);
+
+  TextWriter streak_txt(left, InstructionsY + 410, renderer, false, 22);
+  streak_txt << STRING("Max Streak: " << s.max_streak);
 
   TextWriter tooltip(GetStateWidth() / 2,
                      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::TitleFontSize/2,

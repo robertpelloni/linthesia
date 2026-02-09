@@ -48,6 +48,8 @@ struct SongStatistics {
 
   int perfect_hits;
   int good_hits;
+  int current_streak;
+  int max_streak;
 };
 
 struct SharedState {

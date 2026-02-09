@@ -429,6 +429,22 @@ void PlayingState::Listen() {
       m_current_combo++;
       m_state.stats.longest_combo = max(m_current_combo, m_state.stats.longest_combo);
 
+      m_state.stats.current_streak++;
+      if (m_state.stats.current_streak > m_state.stats.max_streak) {
+          m_state.stats.max_streak = m_state.stats.current_streak;
+      }
+
+      // Streak Popups
+      if (m_state.stats.current_streak > 0 && m_state.stats.current_streak % 10 == 0) {
+          ScorePopup s;
+          s.text = std::to_string(m_state.stats.current_streak) + " Streak!";
+          s.r = 255; s.g = 215; s.b = 0; // Gold
+          s.life = 100;
+          s.x = GetStateWidth() / 2;
+          s.y = GetStateHeight() / 3;
+          m_popups.push_back(s);
+      }
+
       TranslatedNote replacement = *closest_match;
       replacement.state = UserHit;
 
@@ -438,6 +454,7 @@ void PlayingState::Listen() {
 
     else {
       m_state.stats.stray_notes++;
+      m_state.stats.current_streak = 0; // Reset streak
       ScorePopup p;
       p.text = "Miss";
       p.r = 255; p.g = 100; p.b = 100;

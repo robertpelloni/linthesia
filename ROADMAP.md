@@ -2,8 +2,8 @@
 
 This document outlines the planned features, improvements, and known gaps in Linthesia.
 
-## Current Status (v1.0.0)
-Linthesia is a fully functional, feature-complete MIDI visualizer and learning tool for Linux.
+## Current Status (v1.1.0-dev)
+Linthesia is a fully functional MIDI visualizer and learning tool for Linux.
 
 ### Major Milestone: v1.0.0
 *   **Search**: Fully functional Song Library Search with text input support.
@@ -12,10 +12,15 @@ Linthesia is a fully functional, feature-complete MIDI visualizer and learning t
 *   **Scoring**: Precision-based scoring with visual feedback.
 *   **Architecture**: `MidiDriver` interface established for future portability.
 
+### In Progress: v1.1.0
+*   **Cross-Platform Port**: `AlsaMidiDriver` implementation created (refactoring in progress).
+*   **Advanced Scoring**: Streaks and S-Rank added.
+
 ## Future Horizons
 
-### Post-v1.0 Goals
-*   **Cross-Platform Port**: Use the `MidiDriver` interface to implement Windows (WinMM) and macOS (CoreMIDI) backends.
+### Post-v1.1 Goals
+*   **Refactor MidiComm**: Switch to using `MidiDriver` backend.
+*   **Windows/macOS Support**: Implement `WinMidiDriver` and `CoreMidiDriver`.
 *   **Built-in Synthesizer**: Remove the dependency on external synths by embedding FluidSynth.
 *   **MIDI Recording**: Allow users to record their sessions.
 *   **Sheet Music**: Render standard notation.

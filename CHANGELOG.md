@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.1.0-dev] - 2024-05-22
+
+### Added
+- **MidiDriver**: Created `AlsaMidiDriver` class as part of the cross-platform refactoring effort.
+- **Advanced Scoring**: Added Streak tracking with visual popups (every 10 hits) and "S"/"SS" ranks for high accuracy.
+
 ## [1.0.0] - 2024-05-22
 
 ### Added
