@@ -11,6 +11,8 @@ Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It 
     *   **Pause Menu**: Interactive buttons for Resume/Quit.
     *   **Keyboard Size**: Verified logic for 37-88 key support.
     *   **Agent Documentation**: Unified instructions for AI contributors.
+    *   **Song Search**: Added basic search filter logic (UI ready, input needs wiring).
+    *   **MIDI Abstraction**: Created `MidiDriver` interface for future cross-platform support.
 *   **v0.8.0 Features**:
     *   **Settings Menu**: Configurable Lead-In, Lead-Out, Scroll Speed, Metronome.
     *   **Metronome**: Audio and Visual feedback.
@@ -19,13 +21,13 @@ Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It 
 ## Upcoming Features
 
 ### Short Term (v1.0.0)
-*   **[ ] Wait Mode Polish**: Improve the "Learning" mode logic to be more robust with chords.
-*   **[ ] Scoring System**: Implement a scoring algorithm (Perfect, Good, Miss).
-*   **[ ] Song Library Search**: Add a search bar to the song selection screen.
+*   **[ ] Text Input**: Hook up SDL text input events to `SongLibState` to enable the search bar.
+*   **[ ] Scoring Polish**: Refine scoring thresholds and visual feedback.
+*   **[ ] Wait Mode Tolerance**: Implement a "grace window" for sloppy MIDI files where chords aren't perfectly quantized.
 
 ### Medium Term
 *   **[ ] Built-in Synthesizer**: Integrate FluidSynth.
-*   **[ ] Cross-Platform Support**: Windows/macOS build instructions and abstraction.
+*   **[ ] Cross-Platform Support**: Implement `WinMidiDriver` and `CoreMidiDriver` using the new abstraction.
 *   **[ ] MIDI Recording**: User performance recording.
 
 ## Submodule Analysis: `pianogame`

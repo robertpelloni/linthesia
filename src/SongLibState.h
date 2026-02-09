@@ -57,6 +57,7 @@ private:
 
     string m_current_path;
     string m_base_path;
+    string m_search_filter;
 
     std::vector<SongTile> m_song_tiles;
 
