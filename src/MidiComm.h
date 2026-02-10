@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 #include <queue>
-#include <alsa/asoundlib.h>
 
 #include "libmidi/MidiEvent.h"
+#include "MidiDriver.h"
 
 struct MidiCommDescription {
 
@@ -33,6 +33,9 @@ void midiStop();
 
 // Emulate MIDI keyboard using PC keyboard
 void sendNote(const unsigned char note, bool on);
+
+// Global MidiDriver instance (managed by main.cpp/MidiComm)
+extern MidiDriver* g_midi_driver;
 
 // Once you create a MidiCommIn object.  Use the Read() function
 // to grab one event at a time from the buffer.

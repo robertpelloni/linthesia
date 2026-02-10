@@ -77,6 +77,7 @@ struct SharedState {
   std::vector<Track::Properties> track_properties;
   std::string song_title;
   std::string song_path; // Needed for DB
+  bool rhythm_mode; // Melodics-style
   Keyboard keyboard;
 };
 

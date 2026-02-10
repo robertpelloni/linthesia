@@ -254,6 +254,10 @@ void TrackSelectionState::Update() {
       }
   }
 
+  // Toggle Rhythm Mode (hacky binding for now, maybe F3?)
+  if (IsKeyPressed(KeyF6)) { // Reuse F6 or add new key? Let's assume F6 is free here since it's loop/fps in PlayingState.
+      m_state.rhythm_mode = !m_state.rhythm_mode;
+  }
 
   if (IsKeyPressed(KeyEnter) || m_continue_button.hit) {
 
@@ -447,6 +451,11 @@ void TrackSelectionState::Draw(Renderer &renderer) const {
 
   Layout::DrawButton(renderer, m_continue_button, GetTexture(ButtonPlaySong));
   Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonBackToTitle));
+
+  if (m_state.rhythm_mode) {
+      TextWriter mode(GetStateWidth() - 250, 120, renderer, false, 20);
+      mode << Text("Rhythm Mode: ON", Renderer::ToColor(255, 100, 100));
+  }
 
   // Write our page count on the screen
   TextWriter pagination(GetStateWidth()/2+200, GetStateHeight() - Layout::SmallFontSize - 30,

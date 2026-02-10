@@ -93,6 +93,10 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
   DrawBars(renderer, x+x_offset, y, y_offset, y_roll_under, final_width,
            show_duration, current_time, bar_line_usecs);
 
+  // Judgement Line (Visual Aid)
+  renderer.SetColor(255, 255, 0, 80); // Semi-transparent yellow
+  renderer.DrawQuad(x + x_offset, y + y_offset - 1, final_width, 3);
+
   // Do two passes on the notes, the first for note shadows and the second
   // for the note blocks themselves.  This is to avoid shadows being drawn
   // on top of notes.

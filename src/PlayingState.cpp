@@ -335,7 +335,11 @@ void PlayingState::Listen() {
       if (i->state != UserPlayable)
         continue;
 
-      if (window_end > cur_time && i->note_id == ev.NoteNumber()) {
+      // Rhythm Mode: Ignore pitch match, only check timing
+      bool match = (i->note_id == ev.NoteNumber());
+      if (m_state.rhythm_mode) match = true;
+
+      if (window_end > cur_time && match) {
 
         if (closest_match == m_notes.end()) {
           closest_match = i;

@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.2.0] - 2024-05-22
+
+### Added
+- **Rhythm Mode**: A new practice mode where pitch matching is disabled, allowing users to focus purely on rhythm/timing. Toggle with `F6` in the Track Selection screen.
+- **Judgement Line**: Added a semi-transparent yellow line above the keys to indicate the exact timing window.
+- **MidiDriver Integration**: Refactored the core MIDI communication layer (`MidiComm`) to use the new `MidiDriver` interface, fully isolating ALSA dependencies into `src/drivers/AlsaMidiDriver.cpp`.
+
+### Changed
+- **Internal**: `MidiComm` no longer calls ALSA directly. It uses the global `g_midi_driver` instance.
+
 ## [1.1.0] - 2024-05-22
 
 ### Added
@@ -18,26 +28,3 @@
 ### Changed
 - **Version**: Bumped to 1.0.0, marking feature completeness for the core Linux scope.
 - **Documentation**: Updated Roadmap to reflect 1.0 status.
-
-## [0.9.0] - 2024-05-22
-
-### Added
-- **Loop Practice**: Press `F1` to set start point (A), `F2` to set end point (B). The song will loop between these points. Press `F6` to toggle looping.
-- **Interactive Pause Menu**: The pause screen now features clickable buttons to "Resume" or "Quit to Title".
-- **Agent Instructions**: Added `AGENTS.md` and related files to guide AI contributors.
-
-### Changed
-- **Documentation**: Updated `ROADMAP.md` and `DASHBOARD.md`.
-- **Internal**: Verified keyboard size rendering logic.
-
-## [0.8.0] - 2024-05-22
-
-### Added
-- **Settings Menu**: New "Advanced Settings" menu in the title screen.
-- **In-Game Help**: Pressing 'Space' to pause now displays a help overlay.
-- **Visual & Audio Metronome**: A yellow indicator flashes and a MIDI tick plays on every beat.
-- **Version Consolidation**: Project version is now read from a single `VERSION` file.
-
-### Changed
-- **Volume Controls**: Swapped Keypad `+` and `-` mappings.
-- **Documentation**: Rewrote `README.md` as a user manual.
