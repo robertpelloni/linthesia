@@ -29,6 +29,7 @@
 #define SCROLL_SPEED_KEY "scroll-speed"
 #define METRONOME_ON_KEY "metronome-on"
 #define METRONOME_VOLUME_KEY "metronome-volume"
+#define WAIT_TOLERANCE_KEY "wait-tolerance"
 
 namespace UserSetting {
 

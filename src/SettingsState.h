@@ -37,6 +37,7 @@ private:
   EnumValue* m_scroll_speed_val;
   EnumValue* m_metronome_on_val;
   EnumValue* m_metronome_vol_val;
+  EnumValue* m_wait_tolerance_val;
 
   // Tiles
   EnumTile* m_lead_in_tile;
@@ -44,6 +45,9 @@ private:
   EnumTile* m_scroll_speed_tile;
   EnumTile* m_metronome_on_tile;
   EnumTile* m_metronome_vol_tile;
+  EnumTile* m_wait_tolerance_tile;
+
+  ButtonState m_test_audio_button;
 };
 
 #endif // __SETTINGS_STATE_H

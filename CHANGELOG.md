@@ -1,14 +1,21 @@
 # Changelog
 
+## [1.2.1] - 2024-05-22
+
+### Added
+- **Configurable Wait Tolerance**: Added a "Wait Tolerance" setting to the Advanced Settings menu, allowing users to adjust the chord grace period (0-500ms).
+- **Audio Test**: Added a "Test Audio" button in Settings to verify MIDI output configuration.
+- **Search UI**: Improved the song library search bar with a background box and blinking cursor visual.
+
+### Changed
+- **Polish**: Removed legacy TODO comments and improved code cleanliness.
+
 ## [1.2.0] - 2024-05-22
 
 ### Added
 - **Rhythm Mode**: A new practice mode where pitch matching is disabled, allowing users to focus purely on rhythm/timing. Toggle with `F6` in the Track Selection screen.
 - **Judgement Line**: Added a semi-transparent yellow line above the keys to indicate the exact timing window.
-- **MidiDriver Integration**: Refactored the core MIDI communication layer (`MidiComm`) to use the new `MidiDriver` interface, fully isolating ALSA dependencies into `src/drivers/AlsaMidiDriver.cpp`.
-
-### Changed
-- **Internal**: `MidiComm` no longer calls ALSA directly. It uses the global `g_midi_driver` instance.
+- **MidiDriver Integration**: Refactored the core MIDI communication layer (`MidiComm`) to use the new `MidiDriver` interface.
 
 ## [1.1.0] - 2024-05-22
 
@@ -27,4 +34,3 @@
 
 ### Changed
 - **Version**: Bumped to 1.0.0, marking feature completeness for the core Linux scope.
-- **Documentation**: Updated Roadmap to reflect 1.0 status.

@@ -123,6 +123,7 @@ private:
   NoteState findNodeState(const TranslatedNote& note, TranslatedNoteSet& notes, NoteState default_note_state);
 
   microseconds_t m_wait_grace_timer;
+  microseconds_t m_wait_grace_max;
   bool m_in_wait_grace_period;
 
   microseconds_t m_lead_in;

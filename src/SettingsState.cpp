@@ -138,6 +138,9 @@ SettingsState::~SettingsState() {
   delete m_scroll_speed_val;
   delete m_metronome_on_val;
   delete m_metronome_vol_val;
+  delete m_wait_tolerance_val;
+
+  delete m_wait_tolerance_tile;
 }
 
 void SettingsState::Init() {
@@ -153,10 +156,11 @@ void SettingsState::Init() {
   m_scroll_speed_val = new NumericValue(SCROLL_SPEED_KEY, 1000000, 10000000, 250000, 3250000); // 1-10s visible
   m_metronome_on_val = new BoolValue(METRONOME_ON_KEY, false);
   m_metronome_vol_val = new FloatValue(METRONOME_VOLUME_KEY, 0.0, 2.0, 0.1, 1.0); // 0-200%
+  m_wait_tolerance_val = new NumericValue(WAIT_TOLERANCE_KEY, 0, 500000, 10000, 50000); // 0-500ms
 
   // Create Tiles
   int y = 80;
-  int gap = 90;
+  int gap = 70; // Slightly tighter gap to fit more
 
   m_lead_in_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_lead_in_val, "Lead-In Time:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
@@ -164,14 +168,24 @@ void SettingsState::Init() {
   y += gap;
   m_scroll_speed_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_scroll_speed_val, "Visible Duration:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
+  m_wait_tolerance_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_wait_tolerance_val, "Wait Tolerance:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
+  y += gap;
   m_metronome_on_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_metronome_on_val, "Metronome:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
   m_metronome_vol_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_metronome_vol_val, "Metronome Vol:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
+
+  m_test_audio_button = ButtonState(
+      GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
+      GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2,
+      Layout::ButtonWidth, Layout::ButtonHeight);
 }
 
 void SettingsState::Resize() {
   m_back_button.SetX(Layout::ScreenMarginX);
   m_back_button.SetY(GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2);
+
+  m_test_audio_button.SetX(GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth);
+  m_test_audio_button.SetY(GetStateHeight() - Layout::ScreenMarginY/2 - Layout::ButtonHeight/2);
 
   int x = (GetStateWidth() - EnumTileWidth)/2;
   int y = 80;
@@ -180,6 +194,7 @@ void SettingsState::Resize() {
   if (m_lead_in_tile) { m_lead_in_tile->SetX(x); m_lead_in_tile->SetY(y); } y+=gap;
   if (m_lead_out_tile) { m_lead_out_tile->SetX(x); m_lead_out_tile->SetY(y); } y+=gap;
   if (m_scroll_speed_tile) { m_scroll_speed_tile->SetX(x); m_scroll_speed_tile->SetY(y); } y+=gap;
+  if (m_wait_tolerance_tile) { m_wait_tolerance_tile->SetX(x); m_wait_tolerance_tile->SetY(y); } y+=gap;
   if (m_metronome_on_tile) { m_metronome_on_tile->SetX(x); m_metronome_on_tile->SetY(y); } y+=gap;
   if (m_metronome_vol_tile) { m_metronome_vol_tile->SetX(x); m_metronome_vol_tile->SetY(y); }
 }
@@ -188,6 +203,7 @@ void SettingsState::Update() {
   MouseInfo mouse = Mouse();
 
   m_back_button.Update(mouse);
+  m_test_audio_button.Update(mouse);
 
   if (m_lead_in_tile) {
       MouseInfo local(mouse); local.x -= m_lead_in_tile->GetX(); local.y -= m_lead_in_tile->GetY();
@@ -201,6 +217,10 @@ void SettingsState::Update() {
       MouseInfo local(mouse); local.x -= m_scroll_speed_tile->GetX(); local.y -= m_scroll_speed_tile->GetY();
       m_scroll_speed_tile->Update(local);
   }
+  if (m_wait_tolerance_tile) {
+      MouseInfo local(mouse); local.x -= m_wait_tolerance_tile->GetX(); local.y -= m_wait_tolerance_tile->GetY();
+      m_wait_tolerance_tile->Update(local);
+  }
   if (m_metronome_on_tile) {
       MouseInfo local(mouse); local.x -= m_metronome_on_tile->GetX(); local.y -= m_metronome_on_tile->GetY();
       m_metronome_on_tile->Update(local);
@@ -208,6 +228,20 @@ void SettingsState::Update() {
   if (m_metronome_vol_tile) {
       MouseInfo local(mouse); local.x -= m_metronome_vol_tile->GetX(); local.y -= m_metronome_vol_tile->GetY();
       m_metronome_vol_tile->Update(local);
+  }
+
+  // Test Audio Button
+  if (m_test_audio_button.hit) {
+      // Send a test note (Middle C)
+      if (g_midi_driver) {
+          MidiEvent note_on = MidiEvent::NoteOn(0, 60, 100);
+          g_midi_driver->Write(note_on);
+          // Note off after short delay? We can't delay here easily.
+          // Just send a short note on/off? Or rely on user to hear the "plink".
+          // Let's send Note Off immediately? No, that might be too fast.
+          // For now, just Note On. The user might get stuck notes if they spam it,
+          // but they can reset output.
+      }
   }
 
   if (IsKeyPressed(KeyEscape) || m_back_button.hit) {
@@ -221,8 +255,10 @@ void SettingsState::Update() {
   if (m_lead_in_tile && m_lead_in_tile->WholeTile().hovering) m_tooltip = "Time before song starts (Lead-In).";
   if (m_lead_out_tile && m_lead_out_tile->WholeTile().hovering) m_tooltip = "Time after song ends (Lead-Out).";
   if (m_scroll_speed_tile && m_scroll_speed_tile->WholeTile().hovering) m_tooltip = "Amount of time visible on screen (Scroll Speed).";
+  if (m_wait_tolerance_tile && m_wait_tolerance_tile->WholeTile().hovering) m_tooltip = "Wait Mode grace period for chords (in microseconds).";
   if (m_metronome_on_tile && m_metronome_on_tile->WholeTile().hovering) m_tooltip = "Enable visual metronome.";
   if (m_metronome_vol_tile && m_metronome_vol_tile->WholeTile().hovering) m_tooltip = "Adjust metronome volume.";
+  if (m_test_audio_button.hovering) m_tooltip = "Test Audio Output (Plays Middle C).";
 }
 
 void SettingsState::Draw(Renderer &renderer) const {
@@ -230,10 +266,12 @@ void SettingsState::Draw(Renderer &renderer) const {
   Layout::DrawHorizontalRule(renderer, GetStateWidth(), 60);
 
   Layout::DrawButton(renderer, m_back_button, GetTexture(ButtonBackToTitle));
+  Layout::DrawButton(renderer, m_test_audio_button, GetTexture(ButtonPlaySong)); // Reusing Play icon for Test Audio
 
   if (m_lead_in_tile) m_lead_in_tile->Draw(renderer);
   if (m_lead_out_tile) m_lead_out_tile->Draw(renderer);
   if (m_scroll_speed_tile) m_scroll_speed_tile->Draw(renderer);
+  if (m_wait_tolerance_tile) m_wait_tolerance_tile->Draw(renderer);
   if (m_metronome_on_tile) m_metronome_on_tile->Draw(renderer);
   if (m_metronome_vol_tile) m_metronome_vol_tile->Draw(renderer);
 

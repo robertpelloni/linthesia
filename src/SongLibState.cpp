@@ -413,10 +413,32 @@ void SongLibState::Draw(Renderer &renderer) const {
     }
 
     // Draw Search Filter
-    if (!m_search_filter.empty()) {
-        int search_y = GetStateHeight() - Layout::ScreenMarginY * 2;
-        renderer.SetColor(255, 255, 255);
-        TextWriter search(Layout::ScreenMarginX, search_y, renderer, false, 18);
-        search << "Search: " << m_search_filter;
+    int search_y = GetStateHeight() - Layout::ScreenMarginY * 2;
+    int search_x = Layout::ScreenMarginX;
+    int search_w = 300;
+    int search_h = 30;
+
+    // Background Box
+    renderer.SetColor(50, 50, 50, 200);
+    renderer.DrawQuad(search_x, search_y, search_w, search_h);
+    renderer.SetColor(200, 200, 200); // Border
+    renderer.DrawQuad(search_x, search_y, search_w, 2);
+    renderer.DrawQuad(search_x, search_y + search_h - 2, search_w, 2);
+    renderer.DrawQuad(search_x, search_y, 2, search_h);
+    renderer.DrawQuad(search_x + search_w - 2, search_y, 2, search_h);
+
+    renderer.SetColor(255, 255, 255);
+    TextWriter search(search_x + 5, search_y + 5, renderer, false, 18);
+    search << "Search: " << m_search_filter;
+
+    // Blinking Cursor
+    static int cursor_blink = 0;
+    cursor_blink++;
+    if ((cursor_blink / 30) % 2 == 0) { // Blink every ~0.5s at 60fps
+        // Calculate width of text to position cursor?
+        // TextWriter doesn't easily expose width of rendered string without modification.
+        // Approximate width: 9px per char?
+        int text_width = m_search_filter.length() * 10 + 70; // "Search: " is ~70px
+        renderer.DrawQuad(search_x + text_width, search_y + 5, 2, 20);
     }
 }

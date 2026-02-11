@@ -57,5 +57,9 @@
       <default>"1.0"</default>
     </key>
 
+    <key name="wait-tolerance" type="s">
+      <default>"50000"</default>
+    </key>
+
   </schema>
 </schemalist>

@@ -144,6 +144,9 @@ void PlayingState::Init() {
   std::string met_vol = UserSetting::Get(METRONOME_VOLUME_KEY, "1.0");
   try { m_metronome_vol = std::stod(met_vol); } catch (...) { m_metronome_vol = 1.0; }
 
+  std::string wait_tol = UserSetting::Get(WAIT_TOLERANCE_KEY, "50000");
+  try { m_wait_grace_max = std::stoll(wait_tol); } catch (...) { m_wait_grace_max = 50000; }
+
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
     MinPlayableNote = strtol(min_key.c_str(), NULL, 10);
@@ -577,7 +580,7 @@ void PlayingState::Update() {
         if (!m_in_wait_grace_period && m_wait_grace_timer == 0) {
              // Just blocked. Start grace period.
              m_in_wait_grace_period = true;
-             m_wait_grace_timer = 50000; // 50ms tolerance
+             m_wait_grace_timer = m_wait_grace_max;
         }
 
         if (m_in_wait_grace_period) {
