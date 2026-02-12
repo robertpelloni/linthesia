@@ -1,17 +1,19 @@
 # Handoff Notes
 
 ## Current State
-*   **Version**: 0.9.0
-*   **Branch**: `feature-loop-practice-and-pause`
-*   **Recent Features**: Interactive Pause Menu, Loop Practice (A-B Repeat), Unified Agent Docs.
+*   **Version**: 1.2.1
+*   **Branch**: `feature-search-and-polish` (merged)
+*   **Key Achievements**:
+    *   **Search**: Functional with UI and Text Input.
+    *   **Architecture**: `MidiDriver` interface + `AlsaMidiDriver`.
+    *   **Polish**: Wait Mode Tolerance, Rhythm Mode, Score Persistence.
 
-## Next Steps
-*   **Wait Mode Polish**: The "Learning" mode (wait for key) needs testing and polish, especially for chords.
-*   **Scoring**: Implement a proper scoring system.
-*   **Synth**: Investigate FluidSynth integration to remove external dependency.
+## Critical Next Steps
+1.  **Sheet Music**: Implement `SheetMusicDisplay`. This is the "White Whale".
+2.  **Cross-Platform**: Implement `WinMidiDriver` using the new interface.
+3.  **Synth**: Once `libfluidsynth-dev` is available in the env, implement `FluidSynthDriver`.
 
-## Notes for Next Agent
-*   `PlayingState::Update` handles the game loop logic including metronome and looping.
-*   `PlayingState::Draw` handles rendering.
-*   `SettingsState` configures preferences.
-*   **Constraint**: Cannot run `meson` build in this environment, rely on manual code verification.
+## Documentation
+*   See `TECHNICAL_OVERVIEW.md` for architecture deep dive.
+*   See `ROADMAP.md` for feature tracking.
+*   See `AGENTS.md` for coding standards.
