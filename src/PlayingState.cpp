@@ -102,7 +102,8 @@ PlayingState::PlayingState(const SharedState &state) :
   m_lead_in(0), m_lead_out(0),
   m_metronome_on(false), m_metronome_vol(1.0),
   m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
-  m_loop_a(-1), m_loop_b(-1), m_looping(false) {
+  m_loop_a(-1), m_loop_b(-1), m_looping(false),
+  m_sheet_music(0), m_show_sheet_music(false) {
 }
 
 void PlayingState::Init() {
@@ -159,6 +160,7 @@ void PlayingState::Init() {
   }
 
   m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+  m_sheet_music = new SheetMusicDisplay(GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
   // Hide the mouse cursor while we're playing
   Compatible::HideMouseCursor();
@@ -382,13 +384,15 @@ void PlayingState::Listen() {
           r = 100; g = 255; b = 100; // Green
       } else if (diff < 100000) {
           m_state.stats.good_hits++;
-          judge_text = "Good";
+          // Early or Late?
+          if (cur_time < closest_match->start) judge_text = "Good (Early)";
+          else judge_text = "Good (Late)";
           r = 100; g = 200; b = 255; // Blue-ish
       } else {
           // Miss logic usually handled when note scrolls past,
           // but if they hit it late/early but validly, count it?
-          // For now, let's call it "Ok" if it's in the window but > 100ms
-          judge_text = "Ok";
+          if (cur_time < closest_match->start) judge_text = "Ok (Early)";
+          else judge_text = "Ok (Late)";
           r = 255; g = 255; b = 100; // Yellow
       }
 
@@ -486,6 +490,9 @@ void PlayingState::Listen() {
 void PlayingState::Resize() {
     delete  m_keyboard;
     m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+
+    delete m_sheet_music;
+    m_sheet_music = new SheetMusicDisplay(GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
     int center_x = GetStateWidth() / 2;
     int center_y = GetStateHeight() / 2;
@@ -747,6 +754,10 @@ void PlayingState::Update() {
       m_looping = !m_looping;
   }
 
+  if (IsKeyReleased(KeyViewToggle)) {
+      m_show_sheet_music = !m_show_sheet_music;
+  }
+
   else
   {
     // Check retry conditions
@@ -916,10 +927,18 @@ void PlayingState::Draw(Renderer &renderer) const {
                              GetTexture(PlayNotesBlackColor, true) };
   renderer.ForceTexture(0);
 
-  // Draw a keyboard, fallen keys and background for them
-  m_keyboard->Draw(renderer, key_tex, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
-                   m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
-                   m_state.midi->GetBarLines());
+  // Draw falling notes OR Sheet Music
+  if (m_show_sheet_music) {
+      if (m_sheet_music) {
+          m_sheet_music->Draw(renderer, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
+                              m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
+      }
+  } else {
+      // Draw a keyboard, fallen keys and background for them
+      m_keyboard->Draw(renderer, key_tex, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
+                       m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
+                       m_state.midi->GetBarLines());
+  }
 
   string title_text = m_state.song_title;
 
@@ -973,6 +992,8 @@ void PlayingState::Draw(Renderer &renderer) const {
        help << "F2: Set Loop End (B)";
        help.y += 25;
        help << "F6: Toggle Loop Active";
+       help.y += 25;
+       help << "F7: Toggle Sheet Music View";
 
        Layout::DrawButton(renderer, m_resume_button, GetTexture(ButtonPlaySong));
        Layout::DrawButton(renderer, m_quit_button, GetTexture(ButtonExit));

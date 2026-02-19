@@ -311,6 +311,7 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
   case SDLK_F2:       state_manager->KeyPress(KeyLoopB); break;
 
   case SDLK_BACKSPACE: state_manager->KeyPress(KeyBackspace); break;
+  case SDLK_F7:        state_manager->KeyPress(KeyViewToggle); break;
 
   default:
     return false;

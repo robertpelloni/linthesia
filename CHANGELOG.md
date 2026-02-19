@@ -1,9 +1,10 @@
 # Changelog
 
-## [1.3.0-dev] - 2024-05-22
+## [1.3.0] - 2024-05-22
 
 ### Added
-- **Sheet Music Rendering**: Created `SheetMusicDisplay` class capable of rendering a music staff and mapping MIDI notes to visual positions (initial implementation).
+- **Sheet Music View**: Press `F7` during gameplay to toggle between the classic "Falling Notes" view and a new "Sheet Music" view (basic treble clef rendering).
+- **Scoring Polish**: "Good" and "Ok" hit ratings now indicate whether the hit was (Early) or (Late).
 
 ## [1.2.1] - 2024-05-22
 
