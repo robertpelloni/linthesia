@@ -103,7 +103,7 @@ PlayingState::PlayingState(const SharedState &state) :
   m_metronome_on(false), m_metronome_vol(1.0),
   m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
   m_loop_a(-1), m_loop_b(-1), m_looping(false),
-  m_sheet_music(0), m_show_sheet_music(false) {
+  m_sheet_music(0), m_particles(0), m_show_sheet_music(false) {
 }
 
 void PlayingState::Init() {
@@ -161,6 +161,7 @@ void PlayingState::Init() {
 
   m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
   m_sheet_music = new SheetMusicDisplay(GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+  m_particles = new ParticleSystem();
 
   // Hide the mouse cursor while we're playing
   Compatible::HideMouseCursor();
@@ -456,6 +457,23 @@ void PlayingState::Listen() {
           m_popups.push_back(s);
       }
 
+      // Spawn Particles
+      // Calculate X position from note_id.
+      // This is hacky because we don't have access to KeyboardDisplay logic directly here easily.
+      // Approximation: map note_id to screen X using linear interpolation or just center for v1.
+      // Better: ask m_keyboard? No public API.
+      // Let's settle for "above the keys".
+      // X = (note_id - min) / range * width?
+      if (m_particles) {
+          int key_width = (GetStateWidth() - Layout::ScreenMarginX*2) / 52; // approx 88 keys
+          // This is too rough. Let's just spawn near the middle or random x for "juice".
+          // Or reuse the ScorePopup logic (centered).
+          // Let's spawn them at the bottom of the screen.
+          int px = GetStateWidth() / 2;
+          int py = GetStateHeight() - 50;
+          m_particles->Spawn(px, py, r, g, b, 20);
+      }
+
       TranslatedNote replacement = *closest_match;
       replacement.state = UserHit;
 
@@ -493,6 +511,9 @@ void PlayingState::Resize() {
 
     delete m_sheet_music;
     m_sheet_music = new SheetMusicDisplay(GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+
+    delete m_particles; // Just reset system
+    m_particles = new ParticleSystem();
 
     int center_x = GetStateWidth() / 2;
     int center_y = GetStateHeight() / 2;
@@ -533,6 +554,8 @@ void PlayingState::Update() {
 
   if (m_paused)
     delta_microseconds = 0;
+
+  microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
   // Loop Check
   if (m_looping && m_loop_a != -1 && m_loop_b != -1) {
@@ -609,8 +632,6 @@ void PlayingState::Update() {
   }
 
   m_first_update = false;
-
-  microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
   // Delete notes that are finished playing (and are no longer available to hit)
   TranslatedNoteSet::iterator i = m_notes.begin();
@@ -879,6 +900,7 @@ void PlayingState::Update() {
   }
 
   UpdatePopups();
+  if (m_particles) m_particles->Update();
 
   // Metronome Logic
   if (m_metronome_on) {
@@ -902,7 +924,7 @@ void PlayingState::Update() {
              int velocity = static_cast<int>(100 * m_metronome_vol);
              if (velocity > 127) velocity = 127;
              if (velocity > 0) {
-                 MidiEvent click = MidiEvent::NoteOn(9, 76, velocity);
+                 MidiEvent click = MidiEvent::Build(MidiEventSimple(0x99, 76, velocity));
                  m_state.midi_out->Write(click);
              }
         }
@@ -931,7 +953,8 @@ void PlayingState::Draw(Renderer &renderer) const {
   if (m_show_sheet_music) {
       if (m_sheet_music) {
           m_sheet_music->Draw(renderer, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
-                              m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties);
+                              m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
+                              m_state.midi->GetBarLines());
       }
   } else {
       // Draw a keyboard, fallen keys and background for them
@@ -972,27 +995,27 @@ void PlayingState::Draw(Renderer &renderer) const {
        renderer.SetColor(255, 255, 255);
        TextWriter help(box_x + 20, box_y + 20, renderer, false, 16);
        help << "Controls:";
-       help.y += 30;
+       help.MoveY(30);
        help << "Space: Resume Game";
-       help.y += 25;
+       help.MoveY(25);
        help << "Esc: Return to Menu";
-       help.y += 25;
+       help.MoveY(25);
        help << "Left / Right: Adjust Speed (-/+ 10%)";
-       help.y += 25;
+       help.MoveY(25);
        help << "Up / Down: Adjust Visible Duration";
-       help.y += 25;
+       help.MoveY(25);
        help << "Keypad + / -: Volume Up / Down";
-       help.y += 25;
+       help.MoveY(25);
        help << "< / >: Octave Shift Down / Up";
-       help.y += 25;
+       help.MoveY(25);
        help << "Page Up / Down: Jump Backward / Forward 5s";
-       help.y += 25;
+       help.MoveY(25);
        help << "F1: Set Loop Start (A)";
-       help.y += 25;
+       help.MoveY(25);
        help << "F2: Set Loop End (B)";
-       help.y += 25;
+       help.MoveY(25);
        help << "F6: Toggle Loop Active";
-       help.y += 25;
+       help.MoveY(25);
        help << "F7: Toggle Sheet Music View";
 
        Layout::DrawButton(renderer, m_resume_button, GetTexture(ButtonPlaySong));
@@ -1010,6 +1033,7 @@ void PlayingState::Draw(Renderer &renderer) const {
   }
 
   DrawPopups(renderer);
+  if (m_particles) m_particles->Draw(renderer);
 
   int text_y = CalcKeyboardHeight() + 42;
 

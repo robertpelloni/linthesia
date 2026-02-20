@@ -19,6 +19,7 @@
 #include "KeyboardDisplay.h"
 #include "MidiComm.h"
 #include "SheetMusicDisplay.h"
+#include "ParticleSystem.h"
 
 struct ScorePopup {
   int x, y;
@@ -93,6 +94,7 @@ private:
 
   KeyboardDisplay *m_keyboard;
   SheetMusicDisplay *m_sheet_music;
+  ParticleSystem *m_particles;
   bool m_show_sheet_music;
 
   microseconds_t m_show_duration;

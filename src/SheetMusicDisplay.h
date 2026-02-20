@@ -18,7 +18,8 @@ public:
               const TranslatedNoteSet &notes,
               microseconds_t show_duration,
               microseconds_t current_time,
-              const std::vector<Track::Properties> &track_properties);
+              const std::vector<Track::Properties> &track_properties,
+              const MidiEventMicrosecondList &bar_lines);
 
 private:
     int m_width;
@@ -29,6 +30,10 @@ private:
 
     // Convert MIDI note number to vertical offset from Middle C (60)
     int GetStaffY(int note_id);
+
+    void DrawBarLines(Renderer &renderer, int x, int y, int width, int height,
+                      microseconds_t show_duration, microseconds_t current_time,
+                      const MidiEventMicrosecondList &bar_lines);
 };
 
 #endif // __SHEET_MUSIC_DISPLAY_H

@@ -39,7 +39,8 @@ void sendNote(const unsigned char note, bool on) {
     if (g_midi_driver) {
         int velocity = on ? 100 : 0;
         // Channel 0, default
-        MidiEvent ev = on ? MidiEvent::NoteOn(0, note, velocity) : MidiEvent::NoteOff(0, note, velocity);
+        MidiEvent ev = on ? MidiEvent::Build(MidiEventSimple(0x90, note, velocity))
+                          : MidiEvent::Build(MidiEventSimple(0x80, note, velocity));
         g_midi_driver->Write(ev);
     }
 }
@@ -199,7 +200,7 @@ void MidiCommOut::Reset() {
   // Send Note-Off to every open note
   if (g_midi_driver) {
       for (auto i = notes_on.begin(); i != notes_on.end(); ++i) {
-          MidiEvent ev = MidiEvent::NoteOff(i->first, i->second);
+          MidiEvent ev = MidiEvent::Build(MidiEventSimple(0x80 | (i->first & 0x0F), i->second, 0));
           g_midi_driver->Write(ev);
       }
   }

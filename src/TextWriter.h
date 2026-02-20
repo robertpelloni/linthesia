@@ -43,6 +43,8 @@ public:
     return (*this);
   }
 
+  void MoveY(int dy) { y += dy; }
+
 private:
   TextWriter operator=(const TextWriter&);
   TextWriter(const TextWriter&);

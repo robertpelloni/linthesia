@@ -24,6 +24,8 @@ enum TrackTileGraphic;
 class EnumValue
 {
 public:
+  virtual ~EnumValue() {}
+
   virtual void next() = 0;
   virtual void previous() = 0;
 

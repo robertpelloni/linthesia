@@ -172,6 +172,7 @@ protected:
 
   // These are usable inside Update()
   bool IsKeyPressed(GameKey key) const;
+  bool IsKeyReleased(GameKey key) const;
   const MouseInfo &Mouse() const;
 
 private:

@@ -107,6 +107,14 @@ bool GameState::IsKeyPressed(GameKey key) const {
   return m_manager->IsKeyPressed(key);
 }
 
+bool GameState::IsKeyReleased(GameKey key) const {
+
+  if (!m_manager)
+    throw GameStateError("Cannot determine key presses if manager not set!");
+
+  return m_manager->IsKeyReleased(key);
+}
+
 const MouseInfo &GameState::Mouse() const {
 
   if (!m_manager)

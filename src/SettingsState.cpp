@@ -234,7 +234,7 @@ void SettingsState::Update() {
   if (m_test_audio_button.hit) {
       // Send a test note (Middle C)
       if (g_midi_driver) {
-          MidiEvent note_on = MidiEvent::NoteOn(0, 60, 100);
+          MidiEvent note_on = MidiEvent::Build(MidiEventSimple(0x90, 60, 100));
           g_midi_driver->Write(note_on);
           // Note off after short delay? We can't delay here easily.
           // Just send a short note on/off? Or rely on user to hear the "plink".

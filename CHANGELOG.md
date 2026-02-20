@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.4.0-dev] - 2024-05-22
+
+### Added
+- **Sheet Music Polish**: Added measure lines (bar lines) and ledger lines to the sheet music view, significantly improving readability.
+- **Particle Effects**: Added a particle system that spawns colorful sparks when notes are hit, adding visual "juice" to the gameplay.
+
 ## [1.3.0] - 2024-05-22
 
 ### Added
@@ -15,10 +21,3 @@
 
 ### Changed
 - **Polish**: Fixed PC keyboard audio regression.
-
-## [1.2.0] - 2024-05-22
-
-### Added
-- **Rhythm Mode**: A new practice mode where pitch matching is disabled.
-- **Judgement Line**: Added a visual timing aid.
-- **MidiDriver Integration**: Refactored `MidiComm` to use `MidiDriver`.

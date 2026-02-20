@@ -22,17 +22,23 @@ void SheetMusicDisplay::Draw(Renderer &renderer, int x, int y,
                              const TranslatedNoteSet &notes,
                              microseconds_t show_duration,
                              microseconds_t current_time,
-                             const std::vector<Track::Properties> &track_properties) {
+                             const std::vector<Track::Properties> &track_properties,
+                             const MidiEventMicrosecondList &bar_lines) {
 
     // Draw Background
     renderer.SetColor(240, 240, 230); // Paper color
     renderer.DrawQuad(x, y, m_width, m_height);
 
+    int staff_top_y = y + 60;
+    int staff_width = m_width - 40;
+
+    // Draw Bar Lines first (behind notes)
+    DrawBarLines(renderer, x + 50, staff_top_y, staff_width, 4 * LineSpacing, show_duration, current_time, bar_lines);
+
     // Draw Staff Lines
     // Treble Clef Staff
     // 5 lines. E4, G4, B4, D5, F5
-    int staff_top_y = y + 60;
-    DrawStaff(renderer, x + 20, staff_top_y, m_width - 40);
+    DrawStaff(renderer, x + 20, staff_top_y, staff_width);
 
     // Draw Notes
     // Horizontal mapping: Time -> X
@@ -120,9 +126,66 @@ void SheetMusicDisplay::DrawNote(Renderer &renderer, int x, int y, int note_id, 
     // Simple oval
     SDL_Color c = Track::ColorNoteWhite[color];
     renderer.SetColor(c);
-    renderer.DrawQuad(x, y, 12, 10); // Placeholder oval
 
-    // Ledger lines if needed
-    // If y is outside 0 to 40 relative to staff top?
-    // Implementation for later polish.
+    // Draw "Oval" (Octagon approximation for now since we lack texture)
+    // 12x10 size
+    int w = 12;
+    int h = 10;
+
+    // Main body
+    renderer.DrawQuad(x+2, y, w-4, h);
+    renderer.DrawQuad(x, y+2, w, h-4);
+
+    // Ledger lines
+    // y is relative to staff top. Staff is 40px tall (4 gaps * 10).
+    // Center of note is y + h/2.
+    // Top line is 0. Bottom line is 40.
+    // If center < 0 or > 40, draw ledgers.
+    // Each line is 10px apart.
+
+    // Note: y is calculated for the *top* of the note?
+    // GetStaffY returns "step * 5".
+    // 0 is F5 (top line). 40 is E4 (bottom line).
+    // Ledger lines are at 0, -20 (A5), etc?
+    // Actually, lines are at 0, 10, 20, 30, 40.
+    // C6 is above staff -> y approx -20?
+    // C4 is below staff -> y approx 60?
+
+    int center_y = y + 5;
+
+    // Below staff ledgers (C4 is 60)
+    // E4 is 40. C4 is 60 (Line).
+    if (center_y >= 50) {
+        // Draw line at 50, 60...
+        for (int ly = 50; ly <= center_y; ly += 10) {
+             renderer.SetColor(0, 0, 0);
+             renderer.DrawQuad(x - 4, ly, w + 8, 1);
+        }
+    }
+
+    // Above staff ledgers (A5 is -10)
+    // F5 is 0. A5 is -10.
+    if (center_y <= -10) {
+        for (int ly = -10; ly >= center_y; ly -= 10) {
+             renderer.SetColor(0, 0, 0);
+             renderer.DrawQuad(x - 4, ly, w + 8, 1);
+        }
+    }
+}
+
+void SheetMusicDisplay::DrawBarLines(Renderer &renderer, int x, int y, int width, int height,
+                                     microseconds_t show_duration, microseconds_t current_time,
+                                     const MidiEventMicrosecondList &bar_lines) {
+    renderer.SetColor(180, 180, 180); // Gray lines
+    double time_scale = (double)(width - 50) / show_duration;
+
+    for (microseconds_t t : bar_lines) {
+        if (t < current_time) continue;
+        if (t > current_time + show_duration) break;
+
+        long long dt = t - current_time;
+        int bx = x + (int)(dt * time_scale);
+
+        renderer.DrawQuad(bx, y, 2, height);
+    }
 }
