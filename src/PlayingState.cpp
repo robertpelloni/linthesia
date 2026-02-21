@@ -129,7 +129,22 @@ void PlayingState::Init() {
         m_state.track_properties[i].mode == Track::ModeLearningSilently)
     {
       m_any_learning_track = true;
-    } 
+    }
+
+    // Auto-detect Clef
+    const NoteSet &notes = m_state.midi->Tracks()[i].Notes();
+    if (!notes.empty()) {
+        long long sum_pitch = 0;
+        for (const auto& n : notes) {
+            sum_pitch += n.note_id;
+        }
+        double avg_pitch = (double)sum_pitch / notes.size();
+        if (avg_pitch < 60.0) {
+            m_state.track_properties[i].clef = Track::Bass;
+        } else {
+            m_state.track_properties[i].clef = Track::Treble;
+        }
+    }
   }
 
   // Load User Settings

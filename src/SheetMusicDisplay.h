@@ -23,8 +23,8 @@ public:
               int key_sf, int key_mi);
 
 private:
-    void DrawClef(Renderer &renderer, int x, int y);
-    void DrawKeySignature(Renderer &renderer, int x, int y, int key_sf);
+    void DrawClef(Renderer &renderer, int x, int y, Track::Clef clef);
+    void DrawKeySignature(Renderer &renderer, int x, int y, int key_sf, Track::Clef clef);
     int m_width;
     int m_height;
 
@@ -32,8 +32,18 @@ private:
     void DrawNote(Renderer &renderer, int x, int y, int note_id, Track::TrackColor color, bool draw_stem = true);
     void DrawStem(Renderer &renderer, int x, int y, bool stem_up);
 
-    // Convert MIDI note number to vertical offset from F5
-    int GetStaffY(int note_id);
+    // Convert MIDI note number to vertical offset from Reference Line
+    int GetStaffY(int note_id, Track::Clef clef, int key_sf);
+
+    enum Accidental {
+        None,
+        Sharp,
+        Flat,
+        Natural
+    };
+
+    Accidental GetAccidental(int note_id, int key_sf);
+    void DrawAccidental(Renderer &renderer, int x, int y, Accidental acc);
 
     struct NoteCoord {
         int x;

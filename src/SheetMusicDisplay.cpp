@@ -30,73 +30,85 @@ void SheetMusicDisplay::Draw(Renderer &renderer, int x, int y,
     renderer.SetColor(240, 240, 230); // Paper color
     renderer.DrawQuad(x, y, m_width, m_height);
 
-    int staff_top_y = y + 60;
+    // Layout: Two staves (Grand Staff)
+    // Top: Treble
+    // Bottom: Bass (offset by ~120px)
+
+    int treble_y = y + 60;
+    int bass_y = treble_y + 120;
     int staff_width = m_width - 40;
 
-    // Draw Bar Lines first (behind notes)
-    DrawBarLines(renderer, x + 50, staff_top_y, staff_width, 4 * LineSpacing, show_duration, current_time, bar_lines);
+    // Draw Bar Lines (spanning both staves usually, but let's draw separate for now or connected)
+    // Connecting bar line looks better. Height = 120 + 40 = 160.
+    DrawBarLines(renderer, x + 50, treble_y, staff_width, 160, show_duration, current_time, bar_lines);
 
-    // Draw Staff Lines
-    // Treble Clef Staff
-    // 5 lines. E4, G4, B4, D5, F5
-    DrawStaff(renderer, x + 20, staff_top_y, staff_width);
+    // Draw Staves
+    DrawStaff(renderer, x + 20, treble_y, staff_width);
+    DrawStaff(renderer, x + 20, bass_y, staff_width);
 
-    // Draw Clef
-    DrawClef(renderer, x + 30, staff_top_y);
+    // Draw Clefs
+    DrawClef(renderer, x + 30, treble_y, Track::Treble);
+    DrawClef(renderer, x + 30, bass_y, Track::Bass);
 
-    // Draw Key Signature
-    DrawKeySignature(renderer, x + 60, staff_top_y, key_sf);
+    // Draw Key Signatures
+    DrawKeySignature(renderer, x + 60, treble_y, key_sf, Track::Treble);
+    DrawKeySignature(renderer, x + 60, bass_y, key_sf, Track::Bass);
 
     // Draw Notes
-    // Horizontal mapping: Time -> X
-    // Vertical mapping: Pitch -> Y
-
-    // Time scaling: width / duration
     double time_scale = (double)(m_width - 100) / show_duration;
-    int start_x = x + 100; // Padding for clef + key sig
+    int start_x = x + 120; // Increased padding
 
-    std::vector<NoteCoord> beam_group;
-    // Heuristic for "short" note (8th note or less).
-    // Assuming 120bpm, quarter note is 500ms. 8th is 250ms.
+    // Separate beam groups for each staff
+    std::vector<NoteCoord> treble_beam;
+    std::vector<NoteCoord> bass_beam;
+
     const long long ShortNoteThreshold = 300000;
 
     for (const auto& note : notes) {
         if (note.start < current_time) continue;
         if (note.start > current_time + show_duration) break;
 
-        const Track::Mode mode = track_properties[note.track_id].mode;
+        const Track::Properties& props = track_properties[note.track_id];
+        const Track::Mode mode = props.mode;
         if (mode == Track::ModeNotPlayed || mode == Track::ModePlayedButHidden)
             continue;
 
         long long dt = note.start - current_time;
         int note_x = start_x + (int)(dt * time_scale);
-        int note_y = staff_top_y + GetStaffY(note.note_id);
+
+        Track::Clef clef = props.clef;
+        int staff_base_y = (clef == Track::Bass) ? bass_y : treble_y;
+        int note_y = staff_base_y + GetStaffY(note.note_id, clef, key_sf);
+
+        // Draw Accidental
+        Accidental acc = GetAccidental(note.note_id, key_sf);
+        if (acc != None) {
+            DrawAccidental(renderer, note_x - 12, note_y, acc);
+        }
+
+        // Determine stem direction based on clef center line
+        // Treble Center: B4 (71)
+        // Bass Center: D3 (50)
+        int center_pitch = (clef == Track::Bass) ? 50 : 71;
+        bool stem_up = (note.note_id < center_pitch);
 
         long long duration = note.end - note.start;
         bool is_short = (duration < ShortNoteThreshold);
 
-        bool stem_up = (note.note_id < 71); // B4
+        std::vector<NoteCoord>& beam_group = (clef == Track::Bass) ? bass_beam : treble_beam;
 
-        // Check if we should break the beam
+        // Beam Logic
         if (!beam_group.empty()) {
             bool break_beam = !is_short;
             if (!break_beam) {
-                // Check distance
                 if (note_x - beam_group.back().x > 40) break_beam = true;
-                // Check stem direction consistency? Usually forced, but let's break if mixed for now.
-                // Actually, beams usually force stem direction based on majority.
-                // For now, break if different to avoid complex logic.
+                // Strict stem direction matching for simple beaming
                 if (stem_up != beam_group.back().stem_up) break_beam = true;
             }
 
             if (break_beam) {
                 if (beam_group.size() > 1) {
                     DrawBeam(renderer, beam_group);
-                    // Draw notes without stems? No, DrawBeam just draws the beam.
-                    // Stems should connect to the beam.
-                    // DrawNote draws the stem to default length.
-                    // If beamed, stem length should adjust.
-                    // For Phase 2, let's just draw the beam on top of the stems.
                 }
                 beam_group.clear();
             }
@@ -106,18 +118,12 @@ void SheetMusicDisplay::Draw(Renderer &renderer, int x, int y,
             beam_group.push_back({note_x, note_y, stem_up, (int)note.note_id});
         }
 
-        // Draw the note (with stem)
-        // If part of beam, maybe we should suppress the flag?
-        // DrawNote currently just draws stem (quarter note style).
-        // 8th notes need flags if not beamed.
-        // For now, just draw standard note.
-        DrawNote(renderer, note_x, note_y, note.note_id, track_properties[note.track_id].color, true);
+        DrawNote(renderer, note_x, note_y, note.note_id, props.color, true);
     }
 
-    // Flush remaining beam
-    if (beam_group.size() > 1) {
-        DrawBeam(renderer, beam_group);
-    }
+    // Flush
+    if (treble_beam.size() > 1) DrawBeam(renderer, treble_beam);
+    if (bass_beam.size() > 1) DrawBeam(renderer, bass_beam);
 }
 
 void SheetMusicDisplay::DrawStaff(Renderer &renderer, int x, int y, int width) {
@@ -127,55 +133,111 @@ void SheetMusicDisplay::DrawStaff(Renderer &renderer, int x, int y, int width) {
     }
 }
 
-int SheetMusicDisplay::GetStaffY(int note_id) {
-    // F5 (top line) is 77.
-    // E4 (bottom line) is 64.
-    // We render lines at y, y+10, y+20, y+30, y+40.
-    // So y is F5. y+40 is E4.
-    // Each semitone is not linear visual step (sharps/flats share lines).
-    // Simple diatonic mapping for C Major:
-    // C(60), D(62), E(64), F(65), G(67), A(69), B(71)
+int SheetMusicDisplay::GetStaffY(int note_id, Track::Clef clef, int key_sf) {
+    // Reference Note (Top line of staff)
+    // Treble: F5 (77)
+    // Bass: A3 (57)
+    int ref_note_id = (clef == Track::Bass) ? 57 : 77;
 
-    // Offset from F5 (77)
-    // F5 -> 0
-    // E5 -> 5 (half space)
-    // D5 -> 10 (line)
+    // Sharps: C, C#, D, D#, E, F, F#, G, G#, A, A#, B
+    static const int OffsetsSharp[] = { 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6 };
+    // Flats:  C, Db, D, Eb, E, F, Gb, G, Ab, A, Bb, B
+    static const int OffsetsFlat[]  = { 0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6 };
 
-    // Map: Note -> Scale Degree relative to F5
-    // Need a proper theory helper for key signatures, but let's assume C Major visual for now.
-    // White keys only logic?
+    bool flat_key = (key_sf < 0);
+    const int* offsets = flat_key ? OffsetsFlat : OffsetsSharp;
 
-    // F5 (77) is index 0.
-    // Each white key down adds 5 pixels (half line spacing).
-
-    // Ref: F5(77), E5(76), D5(74), C5(72), B4(71), A4(69), G4(67), F4(65), E4(64)
-    // Indexes: 0, 1, 2, 3, 4, 5, 6, 7, 8
-
-    // Simple lookup for octave 0-11
-    static const int OctaveOffsets[] = {
-        0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6
-        // C, C#, D, D#, E, F, F#, G, G#, A, A#, B
-        // C is bottom? No, C is below D.
+    auto get_scale_step = [offsets](int id) {
+        int oct = (id / 12) - 1;
+        int n = id % 12;
+        return oct * 7 + offsets[n];
     };
 
-    // Relative to C:
-    // C=0, D=1, E=2, F=3, G=4, A=5, B=6
+    int current_step = get_scale_step(note_id);
+    int ref_step = get_scale_step(ref_note_id);
 
-    int octave = (note_id / 12) - 1; // MIDI octaves
-    int note_in_octave = note_id % 12;
+    // 5 pixels per step (half line spacing)
+    return (ref_step - current_step) * (LineSpacing / 2);
+}
 
-    // Scale step from C0
-    int scale_step = octave * 7 + OctaveOffsets[note_in_octave];
+SheetMusicDisplay::Accidental SheetMusicDisplay::GetAccidental(int note_id, int key_sf) {
+    // 1. Determine Scale Step
+    static const int PitchToStep[] = { 0, 0, 1, 1, 2, 3, 3, 4, 4, 5, 5, 6 };
+    int pitch_class = note_id % 12;
+    int step = PitchToStep[pitch_class];
 
-    // F5 (77) is C5 (72) + 3 steps (D,E,F).
-    // F5 is step: (5*7 + 3) = 38.
+    // Flats key mapping: 1->1, 3->2, 6->4, 8->5, 10->6
+    if (key_sf < 0) {
+        static const int PitchToStepFlat[] = { 0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6 };
+        step = PitchToStepFlat[pitch_class];
+    }
 
-    int f5_step = 38 + 7; // Adjust for octave
+    // 2. Determine Expected Pitch for this Step in Key
+    static const int BasePitch[] = { 0, 2, 4, 5, 7, 9, 11 };
+    int expected_pitch = BasePitch[step];
 
-    // Inverted Y: Higher pitch = Lower Y value (0 is top)
-    // Each step is 5 pixels (half line)
+    // Apply Key Signature adjustments
+    static const int SharpSteps[] = { 3, 0, 4, 1, 5, 2, 6 }; // F C G D A E B
+    static const int FlatSteps[] = { 6, 2, 5, 1, 4, 0, 3 };  // B E A D G C F
 
-    return (f5_step - scale_step) * (LineSpacing / 2);
+    int key_adjustment = 0;
+    if (key_sf > 0) {
+        for (int i = 0; i < key_sf; ++i) {
+            if (step == SharpSteps[i]) {
+                key_adjustment = 1;
+                break;
+            }
+        }
+    } else if (key_sf < 0) {
+        for (int i = 0; i < -key_sf; ++i) {
+            if (step == FlatSteps[i]) {
+                key_adjustment = -1;
+                break;
+            }
+        }
+    }
+
+    expected_pitch = (expected_pitch + key_adjustment + 12) % 12;
+
+    if (pitch_class == expected_pitch) return None;
+
+    int delta = (pitch_class - expected_pitch + 12) % 12;
+    if (delta > 6) delta -= 12;
+
+    if (delta == 1) return Sharp;
+    if (delta == -1) return Flat;
+
+    // If we are natural but expected sharp/flat -> Natural
+    int base_p = BasePitch[step];
+    if (pitch_class == base_p) return Natural;
+
+    return None;
+}
+
+void SheetMusicDisplay::DrawAccidental(Renderer &renderer, int x, int y, Accidental acc) {
+    renderer.SetColor(0, 0, 0);
+    // Draw centered around y (middle of note)
+    int sy = y + 5;
+    int sx = x;
+
+    if (acc == Sharp) {
+        renderer.DrawQuad(sx+2, sy-7, 1, 14);
+        renderer.DrawQuad(sx+5, sy-7, 1, 14);
+        renderer.DrawQuad(sx, sy-3, 8, 1);
+        renderer.DrawQuad(sx, sy+1, 8, 1);
+    } else if (acc == Flat) {
+        renderer.DrawQuad(sx, sy-10, 1, 14);
+        // "b" curve
+        renderer.DrawQuad(sx, sy, 4, 1);
+        renderer.DrawQuad(sx+4, sy, 1, 4);
+        renderer.DrawQuad(sx, sy+4, 4, 1);
+    } else if (acc == Natural) {
+        // L shape left, 7 shape right
+        renderer.DrawQuad(sx, sy-7, 1, 10);
+        renderer.DrawQuad(sx, sy+3, 4, 1);
+        renderer.DrawQuad(sx+4, sy-3, 1, 10);
+        renderer.DrawQuad(sx+1, sy-3, 4, 1);
+    }
 }
 
 void SheetMusicDisplay::DrawStem(Renderer &renderer, int x, int y, bool stem_up) {
@@ -294,41 +356,55 @@ void SheetMusicDisplay::DrawNote(Renderer &renderer, int x, int y, int note_id, 
     }
 }
 
-void SheetMusicDisplay::DrawClef(Renderer &renderer, int x, int y) {
+void SheetMusicDisplay::DrawClef(Renderer &renderer, int x, int y, Track::Clef clef) {
     renderer.SetColor(0, 0, 0);
-    // Approximate Treble Clef
-    // Vertical line
-    renderer.DrawQuad(x + 10, y - 10, 2, 55);
-    // Bottom hook
-    renderer.DrawQuad(x + 5, y + 45, 5, 2);
-    // Top loop
-    renderer.DrawQuad(x + 12, y - 10, 5, 2);
-    renderer.DrawQuad(x + 17, y - 8, 2, 10);
-    renderer.DrawQuad(x + 10, y + 2, 9, 2);
-    // G-clef spiral center (G line is y+30)
-    renderer.DrawQuad(x + 5, y + 25, 12, 2); // Top of spiral
-    renderer.DrawQuad(x + 5, y + 35, 12, 2); // Bottom of spiral
-    renderer.DrawQuad(x + 5, y + 25, 2, 12); // Left
-    renderer.DrawQuad(x + 17, y + 25, 2, 12); // Right
+
+    if (clef == Track::Treble) {
+        // Approximate Treble Clef (G-Clef)
+        // Vertical line
+        renderer.DrawQuad(x + 10, y - 10, 2, 55);
+        // Bottom hook
+        renderer.DrawQuad(x + 5, y + 45, 5, 2);
+        // Top loop
+        renderer.DrawQuad(x + 12, y - 10, 5, 2);
+        renderer.DrawQuad(x + 17, y - 8, 2, 10);
+        renderer.DrawQuad(x + 10, y + 2, 9, 2);
+        // G-clef spiral center (G line is y+30)
+        renderer.DrawQuad(x + 5, y + 25, 12, 2); // Top
+        renderer.DrawQuad(x + 5, y + 35, 12, 2); // Bottom
+        renderer.DrawQuad(x + 5, y + 25, 2, 12); // Left
+        renderer.DrawQuad(x + 17, y + 25, 2, 12); // Right
+    } else {
+        // Bass Clef (F-Clef)
+        // F-Line is 2nd from top (y+10)
+        // Dot on F-Line
+        int f_line_y = y + 10;
+        renderer.DrawQuad(x + 5, f_line_y - 3, 6, 6);
+        // Curve (Ear)
+        renderer.DrawQuad(x + 5, f_line_y - 8, 10, 2); // Top curve
+        renderer.DrawQuad(x + 15, f_line_y - 8, 2, 15); // Right side
+        renderer.DrawQuad(x + 5, f_line_y + 7, 12, 2); // Bottom
+        // Two dots to the right (surrounding F-line)
+        renderer.DrawQuad(x + 20, f_line_y - 5, 3, 3);
+        renderer.DrawQuad(x + 20, f_line_y + 5, 3, 3);
+    }
 }
 
-void SheetMusicDisplay::DrawKeySignature(Renderer &renderer, int x, int y, int key_sf) {
+void SheetMusicDisplay::DrawKeySignature(Renderer &renderer, int x, int y, int key_sf, Track::Clef clef) {
     if (key_sf == 0) return;
 
     renderer.SetColor(0, 0, 0);
     int current_x = x;
 
-    // Draw Sharps
     if (key_sf > 0) {
-        // Order: F C G D A E B
-        // MIDI notes for treble clef placement:
-        // F5(77), C5(72), G5(79), D5(74), A4(69), E5(76), B4(71)
-        static const int SharpNotes[] = { 77, 72, 79, 74, 69, 76, 71 };
+        // Sharps: F C G D A E B
+        static const int SharpNotesTreble[] = { 77, 72, 79, 74, 69, 76, 71 }; // F5, C5, G5, D5, A4, E5, B4
+        static const int SharpNotesBass[] =   { 53, 48, 55, 50, 45, 52, 47 }; // F3, C3, G3, D3, A2, E3, B2
+
+        const int* notes = (clef == Track::Bass) ? SharpNotesBass : SharpNotesTreble;
 
         for (int i = 0; i < key_sf && i < 7; ++i) {
-            int note_y = y + GetStaffY(SharpNotes[i]);
-            // Draw Sharp (#) - Approximate
-            // Two vertical lines, two slanted horizontal
+            int note_y = y + GetStaffY(notes[i], clef, key_sf);
             int sx = current_x;
             int sy = note_y;
 
@@ -339,23 +415,19 @@ void SheetMusicDisplay::DrawKeySignature(Renderer &renderer, int x, int y, int k
 
             current_x += 10;
         }
-    }
-    // Draw Flats
-    else if (key_sf < 0) {
-        // Order: B E A D G C F
-        // MIDI notes:
-        // B4(71), E5(76), A4(69), D5(74), G4(67), C5(72), F4(65)
-        static const int FlatNotes[] = { 71, 76, 69, 74, 67, 72, 65 };
+    } else {
+        // Flats: B E A D G C F
+        static const int FlatNotesTreble[] = { 71, 76, 69, 74, 67, 72, 65 }; // B4, E5, A4, D5, G4, C5, F4
+        static const int FlatNotesBass[] =   { 47, 52, 45, 50, 43, 48, 41 }; // B2, E3, A2, D3, G2, C3, F2
+
+        const int* notes = (clef == Track::Bass) ? FlatNotesBass : FlatNotesTreble;
 
         for (int i = 0; i < -key_sf && i < 7; ++i) {
-             int note_y = y + GetStaffY(FlatNotes[i]);
-             // Draw Flat (b) - Approximate
-             // Vertical line + curve
+             int note_y = y + GetStaffY(notes[i], clef, key_sf);
              int sx = current_x;
              int sy = note_y;
 
              renderer.DrawQuad(sx, sy-4, 1, 14);
-             // Curve? approximated by a small box for now or "b" shape
              renderer.DrawQuad(sx, sy+5, 4, 1);
              renderer.DrawQuad(sx+4, sy+5, 1, 4);
              renderer.DrawQuad(sx, sy+9, 4, 1);

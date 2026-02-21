@@ -48,6 +48,11 @@ namespace Track {
     MissedNote
   };
 
+  enum Clef {
+    Treble,
+    Bass
+  };
+
   const static SDL_Color ColorNoteWhite[ColorCount] = {
     { 114, 159, 207, 0xFF },
     { 138, 226,  52, 0xFF },
@@ -89,12 +94,14 @@ namespace Track {
     Properties() :
       mode(ModeNotPlayed),
       color(TangoSkyBlue),
-      is_retry_on(false) {
+      is_retry_on(false),
+      clef(Treble) {
     }
 
     Mode mode;
     TrackColor color;
     bool is_retry_on;
+    Clef clef;
   };
 
 }; // end namespace
