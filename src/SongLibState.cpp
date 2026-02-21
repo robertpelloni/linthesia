@@ -135,8 +135,7 @@ void SongLibState::UpdateSongTiles() {
         Tga* dir_tile_graphics = GetTexture(DirBox);
 
         ScoreDB db;
-        string db_path = UserSetting::Get(SQLITE_DB_KEY, "");
-        if (!db_path.empty()) db.Open(db_path);
+        db.OpenDefault();
 
         while ((ent = readdir (dir)) != NULL) {
             string f_name = string(ent->d_name);

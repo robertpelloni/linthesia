@@ -45,8 +45,7 @@ void StatsState::Init() {
 
   // Save to DB
   ScoreDB db;
-  string db_path = UserSetting::Get(SQLITE_DB_KEY, "");
-  if (!db_path.empty() && db.Open(db_path)) {
+  if (db.OpenDefault()) {
       db.AddScore(m_state.song_path, static_cast<int>(m_state.stats.score), m_state.stats.max_streak, grade);
   }
 

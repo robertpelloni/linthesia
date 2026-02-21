@@ -23,6 +23,7 @@ public:
     ~ScoreDB();
 
     bool Open(const std::string& db_path);
+    bool OpenDefault();
     void Close();
 
     void AddScore(const std::string& song_path, int score, int max_streak, const std::string& grade);

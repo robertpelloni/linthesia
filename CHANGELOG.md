@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.0-dev] - 2024-05-22
+
+### Added
+- **Sheet Music Phase 2**: Implemented advanced notation features:
+    - **Beams**: Short notes (8th notes and smaller) are now visually grouped with beams.
+    - **Stems**: Notes now have stems with correct direction (up/down) based on pitch.
+    - **Key Signatures**: Key signatures are parsed from the MIDI file and rendered at the start of the staff.
+    - **Clef Symbol**: A stylized Treble Clef is drawn at the start of the staff.
+- **Persistence Fixes**: Fixed database path resolution to correctly save scores to `~/.local/share/linthesia/scores.db` on Linux.
+
 ## [1.4.0-dev] - 2024-05-22
 
 ### Added

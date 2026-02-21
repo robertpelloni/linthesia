@@ -3,8 +3,11 @@
 // Linthesia
 
 #include "ScoreDB.h"
+#include "UserSettings.h"
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
+#include <sys/stat.h>
 
 using namespace std;
 
@@ -21,6 +24,25 @@ bool ScoreDB::Open(const std::string& db_path) {
     }
     CreateTable();
     return true;
+}
+
+bool ScoreDB::OpenDefault() {
+    string db_path = UserSetting::Get(SQLITE_DB_KEY, "");
+    if (db_path.empty()) {
+        const char* home = getenv("HOME");
+        if (home) {
+            string base = string(home) + "/.local";
+            mkdir(base.c_str(), 0755);
+            base += "/share";
+            mkdir(base.c_str(), 0755);
+            base += "/linthesia";
+            mkdir(base.c_str(), 0755);
+
+            db_path = base + "/scores.db";
+        }
+    }
+    if (db_path.empty()) return false;
+    return Open(db_path);
 }
 
 void ScoreDB::Close() {

@@ -82,6 +82,9 @@ public:
 
   microseconds_t GetNextBarInMicroseconds(const microseconds_t point) const;
 
+  // Returns true if found, false otherwise (default C Major)
+  bool GetKeySignature(int &sf, int &mi) const;
+
 private:
   const static unsigned long DefaultBPM = 120;
   const static microseconds_t OneMinuteInMicroseconds = 60000000;

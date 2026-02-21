@@ -118,11 +118,19 @@ void MidiEvent::ReadMeta(istream &stream) {
     break;
   }
 
+  case MidiMetaEvent_KeySignature: {
+    if (meta_length < 2)
+        throw MidiError(MidiError_EventTooShort);
+
+    m_key_signature_sf = static_cast<signed char>(buffer[0]);
+    m_key_signature_mi = static_cast<unsigned char>(buffer[1]);
+    break;
+  }
+
   case MidiMetaEvent_SequenceNumber:
   case MidiMetaEvent_EndOfTrack:
   case MidiMetaEvent_SMPTEOffset:
   case MidiMetaEvent_TimeSignature:
-  case MidiMetaEvent_KeySignature:
   case MidiMetaEvent_Proprietary:
   case MidiMetaEvent_ChannelPrefix:
   case MidiMetaEvent_MidiPort:
@@ -347,4 +355,13 @@ unsigned long MidiEvent::GetTempoInUsPerQn() const {
     throw MidiError(MidiError_RequestedTempoFromNonTempoEvent);
 
   return m_tempo_uspqn;
+}
+
+void MidiEvent::GetKeySignature(int &sf, int &mi) const {
+  if (Type() != MidiEventType_Meta ||
+      MetaType() != MidiMetaEvent_KeySignature)
+    throw MidiError(MidiError_RequestedKeySignatureFromNonKeySignatureEvent);
+
+  sf = m_key_signature_sf;
+  mi = m_key_signature_mi;
 }

@@ -150,6 +150,10 @@ private:
   microseconds_t m_loop_a;
   microseconds_t m_loop_b;
   bool m_looping;
+
+  // Sheet Music
+  int m_key_sf;
+  int m_key_mi;
 };
 
 #endif // __PLAYING_STATE_H

@@ -44,7 +44,8 @@ public:
   // The only reason it's not private is because the standard containers
   // require a default constructor.
   MidiEvent() :
-    m_status(0), m_data1(0), m_data2(0), m_tempo_uspqn(0) {
+    m_status(0), m_data1(0), m_data2(0), m_tempo_uspqn(0),
+    m_key_signature_sf(0), m_key_signature_mi(0) {
   }
 
   // Returns true if the event could be expressed in a simple event.  (So, 
@@ -89,6 +90,11 @@ public:
   // per quarter note.  (Non-meta-tempo events will throw an error).
   unsigned long GetTempoInUsPerQn() const;
 
+  // Retrieve Key Signature (sf, mi)
+  // sf: sharps/flats (-7 to 7)
+  // mi: major/minor (0 or 1)
+  void GetKeySignature(int &sf, int &mi) const;
+
   // Convenience function: Is this the special End-Of-Track event
   bool IsEnd() const;
 
@@ -125,6 +131,9 @@ private:
 
   unsigned long m_tempo_uspqn;
   std::string m_text;
+
+  signed char m_key_signature_sf;
+  unsigned char m_key_signature_mi;
 };
 
 

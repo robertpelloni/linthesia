@@ -4,6 +4,7 @@
 
 #include "ParticleSystem.h"
 #include <cstdlib>
+#include <cmath>
 
 ParticleSystem::ParticleSystem() {}
 

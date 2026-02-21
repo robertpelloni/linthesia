@@ -85,6 +85,8 @@ void PlayingState::ResetSong() {
   m_should_retry = false;
   m_should_wait_after_retry = false;
   m_retry_start = m_state.midi->GetNextBarInMicroseconds(-1000000000);
+
+  m_state.midi->GetKeySignature(m_key_sf, m_key_mi);
 }
 
 PlayingState::PlayingState(const SharedState &state) :
@@ -103,6 +105,7 @@ PlayingState::PlayingState(const SharedState &state) :
   m_metronome_on(false), m_metronome_vol(1.0),
   m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
   m_loop_a(-1), m_loop_b(-1), m_looping(false),
+  m_key_sf(0), m_key_mi(0),
   m_sheet_music(0), m_particles(0), m_show_sheet_music(false) {
 }
 
@@ -954,7 +957,7 @@ void PlayingState::Draw(Renderer &renderer) const {
       if (m_sheet_music) {
           m_sheet_music->Draw(renderer, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
                               m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
-                              m_state.midi->GetBarLines());
+                              m_state.midi->GetBarLines(), m_key_sf, m_key_mi);
       }
   } else {
       // Draw a keyboard, fallen keys and background for them

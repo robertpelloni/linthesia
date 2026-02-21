@@ -447,6 +447,18 @@ microseconds_t Midi::GetNextBarInMicroseconds(const microseconds_t point) const 
    return 0; // not found
 }
 
+bool Midi::GetKeySignature(int &sf, int &mi) const {
+  for (const MidiTrack &track : m_tracks) {
+    for (const MidiEvent &ev : track.Events()) {
+      if (ev.Type() == MidiEventType_Meta && ev.MetaType() == MidiMetaEvent_KeySignature) {
+        ev.GetKeySignature(sf, mi);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 unsigned int Midi::AggregateEventsRemain() const {
   if (!m_initialized)
     return 0;
