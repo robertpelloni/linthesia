@@ -206,7 +206,9 @@ public:
     m_frameavg(5),
     m_show_fps(false),
     m_screen_x(screen_width),
-    m_screen_y(screen_height) {
+    m_screen_y(screen_height),
+    m_trans_state(TransNone),
+    m_trans_alpha(0.0f) {
   }
 
   ~GameStateManager();
@@ -259,6 +261,14 @@ private:
   int m_screen_y;
 
   mutable std::map<Texture, Tga*> m_textures;
+
+  enum TransitionState {
+      TransNone,
+      TransFadeOut,
+      TransFadeIn
+  };
+  TransitionState m_trans_state;
+  float m_trans_alpha;
 };
 
 #endif // __GAMESTATE_H

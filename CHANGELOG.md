@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.8.0-dev] - 2024-05-22
+
+### Added
+- **Visual Polish**: Smooth "Fade to Black" transition animations between menu screens.
+- **Security Fix**: Patched a critical buffer overflow vulnerability in the legacy database path initialization.
+- **Cleanup**: Removed redundant code in `main.cpp` in favor of the safer `ScoreDB` logic.
+
 ## [1.7.0-dev] - 2024-05-22
 
 ### Added

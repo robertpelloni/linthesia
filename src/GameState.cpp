@@ -248,6 +248,8 @@ void GameStateManager::ChangeState(GameState *new_state) {
                          "guarantee the ordering of the draw/update calls.)");
 
   m_next_state = new_state;
+  m_trans_state = TransFadeOut;
+  m_trans_alpha = 0.0f;
 }
 
 void GameStateManager::Update(bool skip_this_update) {
@@ -265,24 +267,31 @@ void GameStateManager::Update(bool skip_this_update) {
   if (IsKeyReleased(KeyF6))
     m_show_fps = !m_show_fps;
 
-  if (m_next_state && m_current_state) {
+  // Transition Logic
+  if (m_trans_state == TransFadeOut) {
+      m_trans_alpha += 0.08f; // Fade Speed
+      if (m_trans_alpha >= 1.0f) {
+          m_trans_alpha = 1.0f;
 
-    m_current_state->Finish();
-    delete m_current_state;
-    m_current_state = 0;
+          // Swap State
+          if (m_current_state) {
+              m_current_state->Finish();
+              delete m_current_state;
+          }
+          m_current_state = m_next_state;
+          m_next_state = 0;
+          if (m_current_state) {
+              m_current_state->SetManager(this);
+          }
 
-    // We return here to insert a blank frame (that may or may
-    // not last a long time) while the next state's Init()
-    // and first Update() are being called.
-    return;
-  }
-
-  if (m_next_state) {
-
-    m_current_state = m_next_state;
-    m_next_state = 0;
-
-    m_current_state->SetManager(this);
+          m_trans_state = TransFadeIn;
+      }
+  } else if (m_trans_state == TransFadeIn) {
+      m_trans_alpha -= 0.08f;
+      if (m_trans_alpha <= 0.0f) {
+          m_trans_alpha = 0.0f;
+          m_trans_state = TransNone;
+      }
   }
 
   if (!m_current_state)
@@ -329,6 +338,12 @@ void GameStateManager::Draw(Renderer &renderer) {
   glTranslatef(0.375, 0.375, 0.);
 
   m_current_state->Draw(renderer);
+
+  // Draw Transition Overlay
+  if (m_trans_state != TransNone) {
+      renderer.SetColor(0, 0, 0, (int)(m_trans_alpha * 255));
+      renderer.DrawQuad(0, 0, GetStateWidth(), GetStateHeight());
+  }
 
   if (m_show_fps) {
     renderer.SetColor(White);
