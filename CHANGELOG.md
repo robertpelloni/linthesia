@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0-dev] - 2024-05-22
+
+### Added
+- **Note Labels**: Added a setting to display note names (C, D#, etc.) on falling notes to assist learning.
+- **Wait Mode Indicator**: Visual "Waiting..." overlay when the game pauses for input in Learning Mode.
+- **Documentation**: Comprehensive overhaul of `AGENTS.md`, `VISION.md`, and project documentation structure.
+
 ## [1.6.0-dev] - 2024-05-22
 
 ### Added

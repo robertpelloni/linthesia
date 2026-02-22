@@ -1,30 +1,33 @@
 # Vision for Linthesia
 
-Linthesia aims to be the premier open-source piano learning and MIDI visualization tool for Linux and beyond. It is built on the legacy of Synthesia (version 0.6.1a) but modernized with features, stability, and extensibility in mind.
+## The Ultimate Open-Source Piano Learning Software
+
+Linthesia aims to be the definitive, feature-complete, open-source alternative to proprietary software like Synthesia and Melodics on the Linux platform (and eventually cross-platform). It is not just a "clone"; it is an enhancement, offering robust features for serious practice and gamified learning.
 
 ## Core Philosophy
+1.  **Completeness**: If a feature exists in the backend (e.g., MIDI input), it must be fully exposed in the frontend (Settings menu, visual indicators).
+2.  **Accessibility**: Easy to set up, easy to configure. No hidden config files.
+3.  **Visual Feedback**: Every action (hit, miss, wait) has a visual response. The interface should "feel" alive.
+4.  **Education First**: Features like "Wait Mode", "Looping", "Sheet Music", and "Note Labels" are prioritized to aid learning.
 
-1.  **Accessibility**: Easy to install, configure, and use. No complex setup or proprietary drivers required.
-2.  **Openness**: Fully open-source (GPLv2/MIT), encouraging community contributions and modifications.
-3.  **Visual Learning**: Leveraging the intuitive "falling notes" interface (Piano Hero style) to make music theory and practice accessible to beginners.
-4.  **Hardware Agnostic**: Compatible with any MIDI keyboard (via ALSA) and any standard MIDI file.
-5.  **Configurability**: Exposing granular control over gameplay (speed, lead-in/out, metronome) to suit learners at different stages.
+## Key Features (Target)
+*   **Gameplay**:
+    *   Falling Notes (Classic).
+    *   Sheet Music (Standard Notation).
+    *   Wait Mode (Pauses until you hit the right note).
+    *   Rhythm Mode (Timing practice).
+*   **Library**:
+    *   Robust search and filtering.
+    *   History and Statistics (Grades, Streaks).
+*   **Hardware**:
+    *   Low-latency MIDI (ALSA/Jack/FluidSynth).
+    *   Lighted Keys support (output MIDI).
 
-## Long-Term Goals
+## Design
+*   **UI**: Clean, large buttons (touch-friendly where possible), consistent color scheme (Tango-based).
+*   **Architecture**: Modular `GameState` system. `MidiDriver` abstraction for cross-platform support.
 
-*   **Platform Independence**: While currently Linux-focused (ALSA), future versions should abstract MIDI and Audio layers to support Windows (WinMM/WASAPI) and macOS (CoreMIDI/CoreAudio) natively.
-*   **Enhanced Learning Modes**: Implementing "Wait Mode" (already partially supported), "Loop Practice" (looping sections), and "Sight Reading" (standard notation view).
-*   **Audio Synthesis**: Integrating a built-in synthesizer (e.g., FluidSynth) so users don't need external software to hear sound.
-*   **Community Library**: Integration with online repositories of public domain MIDI files or user-generated content.
-*   **Gamification**: Scoring, streaks, and progress tracking to motivate practice.
-
-## Design Principles
-
-*   **Modular Codebase**: Separation of MIDI handling (`libmidi`), Game Logic (`GameState`), and Rendering (`Renderer`).
-*   **Resource Efficiency**: Minimal CPU/GPU usage to run on low-end hardware (Raspberry Pi, old laptops).
-*   **Clean UI**: Focus on the music. Minimal distractions during gameplay. informative menus and tooltips.
-
-## Current Focus
-*   Polishing the UI/UX (Settings, Help, Navigation).
-*   Completing missing features from the original Synthesia codebase.
-*   Documenting the codebase for future contributors.
+## Future Goals
+*   **Built-in Synth**: FluidSynth integration to remove dependency on external synths (QSynth/Timidity).
+*   **Cross-Platform**: Windows (WinMM) and macOS (CoreMIDI) drivers.
+*   **Network**: Leaderboards or multiplayer? (Long term).

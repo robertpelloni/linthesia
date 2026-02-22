@@ -10,6 +10,8 @@
 #include "TrackProperties.h"
 #include "LinthesiaError.h"
 #include "StringUtil.h"
+#include "UserSettings.h"
+#include "TextWriter.h"
 
 #include "Renderer.h"
 #include "Textures.h"
@@ -489,9 +491,34 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
       DrawNote(renderer, (drawing_black ? tex_black : tex_white),
                (drawing_black ? BlackNoteDimensions : WhiteNoteDimensions), left, top, width, height, brush_id);
 
-      //const SDL_Color text_color (Renderer::ToColor(0x90,0x90,0x90));
-      //TextWriter note_text(left + 3, y + height - 20, renderer, false, 11);
-      //note_text << Text(STRING(i->note_id), text_color);
+      static bool show_labels = false;
+      static int label_check_counter = 0;
+      if (label_check_counter++ % 60 == 0) {
+          std::string s = UserSetting::Get(SHOW_NOTE_LABELS_KEY, "false");
+          show_labels = (s == "true" || s == "1");
+      }
+
+      if (show_labels) {
+          std::string name = MidiEvent::NoteName(i->note_id);
+          // Strip octave number (digits)
+          std::string label = "";
+          for (char c : name) {
+              if (!isdigit(c)) label += c;
+          }
+
+          const SDL_Color text_color = Renderer::ToColor(0, 0, 0); // Black text
+          // Center text in note
+          // Note width is 'width', x is 'left'.
+          // Note height is 'height', y is 'top'.
+          // Place at bottom of note like Synthesia? Or center?
+          // Bottom is good.
+
+          int font_size = 14;
+          if (width < 20) font_size = 10;
+
+          TextWriter note_text(left + (width/2) - (font_size/2), top + height - font_size - 5, renderer, true, font_size);
+          note_text << Text(label, text_color);
+      }
     }
 
     drawing_black = !drawing_black;

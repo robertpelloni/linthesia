@@ -61,5 +61,9 @@
       <default>"50000"</default>
     </key>
 
+    <key name="show-note-labels" type="s">
+      <default>"false"</default>
+    </key>
+
   </schema>
 </schemalist>

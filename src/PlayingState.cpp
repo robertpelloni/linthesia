@@ -1159,6 +1159,23 @@ void PlayingState::Draw(Renderer &renderer) const {
     TextWriter combo_text(combo_x, combo_y, renderer, true, combo_font_size);
     combo_text << STRING(m_current_combo << " Combo!");
   }
+
+  // Wait Mode Indicator
+  // Cast to non-const to access private helper if needed, but we have member vars.
+  // We need to check if we are waiting.
+  // areAllRequiredKeysPressed is private non-const?
+  // I need to use m_required_notes directly.
+  if (!m_required_notes.empty() && !m_paused) {
+      static int wait_blink = 0;
+      wait_blink++;
+      if ((wait_blink / 20) % 2 == 0) {
+          int w_x = GetStateWidth() / 2;
+          int w_y = GetStateHeight() / 2;
+
+          TextWriter wait_text(w_x, w_y, renderer, true, 40);
+          wait_text << Text("Waiting...", Renderer::ToColor(255, 200, 0));
+      }
+  }
 }
 
 
