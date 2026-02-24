@@ -16,7 +16,7 @@
     *   **Description**: Original Synthesia 0.6.1a source code. Used as a reference.
     *   **Status**: Frozen (Reference only).
 
-## Current Status (v1.8.0-dev)
+## Current Status (v1.9.0-dev)
 *   **Build System**: Meson.
 *   **Core**: Functional.
 *   **Features**:
@@ -27,11 +27,13 @@
     *   Particles: [x]
     *   Wait Mode: [x] (with Indicator)
     *   Visuals: [x] (Menu Animations)
+    *   Input: [x] (PC Keyboard Gameplay)
 *   **Missing**:
     *   FluidSynth Integration.
     *   Windows/macOS Drivers.
 
 ## Recent Activity
+*   **v1.9.0-dev**: PC Keyboard Gameplay Injection.
 *   **v1.8.0-dev**: Security Patch, Menu Animations.
 *   **v1.7.0-dev**: Note Labels, Wait Mode Indicator, Documentation Overhaul.
 *   **v1.6.0-dev**: Implemented Grand Staff, Bass Clef, Accidentals.

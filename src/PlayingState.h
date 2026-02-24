@@ -65,8 +65,10 @@ protected:
   virtual void Resize();
   virtual void Draw(Renderer &renderer) const;
   void Finish() override;
+  void OnMidiEvent(const MidiEvent& ev) override;
 
 private:
+  void ProcessEvent(MidiEvent ev);
 
   std::set<int> m_pressed_notes;
   std::set<int> m_required_notes;

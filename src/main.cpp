@@ -273,6 +273,12 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
     if (it == pressed.end())
     {
       sendNote(note, true);
+
+      // Inject to Game (PC Keyboard Play)
+      // Note On, Channel 0, Velocity 100
+      MidiEvent ev = MidiEvent::Build(MidiEventSimple(0x90, note, 100));
+      state_manager->MidiEvent(ev);
+
       pressed.insert(note);
     }
     // otherwise, cancel emission of Note-off
@@ -327,6 +333,12 @@ bool DrawingArea::on_key_release(SDL_KeyboardEvent& event) {
     if (it != pressed.end())
     {
       sendNote(note, false);
+
+      // Inject to Game (PC Keyboard Play)
+      // Note Off, Channel 0, Velocity 0
+      MidiEvent ev = MidiEvent::Build(MidiEventSimple(0x80, note, 0));
+      state_manager->MidiEvent(ev);
+
       pressed.erase(it);
     }
     return true;

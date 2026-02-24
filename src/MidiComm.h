@@ -66,10 +66,13 @@ public:
   bool ShouldReconnect() const;
   void Reconnect();
 
+  // Inject a MIDI event (e.g. from PC keyboard)
+  void Inject(const MidiEvent& ev);
+
 private:
   MidiCommDescription m_description;
   bool m_should_reconnect;
-
+  std::queue<MidiEvent> m_injected_events;
 };
 
 class MidiCommOut {

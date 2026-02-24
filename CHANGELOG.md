@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.9.0-dev] - 2024-05-22
+
+### Added
+- **PC Keyboard Gameplay**: PC Keyboard input now directly triggers game notes (via MIDI injection), allowing gameplay without an external MIDI keyboard.
+- **Input Architecture**: Refactored `MidiCommIn` and `PlayingState` to support event injection and processing.
+
 ## [1.8.0-dev] - 2024-05-22
 
 ### Added

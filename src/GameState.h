@@ -18,6 +18,7 @@
 #include "FrameCounter.h"
 #include "FrameAverage.h"
 #include "Renderer.h"
+#include "libmidi/MidiEvent.h"
 
 class GameStateError : public std::exception {
 public:
@@ -137,6 +138,9 @@ protected:
   // Called when text input is received
   virtual void OnTextInput(const std::string& text) {};
 
+  // Called when a MIDI event is received (e.g. from PC keyboard)
+  virtual void OnMidiEvent(const MidiEvent& ev) {};
+
   // Called each frame.  Drawing bounds are [0,
   // GetStateWidth()) and [0, GetStateHeight())
   virtual void Draw(Renderer &renderer) const = 0;
@@ -228,6 +232,9 @@ public:
   const MouseInfo &Mouse() const { return m_mouse; }
 
   void TextInput(const std::string& text);
+  void MidiEvent(const MidiEvent& ev) {
+      if (m_current_state) m_current_state->OnMidiEvent(ev);
+  }
 
   void Update(bool skip_this_update);
   void Draw(Renderer &renderer);

@@ -101,6 +101,11 @@ void MidiCommIn::UpdateDeviceList() {
 }
 
 MidiEvent MidiCommIn::Read() {
+    if (!m_injected_events.empty()) {
+        MidiEvent ev = m_injected_events.front();
+        m_injected_events.pop();
+        return ev;
+    }
     if (g_midi_driver) {
         return g_midi_driver->Read();
     }
@@ -108,6 +113,7 @@ MidiEvent MidiCommIn::Read() {
 }
 
 bool MidiCommIn::KeepReading() const {
+    if (!m_injected_events.empty()) return true;
     if (g_midi_driver) {
         return g_midi_driver->HasInput();
     }
@@ -115,6 +121,8 @@ bool MidiCommIn::KeepReading() const {
 }
 
 void MidiCommIn::Reset() {
+    while(!m_injected_events.empty()) m_injected_events.pop();
+
     // Driver doesn't expose Reset (drop input) directly in interface yet,
     // but Close/Open cycle might work, or we add Reset to interface.
     // For now, AlsaMidiDriver::CloseInput calls snd_seq_drop_input logic inside Shutdown?
@@ -133,6 +141,10 @@ bool MidiCommIn::ShouldReconnect() const {
 void MidiCommIn::Reconnect() {
     // Logic handled by driver state
     m_should_reconnect = false;
+}
+
+void MidiCommIn::Inject(const MidiEvent& ev) {
+    m_injected_events.push(ev);
 }
 
 

@@ -3,37 +3,27 @@
 **To:** Next AI Agent (Claude, Gemini, or Jules)
 **From:** Jules
 **Date:** 2024-05-22
-**Version:** 1.7.0-dev
+**Version:** 1.9.0-dev
 
 ## Current Status
-We have successfully implemented major feature sets for Linthesia, transforming it into a robust piano learning tool.
+Linthesia is now feature-rich with advanced notation, persistence, and improved usability for PC users.
 
 ### Accomplishments
-1.  **Documentation Overhaul**: `AGENTS.md` is now the master instruction file. `VISION.md`, `ROADMAP.md`, `DASHBOARD.md` are up to date.
-2.  **Sheet Music Phase 3**:
-    *   Grand Staff rendering (Treble + Bass).
-    *   Auto-Clef detection.
-    *   Key Signature parsing and rendering.
-    *   Accidentals rendering.
-    *   Procedural Clef symbols.
-    *   Beams and Stems.
-3.  **UI/UX Features**:
-    *   **Note Labels**: Option to show "C", "D#" on falling notes.
-    *   **Wait Mode Indicator**: Visual "Waiting..." text when user is blocked.
-    *   **Search**: Fully functional with text input.
-    *   **Settings**: Comprehensive menu with toggles for new features.
-4.  **Persistence**: Fixed SQLite database path logic.
+1.  **PC Keyboard Gameplay**: Users can now play the game using their PC keyboard without needing an external MIDI device. This was achieved by injecting simulated MIDI events into the game loop (`MidiCommIn::Inject`, `PlayingState::OnMidiEvent`).
+2.  **Visual Polish**: Menu transitions (Fade to Black) implemented in `GameStateManager`.
+3.  **Security**: Fixed a buffer overflow in `main.cpp` regarding DB path.
+4.  **Sheet Music Phase 3**: Grand Staff, Bass Clef, Accidentals.
+5.  **Educational Features**: Note Labels on falling notes, Wait Mode Indicator.
 
 ### Known Issues
-*   **FluidSynth**: Not implemented due to missing `libfluidsynth-dev` in the environment.
-*   **Text Rendering**: We use `SDL_ttf` with `FreeSans.ttf`. Some special chars (flat symbol `b`) are approximated.
-*   **Performance**: `SheetMusicDisplay` redraws everything every frame. Optimization might be needed later (display lists or texture caching).
+*   **FluidSynth**: Not implemented due to missing `libfluidsynth-dev`.
+*   **Text Rendering**: `SDL_ttf` usage is basic.
+*   **Input Mapping**: PC Keyboard mapping is hardcoded in `main.cpp` (QWERTY layout). A remapping UI is desired.
 
 ## Next Steps (Priorities)
-1.  **FluidSynth**: If the environment allows, implement the driver.
-2.  **Cross-Platform**: Abstract filesystem paths further for Windows/macOS.
-3.  **Visual Polish**: Add animations to the menus.
-4.  **Input Mapping**: Add UI to remap keys (currently hardcoded or partial).
+1.  **Input Mapping UI**: Allow users to remap PC keys.
+2.  **Visual Polish**: Add background images/animations to Title Screen.
+3.  **Cross-Platform**: Test/Implement Windows support.
 
 ## Useful Commands
 *   **Build**: `meson compile -C build`

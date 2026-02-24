@@ -291,8 +291,6 @@ void PlayingState::Listen() {
     return;
 
   while (m_state.midi_in->KeepReading()) {
-
-    microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
     MidiEvent ev = m_state.midi_in->Read();
     if (m_state.midi_in->ShouldReconnect())
     {
@@ -300,15 +298,24 @@ void PlayingState::Listen() {
         m_state.midi_out->Reconnect();
         continue;
     }
+    ProcessEvent(ev);
+  }
+}
 
+void PlayingState::OnMidiEvent(const MidiEvent& ev) {
+    ProcessEvent(ev);
+}
+
+void PlayingState::ProcessEvent(MidiEvent ev) {
+    microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
 
     // Just eat input if we're paused
     if (m_paused)
-      continue;
+      return;
 
     // We're only interested in NoteOn and NoteOff
     if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff)
-      continue;
+      return;
 
     // Octave Sliding
     ev.ShiftNote(m_note_offset);
@@ -342,7 +349,7 @@ void PlayingState::Listen() {
       // it is unpressed automatically
       m_keyboard->SetKeyActive(note_name, false, Track::FlatGray);
       userPressedKey(note_number, false);
-      continue;
+      return;
     }
 
     TranslatedNoteSet::iterator closest_match = m_notes.end();
@@ -416,12 +423,6 @@ void PlayingState::Listen() {
       }
 
       // Spawn Popup
-      // Calculate X position based on note key... hard without note position logic here.
-      // We can use note_number to guess X.
-      // m_keyboard has logic for X. But it's private.
-      // Let's just put it near the bottom center for now or try to estimate.
-      // Or make it follow the key? We have `note_name` and `m_keyboard->SetKeyActive` knows the position.
-      // Actually, we can just center it or put it above the keyboard.
       ScorePopup p;
       p.text = judge_text;
       p.r = r; p.g = g; p.b = b;
@@ -476,17 +477,8 @@ void PlayingState::Listen() {
       }
 
       // Spawn Particles
-      // Calculate X position from note_id.
-      // This is hacky because we don't have access to KeyboardDisplay logic directly here easily.
-      // Approximation: map note_id to screen X using linear interpolation or just center for v1.
-      // Better: ask m_keyboard? No public API.
-      // Let's settle for "above the keys".
-      // X = (note_id - min) / range * width?
       if (m_particles) {
           int key_width = (GetStateWidth() - Layout::ScreenMarginX*2) / 52; // approx 88 keys
-          // This is too rough. Let's just spawn near the middle or random x for "juice".
-          // Or reuse the ScorePopup logic (centered).
-          // Let's spawn them at the bottom of the screen.
           int px = GetStateWidth() / 2;
           int py = GetStateHeight() - 50;
           m_particles->Spawn(px, py, r, g, b, 20);
@@ -520,7 +512,6 @@ void PlayingState::Listen() {
     // But correct presed key will be shown as usual.
     m_keyboard->SetKeyActive(note_name, true, note_color);
     userPressedKey(note_number, true);
-  }
 }
 
 void PlayingState::Resize() {
