@@ -38,9 +38,11 @@ TitleState::~TitleState() {
    if (m_file_tile) delete m_file_tile;
    if (m_keyboard_size_tile) delete m_keyboard_size_tile;
    if (m_settings_tile) delete m_settings_tile;
+   if (m_particles) delete m_particles;
 }
 
 void TitleState::Init() {
+   m_particles = new ParticleSystem();
 
    m_back_button = ButtonState(
       Layout::ScreenMarginX,
@@ -222,6 +224,18 @@ void TitleState::Update() {
   settings_mouse.x -= m_settings_tile->GetX();
   settings_mouse.y -= m_settings_tile->GetY();
   m_settings_tile->Update(settings_mouse);
+
+  if (m_particles) {
+      if (rand() % 40 == 0) {
+          int x = rand() % GetStateWidth();
+          int y = rand() % GetStateHeight();
+          m_particles->Spawn(x, y, 100, 100, 255, 30);
+      }
+      if (mouse.x != 0 && mouse.y != 0) {
+           m_particles->Spawn(mouse.x, mouse.y, 255, 200, 100, 20);
+      }
+      m_particles->Update();
+  }
 
   MouseInfo file_mouse(mouse);
   file_mouse.x -= m_file_tile->GetX();
@@ -447,6 +461,8 @@ void TitleState::Draw(Renderer &renderer) const {
   renderer.SetColor(White);
   renderer.DrawTga(GetTexture(TitleLogo), left, TitleY);
   renderer.DrawTga(GetTexture(GameMusicThemes), left+3, TitleY + (compress_height ? 120 : 150) );
+
+  if (m_particles) m_particles->Draw(renderer);
 
   TextWriter version(Layout::ScreenMarginX,
                      GetStateHeight() - Layout::ScreenMarginY - Layout::SmallFontSize * 2,

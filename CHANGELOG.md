@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.10.0-dev] - 2024-05-22
+
+### Added
+- **Lighted Keys Support**: Option to send "Guide Notes" to the MIDI output device even when muting the track. This enables "Lighted Keys" functionality on compatible keyboards (like Casio/Yamaha) during "You Play" mode.
+- **Title Screen Polish**: Added interactive particle effects to the title screen.
+
 ## [1.9.0-dev] - 2024-05-22
 
 ### Added

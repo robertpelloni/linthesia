@@ -140,6 +140,7 @@ private:
   double m_metronome_vol;
   bool m_metronome_was_on_beat;
   bool m_metronome_visual_flash;
+  bool m_guide_notes_enabled;
 
   // Pause Menu
   ButtonState m_resume_button;

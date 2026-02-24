@@ -39,6 +39,7 @@ private:
   EnumValue* m_metronome_vol_val;
   EnumValue* m_wait_tolerance_val;
   EnumValue* m_show_labels_val;
+  EnumValue* m_guide_notes_val;
 
   // Tiles
   EnumTile* m_lead_in_tile;
@@ -48,6 +49,7 @@ private:
   EnumTile* m_metronome_vol_tile;
   EnumTile* m_wait_tolerance_tile;
   EnumTile* m_show_labels_tile;
+  EnumTile* m_guide_notes_tile;
 
   ButtonState m_test_audio_button;
 };

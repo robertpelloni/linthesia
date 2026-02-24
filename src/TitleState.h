@@ -16,6 +16,7 @@
 #include "DeviceTile.h"
 #include "StringTile.h"
 #include "EnumTile.h"
+#include "ParticleSystem.h"
 
 
 // class Midi;
@@ -65,6 +66,8 @@ private:
   StringTile *m_settings_tile;
 
   bool m_skip_next_mouse_up;
+
+  ParticleSystem *m_particles;
 };
 
 #endif // __TITLE_STATE_H

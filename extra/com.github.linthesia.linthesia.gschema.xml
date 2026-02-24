@@ -65,5 +65,9 @@
       <default>"false"</default>
     </key>
 
+    <key name="guide-notes" type="s">
+      <default>"false"</default>
+    </key>
+
   </schema>
 </schemalist>

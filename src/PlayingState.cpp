@@ -106,7 +106,8 @@ PlayingState::PlayingState(const SharedState &state) :
   m_metronome_was_on_beat(false), m_metronome_visual_flash(false),
   m_loop_a(-1), m_loop_b(-1), m_looping(false),
   m_key_sf(0), m_key_mi(0),
-  m_sheet_music(0), m_particles(0), m_show_sheet_music(false) {
+  m_sheet_music(0), m_particles(0), m_show_sheet_music(false),
+  m_guide_notes_enabled(false) {
 }
 
 void PlayingState::Init() {
@@ -165,6 +166,9 @@ void PlayingState::Init() {
 
   std::string wait_tol = UserSetting::Get(WAIT_TOLERANCE_KEY, "50000");
   try { m_wait_grace_max = std::stoll(wait_tol); } catch (...) { m_wait_grace_max = 50000; }
+
+  std::string guide_notes = UserSetting::Get(GUIDE_NOTES_KEY, "false");
+  m_guide_notes_enabled = (guide_notes == "true" || guide_notes == "1");
 
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
@@ -250,6 +254,15 @@ void PlayingState::Play(microseconds_t delta_microseconds) {
         && ev.Type() != MidiEventType_NoteOn
         && ev.Type() != MidiEventType_NoteOff)
       play = true;
+
+    // Guide Notes: Play "You Play" notes if enabled
+    if (m_guide_notes_enabled &&
+       (m_state.track_properties[track_id].mode == Track::ModeYouPlay ||
+        m_state.track_properties[track_id].mode == Track::ModeLearning)) {
+        if (ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff) {
+            play = true;
+        }
+    }
 
     if (ev.Type() == MidiEventType_NoteOn || ev.Type() == MidiEventType_NoteOff) {
       int vel = ev.NoteVelocity();

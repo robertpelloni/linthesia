@@ -31,6 +31,7 @@
 #define METRONOME_VOLUME_KEY "metronome-volume"
 #define WAIT_TOLERANCE_KEY "wait-tolerance"
 #define SHOW_NOTE_LABELS_KEY "show-note-labels"
+#define GUIDE_NOTES_KEY "guide-notes"
 
 namespace UserSetting {
 

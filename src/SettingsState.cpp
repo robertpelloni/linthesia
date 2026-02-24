@@ -120,11 +120,11 @@ SettingsState::SettingsState(const SharedState &state) :
   m_lead_in_val(nullptr), m_lead_out_val(nullptr),
   m_scroll_speed_val(nullptr), m_metronome_on_val(nullptr),
   m_metronome_vol_val(nullptr), m_wait_tolerance_val(nullptr),
-  m_show_labels_val(nullptr),
+  m_show_labels_val(nullptr), m_guide_notes_val(nullptr),
   m_lead_in_tile(nullptr), m_lead_out_tile(nullptr),
   m_scroll_speed_tile(nullptr), m_metronome_on_tile(nullptr),
   m_metronome_vol_tile(nullptr), m_wait_tolerance_tile(nullptr),
-  m_show_labels_tile(nullptr)
+  m_show_labels_tile(nullptr), m_guide_notes_tile(nullptr)
 {
 }
 
@@ -136,6 +136,7 @@ SettingsState::~SettingsState() {
   delete m_metronome_vol_tile;
   delete m_wait_tolerance_tile;
   delete m_show_labels_tile;
+  delete m_guide_notes_tile;
 
   delete m_lead_in_val;
   delete m_lead_out_val;
@@ -144,6 +145,7 @@ SettingsState::~SettingsState() {
   delete m_metronome_vol_val;
   delete m_wait_tolerance_val;
   delete m_show_labels_val;
+  delete m_guide_notes_val;
 }
 
 void SettingsState::Init() {
@@ -161,10 +163,11 @@ void SettingsState::Init() {
   m_metronome_vol_val = new FloatValue(METRONOME_VOLUME_KEY, 0.0, 2.0, 0.1, 1.0); // 0-200%
   m_wait_tolerance_val = new NumericValue(WAIT_TOLERANCE_KEY, 0, 500000, 10000, 50000); // 0-500ms
   m_show_labels_val = new BoolValue(SHOW_NOTE_LABELS_KEY, false);
+  m_guide_notes_val = new BoolValue(GUIDE_NOTES_KEY, false);
 
   // Create Tiles
   int y = 80;
-  int gap = 65; // Tighter gap
+  int gap = 60; // Tighter gap
 
   m_lead_in_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_lead_in_val, "Lead-In Time:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
@@ -179,6 +182,8 @@ void SettingsState::Init() {
   m_metronome_vol_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_metronome_vol_val, "Metronome Vol:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
   m_show_labels_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_show_labels_val, "Note Labels:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
+  y += gap;
+  m_guide_notes_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_guide_notes_val, "Guide Notes:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
 
   m_test_audio_button = ButtonState(
       GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
@@ -203,7 +208,8 @@ void SettingsState::Resize() {
   if (m_wait_tolerance_tile) { m_wait_tolerance_tile->SetX(x); m_wait_tolerance_tile->SetY(y); } y+=gap;
   if (m_metronome_on_tile) { m_metronome_on_tile->SetX(x); m_metronome_on_tile->SetY(y); } y+=gap;
   if (m_metronome_vol_tile) { m_metronome_vol_tile->SetX(x); m_metronome_vol_tile->SetY(y); } y+=gap;
-  if (m_show_labels_tile) { m_show_labels_tile->SetX(x); m_show_labels_tile->SetY(y); }
+  if (m_show_labels_tile) { m_show_labels_tile->SetX(x); m_show_labels_tile->SetY(y); } y+=gap;
+  if (m_guide_notes_tile) { m_guide_notes_tile->SetX(x); m_guide_notes_tile->SetY(y); }
 }
 
 void SettingsState::Update() {
@@ -239,6 +245,10 @@ void SettingsState::Update() {
   if (m_show_labels_tile) {
       MouseInfo local(mouse); local.x -= m_show_labels_tile->GetX(); local.y -= m_show_labels_tile->GetY();
       m_show_labels_tile->Update(local);
+  }
+  if (m_guide_notes_tile) {
+      MouseInfo local(mouse); local.x -= m_guide_notes_tile->GetX(); local.y -= m_guide_notes_tile->GetY();
+      m_guide_notes_tile->Update(local);
   }
 
   // Test Audio Button
@@ -286,6 +296,7 @@ void SettingsState::Draw(Renderer &renderer) const {
   if (m_metronome_on_tile) m_metronome_on_tile->Draw(renderer);
   if (m_metronome_vol_tile) m_metronome_vol_tile->Draw(renderer);
   if (m_show_labels_tile) m_show_labels_tile->Draw(renderer);
+  if (m_guide_notes_tile) m_guide_notes_tile->Draw(renderer);
 
   Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
