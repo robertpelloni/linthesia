@@ -24,6 +24,7 @@
 #include "TitleState.h"
 #include "DpmsThread.h"
 #include "SongLibState.h"
+#include "KeyMapper.h"
 
 #include "libmidi/Midi.h"
 #include "libmidi/MidiUtil.h"
@@ -45,6 +46,7 @@ using namespace std;
 GameStateManager* state_manager;
 SDL_Window* sdl_window;
 bool main_loop_running = true;
+KeyMapper g_key_mapper;
 
 const static string friendly_app_name = STRING("Linthesia " <<
                                                LinthesiaVersionString);
@@ -213,37 +215,7 @@ bool DrawingArea::on_button_press(SDL_MouseButtonEvent& event) {
 
 // FIXME: use user settings to do this mapping
 int keyToNote(SDL_KeyboardEvent& event) {
-  const unsigned short oct = 4;
-
-  switch(event.keysym.scancode) {
-  /* no key for C :( */
-  case SDL_SCANCODE_GRAVE:        return 12*oct + 1;      /* C# */
-  case SDL_SCANCODE_TAB:          return 12*oct + 2;      /* D  */
-  case SDL_SCANCODE_1:            return 12*oct + 3;      /* D# */
-  case SDL_SCANCODE_Q:            return 12*oct + 4;      /* E  */
-  case SDL_SCANCODE_W:            return 12*oct + 5;      /* F  */
-  case SDL_SCANCODE_3:            return 12*oct + 6;      /* F# */
-  case SDL_SCANCODE_E:            return 12*oct + 7;      /* G  */
-  case SDL_SCANCODE_4:            return 12*oct + 8;      /* G# */
-  case SDL_SCANCODE_R:            return 12*oct + 9;      /* A  */
-  case SDL_SCANCODE_5:            return 12*oct + 10;     /* A# */
-  case SDL_SCANCODE_T:            return 12*oct + 11;     /* B  */
-
-  case SDL_SCANCODE_Y:            return 12*(oct+1) + 0;  /* C  */
-  case SDL_SCANCODE_7:            return 12*(oct+1) + 1;  /* C# */
-  case SDL_SCANCODE_U:            return 12*(oct+1) + 2;  /* D  */
-  case SDL_SCANCODE_8:            return 12*(oct+1) + 3;  /* D# */
-  case SDL_SCANCODE_I:            return 12*(oct+1) + 4;  /* E  */
-  case SDL_SCANCODE_O:            return 12*(oct+1) + 5;  /* F  */
-  case SDL_SCANCODE_0:            return 12*(oct+1) + 6;  /* F# */
-  case SDL_SCANCODE_P:            return 12*(oct+1) + 7;  /* G  */
-  case SDL_SCANCODE_MINUS:        return 12*(oct+1) + 8;  /* G# */
-  case SDL_SCANCODE_LEFTBRACKET:  return 12*(oct+1) + 9;  /* A  */
-  case SDL_SCANCODE_EQUALS:       return 12*(oct+1) + 10; /* A# */
-  case SDL_SCANCODE_RIGHTBRACKET: return 12*(oct+1) + 11; /* B  */
-  }
-
-  return -1;
+  return g_key_mapper.GetNote(event.keysym.scancode);
 }
 
 typedef set<int> ConnectMap;
@@ -471,6 +443,15 @@ int main(int argc, char *argv[]) {
     string file_opt("");
 
     UserSetting::Initialize();
+
+    // Init KeyMapper
+    std::string layout_str = UserSetting::Get(KEYBOARD_LAYOUT_KEY, "0");
+    int layout_idx = 0;
+    try {
+        layout_idx = std::stoi(layout_str);
+    } catch (...) {}
+    if (layout_idx < 0 || layout_idx >= LayoutCount) layout_idx = 0;
+    g_key_mapper.SetLayout((KeyboardLayout)layout_idx);
 
     int show_help_exit_status = 0;
     bool invalid_options = has_invalid_options(argc, argv);

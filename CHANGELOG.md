@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.11.0-dev] - 2024-05-22
+
+### Added
+- **PC Keyboard Layouts**: Support for QWERTY (default), AZERTY, and QWERTZ layouts for PC keyboard gameplay. Configurable in Settings.
+- **Input Refactoring**: Centralized input mapping logic into `KeyMapper` class.
+
 ## [1.10.0-dev] - 2024-05-22
 
 ### Added

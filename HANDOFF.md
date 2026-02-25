@@ -3,27 +3,27 @@
 **To:** Next AI Agent (Claude, Gemini, or Jules)
 **From:** Jules
 **Date:** 2024-05-22
-**Version:** 1.10.0-dev
+**Version:** 1.11.0-dev
 
 ## Current Status
-Linthesia is now a feature-complete piano learning application with advanced notation, hardware support, and polished visuals.
+Linthesia is polished, secure, and feature-rich.
 
 ### Accomplishments
-1.  **Lighted Keys Support**: Added "Guide Notes" feature to send MIDI events to output devices even for muted tracks, enabling hardware lighted keys.
-2.  **PC Keyboard Gameplay**: Users can play without a MIDI keyboard.
-3.  **Visual Polish**: Menu transitions, Title Screen particles, Note Labels, Wait Indicator.
-4.  **Sheet Music Phase 3**: Grand Staff, Bass Clef, Accidentals.
-5.  **Documentation**: Comprehensive instructions in `AGENTS.md`.
+1.  **PC Keyboard Layouts**: Added QWERTY/AZERTY/QWERTZ support via `KeyMapper` class and Settings UI.
+2.  **Lighted Keys**: Hardware support via "Guide Notes".
+3.  **PC Gameplay**: Direct key injection.
+4.  **Security**: Patched `main.cpp`.
+5.  **Visuals**: Menu animations, Title particles.
+6.  **Sheet Music**: Grand Staff, Accidentals.
 
 ### Known Issues
-*   **FluidSynth**: Not implemented due to missing `libfluidsynth-dev`.
-*   **Input Mapping**: Hardcoded QWERTY.
-*   **Text Rendering**: Basic `SDL_ttf`.
+*   **FluidSynth**: Blocked by environment.
+*   **Input Mapping**: "Custom" layout not yet implemented (requires UI).
 
 ## Next Steps (Priorities)
-1.  **Input Mapping UI**: Allow users to remap PC keys.
-2.  **Performance Optimization**: Profile rendering loop.
-3.  **Cross-Platform**: Test/Implement Windows support.
+1.  **Custom Key Mapping**: UI to let users press keys to map notes.
+2.  **Performance**: Texture caching for Sheet Music?
+3.  **Cross-Platform**: Windows port.
 
 ## Useful Commands
 *   **Build**: `meson compile -C build`

@@ -32,6 +32,7 @@
 #define WAIT_TOLERANCE_KEY "wait-tolerance"
 #define SHOW_NOTE_LABELS_KEY "show-note-labels"
 #define GUIDE_NOTES_KEY "guide-notes"
+#define KEYBOARD_LAYOUT_KEY "keyboard-layout"
 
 namespace UserSetting {
 

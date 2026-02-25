@@ -34,6 +34,7 @@
     *   Windows/macOS Drivers.
 
 ## Recent Activity
+*   **v1.11.0-dev**: PC Keyboard Layouts (QWERTY/AZERTY/QWERTZ).
 *   **v1.10.0-dev**: Lighted Keys Support, Title Screen Particles.
 *   **v1.9.0-dev**: PC Keyboard Gameplay Injection.
 *   **v1.8.0-dev**: Security Patch, Menu Animations.

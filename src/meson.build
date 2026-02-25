@@ -48,6 +48,7 @@ executable('linthesia',
            'SongLibState.cpp',
            'DpmsThread.cpp',
            'FileSelector.cpp',
+           'KeyMapper.cpp',
            dependencies : dependencies,
            link_with: libmidi,
            install : true)

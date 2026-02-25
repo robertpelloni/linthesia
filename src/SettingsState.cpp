@@ -14,6 +14,7 @@
 #include "Renderer.h"
 #include "Textures.h"
 #include "MenuLayout.h"
+#include "KeyMapper.h"
 
 #include <iomanip>
 #include <sstream>
@@ -113,6 +114,31 @@ protected:
   bool m_val;
 };
 
+class LayoutValue : public EnumValue {
+public:
+  LayoutValue() {
+      m_val = g_key_mapper.GetLayout();
+  }
+
+  void next() override {
+      m_val = (KeyboardLayout)((m_val + 1) % LayoutCount);
+      save();
+  }
+  void previous() override {
+      m_val = (KeyboardLayout)((m_val + LayoutCount - 1) % LayoutCount);
+      save();
+  }
+  std::string AsText() const override {
+      return g_key_mapper.GetLayoutName(m_val);
+  }
+protected:
+  void save() {
+      g_key_mapper.SetLayout(m_val);
+      UserSetting::Set(KEYBOARD_LAYOUT_KEY, std::to_string((int)m_val));
+  }
+  KeyboardLayout m_val;
+};
+
 // --- SettingsState Implementation ---
 
 SettingsState::SettingsState(const SharedState &state) :
@@ -121,10 +147,12 @@ SettingsState::SettingsState(const SharedState &state) :
   m_scroll_speed_val(nullptr), m_metronome_on_val(nullptr),
   m_metronome_vol_val(nullptr), m_wait_tolerance_val(nullptr),
   m_show_labels_val(nullptr), m_guide_notes_val(nullptr),
+  m_layout_val(nullptr),
   m_lead_in_tile(nullptr), m_lead_out_tile(nullptr),
   m_scroll_speed_tile(nullptr), m_metronome_on_tile(nullptr),
   m_metronome_vol_tile(nullptr), m_wait_tolerance_tile(nullptr),
-  m_show_labels_tile(nullptr), m_guide_notes_tile(nullptr)
+  m_show_labels_tile(nullptr), m_guide_notes_tile(nullptr),
+  m_layout_tile(nullptr)
 {
 }
 
@@ -137,6 +165,7 @@ SettingsState::~SettingsState() {
   delete m_wait_tolerance_tile;
   delete m_show_labels_tile;
   delete m_guide_notes_tile;
+  delete m_layout_tile;
 
   delete m_lead_in_val;
   delete m_lead_out_val;
@@ -146,6 +175,7 @@ SettingsState::~SettingsState() {
   delete m_wait_tolerance_val;
   delete m_show_labels_val;
   delete m_guide_notes_val;
+  delete m_layout_val;
 }
 
 void SettingsState::Init() {
@@ -164,10 +194,11 @@ void SettingsState::Init() {
   m_wait_tolerance_val = new NumericValue(WAIT_TOLERANCE_KEY, 0, 500000, 10000, 50000); // 0-500ms
   m_show_labels_val = new BoolValue(SHOW_NOTE_LABELS_KEY, false);
   m_guide_notes_val = new BoolValue(GUIDE_NOTES_KEY, false);
+  m_layout_val = new LayoutValue();
 
   // Create Tiles
   int y = 80;
-  int gap = 60; // Tighter gap
+  int gap = 55; // Tighter gap
 
   m_lead_in_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_lead_in_val, "Lead-In Time:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
@@ -184,6 +215,8 @@ void SettingsState::Init() {
   m_show_labels_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_show_labels_val, "Note Labels:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
   y += gap;
   m_guide_notes_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_guide_notes_val, "Guide Notes:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
+  y += gap;
+  m_layout_tile = new EnumTile((GetStateWidth() - EnumTileWidth)/2, y, *m_layout_val, "PC Layout:", GetTexture(InterfaceButtons), GetTexture(EmptyBox));
 
   m_test_audio_button = ButtonState(
       GetStateWidth() - Layout::ScreenMarginX - Layout::ButtonWidth,
@@ -209,7 +242,8 @@ void SettingsState::Resize() {
   if (m_metronome_on_tile) { m_metronome_on_tile->SetX(x); m_metronome_on_tile->SetY(y); } y+=gap;
   if (m_metronome_vol_tile) { m_metronome_vol_tile->SetX(x); m_metronome_vol_tile->SetY(y); } y+=gap;
   if (m_show_labels_tile) { m_show_labels_tile->SetX(x); m_show_labels_tile->SetY(y); } y+=gap;
-  if (m_guide_notes_tile) { m_guide_notes_tile->SetX(x); m_guide_notes_tile->SetY(y); }
+  if (m_guide_notes_tile) { m_guide_notes_tile->SetX(x); m_guide_notes_tile->SetY(y); } y+=gap;
+  if (m_layout_tile) { m_layout_tile->SetX(x); m_layout_tile->SetY(y); }
 }
 
 void SettingsState::Update() {
@@ -249,6 +283,10 @@ void SettingsState::Update() {
   if (m_guide_notes_tile) {
       MouseInfo local(mouse); local.x -= m_guide_notes_tile->GetX(); local.y -= m_guide_notes_tile->GetY();
       m_guide_notes_tile->Update(local);
+  }
+  if (m_layout_tile) {
+      MouseInfo local(mouse); local.x -= m_layout_tile->GetX(); local.y -= m_layout_tile->GetY();
+      m_layout_tile->Update(local);
   }
 
   // Test Audio Button
@@ -297,6 +335,7 @@ void SettingsState::Draw(Renderer &renderer) const {
   if (m_metronome_vol_tile) m_metronome_vol_tile->Draw(renderer);
   if (m_show_labels_tile) m_show_labels_tile->Draw(renderer);
   if (m_guide_notes_tile) m_guide_notes_tile->Draw(renderer);
+  if (m_layout_tile) m_layout_tile->Draw(renderer);
 
   Layout::DrawHorizontalRule(renderer, GetStateWidth(), GetStateHeight() - Layout::ScreenMarginY);
 
