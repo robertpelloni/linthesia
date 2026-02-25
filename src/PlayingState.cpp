@@ -107,7 +107,7 @@ PlayingState::PlayingState(const SharedState &state) :
   m_loop_a(-1), m_loop_b(-1), m_looping(false),
   m_key_sf(0), m_key_mi(0),
   m_sheet_music(0), m_particles(0), m_show_sheet_music(false),
-  m_guide_notes_enabled(false) {
+  m_guide_notes_enabled(false), m_sustain_active(false) {
 }
 
 void PlayingState::Init() {
@@ -315,6 +315,37 @@ void PlayingState::Listen() {
   }
 }
 
+void PlayingState::HandleMouseClick() {
+    const MouseInfo& m = Mouse();
+    int pb_x = Layout::ScreenMarginX;
+    int pb_y = CalcKeyboardHeight() + 25;
+    int pb_w = GetStateWidth() - Layout::ScreenMarginX*2;
+    int pb_h = 16;
+
+    // Check if clicked on progress bar
+    if (m.x >= pb_x && m.x <= pb_x + pb_w &&
+        m.y >= pb_y && m.y <= pb_y + pb_h) {
+
+        double pct = (double)(m.x - pb_x) / pb_w;
+        microseconds_t len = m_state.midi->GetSongLengthInMicroseconds();
+        microseconds_t new_time = (microseconds_t)(pct * len);
+
+        // Seek
+        m_state.midi->GoTo(new_time);
+        m_required_notes.clear();
+        if (m_state.midi_out) m_state.midi_out->Reset();
+        m_keyboard->ResetActiveKeys();
+        m_notes = m_state.midi->Notes();
+        m_notes_history.clear();
+        SetupNoteState();
+        eraseUntilTime(new_time);
+
+        m_should_retry = false;
+        m_should_wait_after_retry = false;
+        m_retry_start = new_time;
+    }
+}
+
 void PlayingState::OnMidiEvent(const MidiEvent& ev) {
     ProcessEvent(ev);
 }
@@ -325,6 +356,12 @@ void PlayingState::ProcessEvent(MidiEvent ev) {
     // Just eat input if we're paused
     if (m_paused)
       return;
+
+    // Handle Sustain Pedal (CC 64)
+    if (ev.Type() == MidiEventType_Controller && ev.ControllerNumber() == 64) {
+        m_sustain_active = (ev.ControllerValue() >= 64);
+        return;
+    }
 
     // We're only interested in NoteOn and NoteOff
     if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff)
@@ -872,6 +909,10 @@ void PlayingState::Update() {
   }
 
   // Pause Menu Interaction
+  if (Mouse().newPress.left) {
+      HandleMouseClick();
+  }
+
   if (m_paused) {
       MouseInfo mouse = Mouse();
       m_resume_button.Update(mouse);
@@ -982,7 +1023,7 @@ void PlayingState::Draw(Renderer &renderer) const {
       // Draw a keyboard, fallen keys and background for them
       m_keyboard->Draw(renderer, key_tex, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
                        m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
-                       m_state.midi->GetBarLines());
+                       m_state.midi->GetBarLines(), m_sustain_active);
   }
 
   string title_text = m_state.song_title;

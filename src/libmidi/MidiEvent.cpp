@@ -342,6 +342,16 @@ int MidiEvent::NoteVelocity() const {
   return static_cast<int>(m_data2);
 }
 
+int MidiEvent::ControllerNumber() const {
+  if (Type() != MidiEventType_Controller) return -1;
+  return m_data1;
+}
+
+int MidiEvent::ControllerValue() const {
+  if (Type() != MidiEventType_Controller) return -1;
+  return m_data2;
+}
+
 string MidiEvent::Text() const {
   if (!HasText())
     return "";

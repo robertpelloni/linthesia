@@ -82,6 +82,9 @@ public:
 
   void SetVelocity(int velocity);
 
+  int ControllerNumber() const;
+  int ControllerValue() const;
+
   // Returns which type of meta event this is (or
   // MetaEvent_Unknown if type() is not EventType_Meta).
   MidiMetaEventType MetaType() const;
