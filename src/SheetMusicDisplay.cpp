@@ -4,6 +4,8 @@
 
 #include "SheetMusicDisplay.h"
 #include "Textures.h"
+#include "TextWriter.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -443,13 +445,30 @@ void SheetMusicDisplay::DrawBarLines(Renderer &renderer, int x, int y, int width
     renderer.SetColor(180, 180, 180); // Gray lines
     double time_scale = (double)(width - 50) / show_duration;
 
-    for (microseconds_t t : bar_lines) {
-        if (t < current_time) continue;
+    int bar_count = 0;
+    // We need to count bars from the beginning to display numbers correctly
+    // This is inefficient if we do it every frame for the whole song.
+    // Ideally we pass bar index. But for now let's just count visible bars relative to something?
+    // Actually, bar_lines is a sorted list of timestamps.
+    // We can find the index of the first visible bar.
+
+    auto it = std::lower_bound(bar_lines.begin(), bar_lines.end(), current_time);
+    int current_bar_index = std::distance(bar_lines.begin(), it) + 1;
+
+    for (; it != bar_lines.end(); ++it) {
+        microseconds_t t = *it;
         if (t > current_time + show_duration) break;
 
         long long dt = t - current_time;
         int bx = x + (int)(dt * time_scale);
 
+        renderer.SetColor(180, 180, 180);
         renderer.DrawQuad(bx, y, 2, height);
+
+        // Draw Measure Number
+        TextWriter num(bx + 4, y - 15, renderer, false, 10);
+        num << Text(current_bar_index, Renderer::ToColor(100, 100, 100));
+
+        current_bar_index++;
     }
 }

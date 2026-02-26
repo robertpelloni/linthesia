@@ -801,6 +801,10 @@ void PlayingState::Update() {
       m_show_sheet_music = !m_show_sheet_music;
   }
 
+  if (IsKeyReleased(KeyRhythmToggle)) {
+      m_state.rhythm_mode = !m_state.rhythm_mode;
+  }
+
   else
   {
     // Check retry conditions
@@ -1062,6 +1066,11 @@ void PlayingState::Draw(Renderer &renderer) const {
   renderer.SetColor(White);
   renderer.DrawTga(GetTexture(PlayStatus),  Layout::ScreenMarginX - 1,   text_y);
   renderer.DrawTga(GetTexture(PlayStatus2), Layout::ScreenMarginX + 273, text_y);
+
+  if (m_state.rhythm_mode) {
+      TextWriter rhythm(Layout::ScreenMarginX + 800, text_y + 12, renderer, false, Layout::TitleFontSize);
+      rhythm << Text("Rhythm Mode", Renderer::ToColor(255, 165, 0));
+  }
 
   string multiplier_text = STRING(fixed << setprecision(1) << CalculateScoreMultiplier() <<
                                   " Multiplier");

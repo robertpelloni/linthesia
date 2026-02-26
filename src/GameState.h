@@ -71,7 +71,8 @@ enum GameKey {
   KeyLoopB       = 0x8000,
 
   KeyBackspace   = 0x10000,
-  KeyViewToggle  = 0x20000 // F7
+  KeyViewToggle  = 0x20000, // F7
+  KeyRhythmToggle = 0x40000 // F8
 };
 
 enum MouseButton {
