@@ -32,7 +32,7 @@ public:
   void Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4],
             int x, int y, const TranslatedNoteSet &notes, microseconds_t show_duration,
             microseconds_t current_time, const std::vector<Track::Properties> &track_properties,
-            const MidiEventMicrosecondList &bar_lines, bool sustain_active);
+            const MidiEventMicrosecondList &bar_line_usecs);
 
   void SetKeyActive(const std::string &key_name, bool active, Track::TrackColor color);
 
@@ -95,7 +95,7 @@ private:
                     int white_width, int key_space, int black_width, int black_offset,
                     int x_offset, int y, int y_offset, int final_width, int y_roll_under,
                     const TranslatedNoteSet &notes, microseconds_t show_duration,
-                    microseconds_t current_time, const std::vector<Track::Properties> &track_properties, bool show_labels) const;
+                    microseconds_t current_time, const std::vector<Track::Properties> &track_properties) const;
 
   // This takes the rectangle where the actual note block should appear and transforms
   // it to the multi-quad (with relatively complicated texture coordinates) using the

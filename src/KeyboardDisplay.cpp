@@ -44,7 +44,7 @@ KeyboardDisplay::KeyboardDisplay(const Keyboard& keyboard, int pixelWidth, int p
 void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga *note_tex[4], int x, int y,
                            const TranslatedNoteSet &notes, microseconds_t show_duration, microseconds_t current_time,
                            const vector<Track::Properties> &track_properties,
-                           const MidiEventMicrosecondList &bar_line_usecs, bool sustain_active) {
+                           const MidiEventMicrosecondList &bar_line_usecs) {
 
   // Source: Measured from Yamaha P-70
   const static double WhiteWidthHeightRatio = 6.8181818;
@@ -99,35 +99,17 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
   renderer.SetColor(255, 255, 0, 80); // Semi-transparent yellow
   renderer.DrawQuad(x + x_offset, y + y_offset - 1, final_width, 3);
 
-  // Sustain Indicator
-  if (sustain_active) {
-      // Draw a glowing cyan line above the judgement line
-      renderer.SetColor(0, 255, 255, 100);
-      renderer.DrawQuad(x + x_offset, y + y_offset - 6, final_width, 5);
-
-      // Draw "Pedal" text?
-      // TextWriter pedal_text(x + x_offset + final_width - 60, y + y_offset - 25, renderer, false, 14);
-      // pedal_text << Text("Pedal", Renderer::ToColor(0, 255, 255));
-  }
-
   // Do two passes on the notes, the first for note shadows and the second
   // for the note blocks themselves.  This is to avoid shadows being drawn
   // on top of notes.
   renderer.SetColor(Renderer::ToColor(255, 255, 255));
   DrawNotePass(renderer, note_tex[0], note_tex[1], white_width, white_space, black_width,
                black_offset, x + x_offset, y, y_offset, final_width, y_roll_under, notes, show_duration,
-               current_time, track_properties, false);
-
-  static bool show_labels = false;
-  static int label_check_counter = 0;
-  if (label_check_counter++ % 60 == 0) {
-      std::string s = UserSetting::Get(SHOW_NOTE_LABELS_KEY, "false");
-      show_labels = (s == "true" || s == "1");
-  }
+               current_time, track_properties);
 
   DrawNotePass(renderer, note_tex[2], note_tex[3], white_width, white_space, black_width,
                black_offset, x + x_offset, y, y_offset, final_width, y_roll_under, notes, show_duration,
-               current_time, track_properties, show_labels);
+               current_time, track_properties);
 
   const int ActualKeyboardWidth = white_width*white_key_count + white_space*(white_key_count-1);
 
@@ -427,7 +409,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
                                    int key_space, int black_width, int black_offset, int x_offset, int y,
                                    int y_offset, int final_width, int y_roll_under, const TranslatedNoteSet &notes,
                                    microseconds_t show_duration, microseconds_t current_time,
-                                   const vector<Track::Properties> &track_properties, bool show_labels) const {
+                                   const vector<Track::Properties> &track_properties) const {
 
   // Shiny music domain knowledge
   const static unsigned int NotesPerOctave = 12;
@@ -508,6 +490,13 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
 
       DrawNote(renderer, (drawing_black ? tex_black : tex_white),
                (drawing_black ? BlackNoteDimensions : WhiteNoteDimensions), left, top, width, height, brush_id);
+
+      static bool show_labels = false;
+      static int label_check_counter = 0;
+      if (label_check_counter++ % 60 == 0) {
+          std::string s = UserSetting::Get(SHOW_NOTE_LABELS_KEY, "false");
+          show_labels = (s == "true" || s == "1");
+      }
 
       if (show_labels) {
           std::string name = MidiEvent::NoteName(i->note_id);

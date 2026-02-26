@@ -107,7 +107,7 @@ PlayingState::PlayingState(const SharedState &state) :
   m_loop_a(-1), m_loop_b(-1), m_looping(false),
   m_key_sf(0), m_key_mi(0),
   m_sheet_music(0), m_particles(0), m_show_sheet_music(false),
-  m_guide_notes_enabled(false), m_sustain_active(false) {
+  m_guide_notes_enabled(false) {
 }
 
 void PlayingState::Init() {
@@ -315,37 +315,6 @@ void PlayingState::Listen() {
   }
 }
 
-void PlayingState::HandleMouseClick() {
-    const MouseInfo& m = Mouse();
-    int pb_x = Layout::ScreenMarginX;
-    int pb_y = CalcKeyboardHeight() + 25;
-    int pb_w = GetStateWidth() - Layout::ScreenMarginX*2;
-    int pb_h = 16;
-
-    // Check if clicked on progress bar
-    if (m.x >= pb_x && m.x <= pb_x + pb_w &&
-        m.y >= pb_y && m.y <= pb_y + pb_h) {
-
-        double pct = (double)(m.x - pb_x) / pb_w;
-        microseconds_t len = m_state.midi->GetSongLengthInMicroseconds();
-        microseconds_t new_time = (microseconds_t)(pct * len);
-
-        // Seek
-        m_state.midi->GoTo(new_time);
-        m_required_notes.clear();
-        if (m_state.midi_out) m_state.midi_out->Reset();
-        m_keyboard->ResetActiveKeys();
-        m_notes = m_state.midi->Notes();
-        m_notes_history.clear();
-        SetupNoteState();
-        eraseUntilTime(new_time);
-
-        m_should_retry = false;
-        m_should_wait_after_retry = false;
-        m_retry_start = new_time;
-    }
-}
-
 void PlayingState::OnMidiEvent(const MidiEvent& ev) {
     ProcessEvent(ev);
 }
@@ -356,12 +325,6 @@ void PlayingState::ProcessEvent(MidiEvent ev) {
     // Just eat input if we're paused
     if (m_paused)
       return;
-
-    // Handle Sustain Pedal (CC 64)
-    if (ev.Type() == MidiEventType_Controller && ev.ControllerNumber() == 64) {
-        m_sustain_active = (ev.ControllerValue() >= 64);
-        return;
-    }
 
     // We're only interested in NoteOn and NoteOff
     if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff)
@@ -909,10 +872,6 @@ void PlayingState::Update() {
   }
 
   // Pause Menu Interaction
-  if (Mouse().newPress.left) {
-      HandleMouseClick();
-  }
-
   if (m_paused) {
       MouseInfo mouse = Mouse();
       m_resume_button.Update(mouse);
@@ -1023,7 +982,7 @@ void PlayingState::Draw(Renderer &renderer) const {
       // Draw a keyboard, fallen keys and background for them
       m_keyboard->Draw(renderer, key_tex, note_tex, Layout::ScreenMarginX, 0, m_notes, m_show_duration,
                        m_state.midi->GetSongPositionInMicroseconds(), m_state.track_properties,
-                       m_state.midi->GetBarLines(), m_sustain_active);
+                       m_state.midi->GetBarLines());
   }
 
   string title_text = m_state.song_title;
@@ -1168,13 +1127,60 @@ void PlayingState::Draw(Renderer &renderer) const {
   }
 
   // Draw a song progress bar along the top of the screen
-  const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * (GetStateWidth() -
-                                                                                          Layout::ScreenMarginX*2));
+  const int pb_full_width = GetStateWidth() - Layout::ScreenMarginX*2;
+  const int time_pb_width = static_cast<int>(m_state.midi->GetSongPercentageComplete() * pb_full_width);
   const int pb_x = Layout::ScreenMarginX;
   const int pb_y = CalcKeyboardHeight() + 25;
+  const int pb_height = 16;
+  const microseconds_t song_length = m_state.midi->GetSongLengthInMicroseconds();
 
-  renderer.SetColor(0x50, 0x50, 0x50);
-  renderer.DrawQuad(pb_x, pb_y, time_pb_width, 16);
+  // Background
+  renderer.SetColor(0x20, 0x20, 0x20);
+  renderer.DrawQuad(pb_x, pb_y, pb_full_width, pb_height);
+
+  // Loop Region
+  if (m_loop_a != -1 && m_loop_b != -1) {
+      double start_pct = (double)m_loop_a / song_length;
+      double end_pct = (double)m_loop_b / song_length;
+      if (start_pct < 0) start_pct = 0;
+      if (end_pct > 1.0) end_pct = 1.0;
+
+      int loop_x = pb_x + (int)(start_pct * pb_full_width);
+      int loop_w = (int)((end_pct - start_pct) * pb_full_width);
+
+      if (m_looping) renderer.SetColor(0x00, 0x00, 0xAA, 150); // Blue if active
+      else renderer.SetColor(0x40, 0x40, 0x40, 150); // Gray if inactive
+
+      renderer.DrawQuad(loop_x, pb_y, loop_w, pb_height);
+  }
+
+  // Progress
+  if (m_in_wait_grace_period) {
+      renderer.SetColor(0xFF, 0xD7, 0x00); // Gold (Grace Period)
+  } else if (!m_required_notes.empty() && !m_paused) {
+      renderer.SetColor(0xFF, 0x45, 0x00); // OrangeRed (Blocked)
+  } else {
+      renderer.SetColor(0x50, 0x50, 0x50);
+  }
+  renderer.DrawQuad(pb_x, pb_y, time_pb_width, pb_height);
+
+  // Loop Markers (A and B)
+  if (m_loop_a != -1) {
+      double pct = (double)m_loop_a / song_length;
+      int marker_x = pb_x + (int)(pct * pb_full_width);
+      renderer.SetColor(0x00, 0xFF, 0xFF); // Cyan
+      renderer.DrawQuad(marker_x, pb_y, 2, pb_height);
+      TextWriter text(marker_x - 4, pb_y - 15, renderer, false, 12);
+      text << Text("A", Renderer::ToColor(0x00, 0xFF, 0xFF));
+  }
+  if (m_loop_b != -1) {
+      double pct = (double)m_loop_b / song_length;
+      int marker_x = pb_x + (int)(pct * pb_full_width);
+      renderer.SetColor(0x00, 0xFF, 0xFF); // Cyan
+      renderer.DrawQuad(marker_x, pb_y, 2, pb_height);
+      TextWriter text(marker_x - 4, pb_y - 15, renderer, false, 12);
+      text << Text("B", Renderer::ToColor(0x00, 0xFF, 0xFF));
+  }
 
   if (m_look_ahead_you_play_note_count > 0) {
 
