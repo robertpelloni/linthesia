@@ -30,7 +30,7 @@ void SongLibState::Init() {
     m_current_path = UserSetting::Get(SONG_LIB_DIR_SETTINGS_KEY, MUSICDIR);
     // since it is unconfortable to crash when no file is present, let's test it now
     struct stat st;
-    if ( (!stat(m_current_path.c_str(),&st) == 0) || (! st.st_mode & S_IFDIR != 0) ) {
+    if ( (!stat(m_current_path.c_str(),&st) == 0) || (!(st.st_mode & S_IFDIR)) ) {
 	    m_current_path = m_base_path;
     }
 
@@ -260,16 +260,19 @@ void SongLibState::Update() {
         }
     }
 
-    string path_title = eraseSubstring(m_current_path, m_base_path);
-    if (path_title.length() > 0) {
-        m_path_up_button.Update(mouse);
-
     if (IsKeyPressed(KeyBackspace)) {
         if (m_search_query.length() > 0) {
             m_search_query.pop_back();
             UpdateSongTiles();
+            UpdateSongTilesPage();
         }
     }
+
+    string path_title = eraseSubstring(m_current_path, m_base_path);
+    if (path_title.length() > 0) {
+        m_path_up_button.Update(mouse);
+
+
 
         if (IsKeyPressed(KeyBackward) || m_path_up_button.hit) {
             m_skip_next_mouse_up = true;
@@ -293,7 +296,8 @@ void SongLibState::Update() {
                 m_current_path = m_song_tiles[i].GetPath();
                 UserSetting::Set(SONG_LIB_DIR_SETTINGS_KEY, m_current_path);
                 m_search_query = "";
-    UpdateSongTiles();
+                m_current_page = 0;
+                UpdateSongTiles();
             }
             else {
                 OpenTitleState(m_song_tiles[i].GetPath());
@@ -383,4 +387,5 @@ void SongLibState::Draw(Renderer &renderer) const {
 void SongLibState::TextInput(const std::string& text) {
     m_search_query += text;
     UpdateSongTiles();
+    UpdateSongTilesPage();
 }

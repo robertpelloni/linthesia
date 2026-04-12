@@ -1,24 +1,16 @@
 # Changelog
 
-## [0.9.0] - 2024-05-22
+All notable changes to Linthesia will be documented in this file.
 
+## [0.9.1] - 2026-04-12
 ### Added
-- **Loop Practice**: Press `F1` to set start point (A), `F2` to set end point (B). The song will loop between these points. Press `F6` to toggle looping.
-- **Interactive Pause Menu**: The pause screen now features clickable buttons to "Resume" or "Quit to Title", replacing the static text overlay.
-- **Agent Instructions**: Added `AGENTS.md` and related files to guide AI contributors.
+- **Song Library Search**: Added text-based search functionality to the Song Library screen. Users can now type characters to filter the currently displayed list of MIDI files and directories. Backspace works.
 
-### Changed
-- **Documentation**: Updated `ROADMAP.md` and `DASHBOARD.md` to reflect new features and version.
-- **Internal**: Verified keyboard size rendering logic.
+### Fixed
+- Fixed critical syntax and logic regressions introduced in the previous mass-replace process across `PlayingState.cpp`, `main.cpp`, and `FileSelector.cpp`.
+- Resolved merge conflict markers and successfully migrated the Github Actions CI workflow to use `actions/checkout@v4` with the necessary `libgtkmm-3.0-dev` dependency for Pango rendering contexts.
 
-## [0.8.0] - 2024-05-22
-
-### Added
-- **Settings Menu**: New "Advanced Settings" menu in the title screen.
-- **In-Game Help**: Pressing 'Space' to pause now displays a help overlay.
-- **Visual & Audio Metronome**: A yellow indicator flashes and a MIDI tick plays on every beat.
-- **Version Consolidation**: Project version is now read from a single `VERSION` file.
-
-### Changed
-- **Volume Controls**: Swapped Keypad `+` and `-` mappings.
-- **Documentation**: Rewrote `README.md` as a user manual.
+## [0.9.0] - Prior Work
+- Basic state management transitions.
+- Preliminary GTKmm/Pango graphics backend transition setup.
+- Custom `Color` structure to replace `SDL_Color` for better cross-compatibility.
