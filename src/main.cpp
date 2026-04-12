@@ -154,6 +154,9 @@ void DrawingArea::PollEvent(SDL_Event& event)
     case SDL_KEYUP:
       on_key_release(event.key);
       break;
+    case SDL_TEXTINPUT:
+      state_manager->TextInput(event.text.text);
+      break;
     case SDL_WINDOWEVENT:
       on_window_event(event.window);
       break;
@@ -289,6 +292,7 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
   case SDLK_SPACE:    state_manager->KeyPress(KeySpace);   break;
   case SDLK_RETURN:   state_manager->KeyPress(KeyEnter);   break;
   case SDLK_ESCAPE:   state_manager->KeyPress(KeyEscape);  break;
+  case SDLK_BACKSPACE: state_manager->KeyPress(KeyBackspace); break;
 
   // show FPS
   case SDLK_F6:       state_manager->KeyPress(KeyF6);      break;
@@ -368,7 +372,7 @@ bool DrawingArea::GameLoop() {
 
     state_manager->Update(window_state.JustActivated());
 
-    Renderer rend(m_sdl_window);
+    Renderer rend(GLContext(nullptr), PGContext(nullptr));
     rend.SetVSyncInterval(vsync_interval);
 
     state_manager->Draw(rend);
@@ -451,7 +455,6 @@ int main(int argc, char *argv[]) {
     string file_opt("");
 
     UserSetting::Initialize();
-<<<<<<< HEAD
 
     int show_help_exit_status = 0;
     bool invalid_options = has_invalid_options(argc, argv);
@@ -468,8 +471,6 @@ int main(int argc, char *argv[]) {
       print_version();
       return 0;
     }
-=======
->>>>>>> origin/meson
 
     if (cmdOptionExists(argv, argv+argc, "-f"))
       file_opt = string(getCmdOption(argv, argv + argc, "-f"));
@@ -639,11 +640,8 @@ int main(int argc, char *argv[]) {
     else {
       istringstream iss(user_rate);
       if (not (iss >> default_rate)) {
-<<<<<<< HEAD
         Compatible::ShowError(_("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload."));
-=======
         Compatible::ShowError("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload.");
->>>>>>> origin/meson
         UserSetting::Set(REFRESH_RATE_KEY, "");
       }
     }
@@ -663,6 +661,7 @@ int main(int argc, char *argv[]) {
 
     DrawingArea da(sdl_window);
     da.on_configure_event();
+    SDL_StartTextInput();
     while (main_loop_running)
     {
       SDL_Event Event;

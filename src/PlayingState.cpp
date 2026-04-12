@@ -127,7 +127,6 @@ void PlayingState::Init() {
     } 
   }
 
-<<<<<<< HEAD
   // Load User Settings
   std::string lead_in_str = UserSetting::Get(LEAD_IN_TIME_KEY, "5500000");
   try { m_lead_in = std::stoll(lead_in_str); } catch (...) { m_lead_in = 5500000; }
@@ -144,8 +143,7 @@ void PlayingState::Init() {
   std::string met_vol = UserSetting::Get(METRONOME_VOLUME_KEY, "1.0");
   try { m_metronome_vol = std::stod(met_vol); } catch (...) { m_metronome_vol = 1.0; }
 
-=======
->>>>>>> origin/meson
+
   string min_key = UserSetting::Get(MIN_KEY_KEY, "");
   if (strtol(min_key.c_str(), NULL, 10) > 0) {
     MinPlayableNote = strtol(min_key.c_str(), NULL, 10);
@@ -509,6 +507,7 @@ void PlayingState::Update() {
 
   // Loop Check
   if (m_looping && m_loop_a != -1 && m_loop_b != -1) {
+      microseconds_t cur_time = m_notes.empty() ? 0 : m_notes.begin()->start;
       if (cur_time >= m_loop_b) {
           m_state.midi->GoTo(m_loop_a);
           m_required_notes.clear();
@@ -832,7 +831,7 @@ void PlayingState::Update() {
              int velocity = static_cast<int>(100 * m_metronome_vol);
              if (velocity > 127) velocity = 127;
              if (velocity > 0) {
-                 MidiEvent click = MidiEvent::NoteOn(9, 76, velocity);
+                 MidiEvent click = MidiEvent::Build(MidiEventSimple(0x90, 9, 76));
                  m_state.midi_out->Write(click);
              }
         }
@@ -873,14 +872,14 @@ void PlayingState::Draw(Renderer &renderer) const {
   if (alpha > 0.001) {
     renderer.SetColor(0, 0, 0, int(alpha * 160));
     renderer.DrawQuad(0, GetStateHeight() / 3 - 40, GetStateWidth(), 80);
-    const SDL_Color c = Renderer::ToColor(255, 255, 255, int(alpha * 0xFF));
+    const Color c = Renderer::ToColor(255, 255, 255, int(alpha * 0xFF));
     TextWriter title(GetStateWidth()/2, GetStateHeight()/3 - 15, renderer, true, Layout::TitleFontSize);
-    title << Text(title_text, c);
+    title << Text(title_text, TextAttributes(c));
 
     // While we're at it, show the key legend
     renderer.SetColor(c);
     const Tga *keys = GetTexture(PlayKeys, true);
-    renderer.DrawCenteredTga(keys, GetStateWidth() / 2, GetStateHeight() / 2, GetStateWidth() / 2, GetStateHeight() / 3);
+    renderer.DrawStretchedTga(keys, GetStateWidth() / 4, GetStateHeight() / 3, GetStateWidth() / 2, GetStateHeight() / 3);
 
     if (m_paused) {
        int box_w = 600;

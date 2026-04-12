@@ -70,9 +70,9 @@ TextWriter& TextWriter::next_line() {
   return *this;
 }
 
-void Text::DrawText(TextWriter& tw, SDL_Color color, int draw_x, int draw_y) const
+void Text::DrawText(TextWriter& tw, Color color, int draw_x, int draw_y) const
 {
-  SDL_Surface* sFont = TTF_RenderText_Blended(tw.font, m_text.c_str(), color);
+  SDL_Surface* sFont = TTF_RenderText_Blended(tw.font, m_text.c_str(), {static_cast<Uint8>(color.r), static_cast<Uint8>(color.g), static_cast<Uint8>(color.b), static_cast<Uint8>(color.a)});
   if (sFont == nullptr)
     throw LinthesiaSDLTTFError("error rendering text");
 

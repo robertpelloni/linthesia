@@ -93,6 +93,12 @@ namespace Compatible {
     return rect.get_width();
   }
 
+  int GetWindowHeight() {
+		Gdk::Rectangle rect;
+		GetDisplayRect(rect);
+	    return rect.get_height();
+  }
+
   int GetDisplayHeight() {
 		Gdk::Rectangle rect;
 		GetDisplayRect(rect);

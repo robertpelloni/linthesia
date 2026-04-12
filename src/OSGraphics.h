@@ -15,6 +15,6 @@
 #include <gtkmm.h>
 
 #include <GL/gl.h>
-#include <GL/glu.h>
+#include <GL/gl.h>
 
 #endif // __OS_GRAPHICS_H

@@ -1,3 +1,4 @@
+#include <algorithm>
 // -*- mode: c++; coding: utf-8 -*-
 
 // Linthesia
@@ -35,6 +36,7 @@ void SongLibState::Init() {
 
     m_current_page = 0;
 
+    m_search_query = "";
     UpdateSongTiles();
 
     m_next_page_button = ButtonState(
@@ -64,7 +66,7 @@ int SongLibState::ContentLeft() {
     return (m_columns > 1) ? content_left_wide  : content_left_slim;
 }
 
-int SongLibState::ContentRight() {
+int SongLibState::ContentRight() const {
     int columns_margins = ColumnMargin * (m_columns - 1);
     int columns_content = SongTileWidth * m_columns;
     
@@ -128,6 +130,13 @@ void SongLibState::UpdateSongTiles() {
                     Tga * graphics = ent->d_type == DT_DIR ? dir_tile_graphics : song_tile_graphics;
                     string path = m_current_path + "/" + ent->d_name;
                     string title = string(FileSelector::TrimFilename(ent->d_name));
+                    if (m_search_query.length() > 0 && ent->d_type != DT_DIR) {
+                        string title_lower = title;
+                        string search_lower = m_search_query;
+                        std::transform(title_lower.begin(), title_lower.end(), title_lower.begin(), ::tolower);
+                        std::transform(search_lower.begin(), search_lower.end(), search_lower.begin(), ::tolower);
+                        if (title_lower.find(search_lower) == std::string::npos) continue;
+                    }
                     SongTile song_tile = SongTile(0, 0, path, title,
                                         ent->d_type == DT_DIR,
                                         graphics);
@@ -255,6 +264,13 @@ void SongLibState::Update() {
     if (path_title.length() > 0) {
         m_path_up_button.Update(mouse);
 
+    if (IsKeyPressed(KeyBackspace)) {
+        if (m_search_query.length() > 0) {
+            m_search_query.pop_back();
+            UpdateSongTiles();
+        }
+    }
+
         if (IsKeyPressed(KeyBackward) || m_path_up_button.hit) {
             m_skip_next_mouse_up = true;
             m_current_page = 0;
@@ -276,7 +292,8 @@ void SongLibState::Update() {
                 m_skip_next_mouse_up = true;
                 m_current_path = m_song_tiles[i].GetPath();
                 UserSetting::Set(SONG_LIB_DIR_SETTINGS_KEY, m_current_path);
-                UpdateSongTiles();
+                m_search_query = "";
+    UpdateSongTiles();
             }
             else {
                 OpenTitleState(m_song_tiles[i].GetPath());
@@ -290,6 +307,7 @@ void SongLibState::Update() {
 void SongLibState::GoUpDirectory() {
     m_current_path = m_current_path.substr(0, m_current_path.find_last_of("\\/"));
     UserSetting::Set(SONG_LIB_DIR_SETTINGS_KEY, m_current_path);
+    m_search_query = "";
     UpdateSongTiles();
 }
 
@@ -353,6 +371,16 @@ void SongLibState::Draw(Renderer &renderer) const {
         Layout::DrawButton(renderer, m_path_up_button, GetTexture(ButtonDirBack));
     }
 
+    // Draw search text
+    TextWriter search(ContentRight() - 250, Layout::ScreenMarginY / 2 - 6, renderer, false, Layout::ButtonFontSize);
+    search << "Search: ";
+    search << m_search_query.c_str();
+    search << "_";
     //TextWriter dbg(Layout::ScreenMarginX, GetStateHeight() - Layout::ScreenMarginY * 2, renderer, false, 14);
     //dbg << m_current_page;
+}
+
+void SongLibState::TextInput(const std::string& text) {
+    m_search_query += text;
+    UpdateSongTiles();
 }

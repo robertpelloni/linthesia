@@ -72,8 +72,8 @@ void EnumTile::Draw(Renderer &renderer) const
 {
   renderer.SetOffset(m_x, m_y);
 
-  const SDL_Color hover = Renderer::ToColor(0xFF, 0xFF, 0xFF);
-  const SDL_Color no_hover = Renderer::ToColor(0xE0, 0xE0, 0xE0);
+  Color hover = Renderer::ToColor(0xFF, 0xFF, 0xFF);
+  Color no_hover = Renderer::ToColor(0xE0, 0xE0, 0xE0);
   renderer.SetColor(whole_tile.hovering ? hover : no_hover);
   renderer.DrawTga(m_frame_graphics, 0, 0);
 

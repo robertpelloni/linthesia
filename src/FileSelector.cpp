@@ -59,7 +59,7 @@ namespace FileSelector {
     case Gtk::RESPONSE_ACCEPT:
 
       string filename = dialog.get_filename();
-      SetLastMidiFilename(filename);
+
 
       if (returned_file_title)
 	*returned_file_title = filename.substr(filename.rfind(PathDelimiter)+1);

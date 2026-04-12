@@ -326,3 +326,9 @@ void GameStateManager::Draw(Renderer &renderer) {
   renderer.SwapBuffers();
 }
 
+
+void GameStateManager::TextInput(const std::string& text) {
+  if (m_current_state) {
+    m_current_state->TextInput(text);
+  }
+}

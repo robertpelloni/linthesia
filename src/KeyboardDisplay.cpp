@@ -125,7 +125,7 @@ void KeyboardDisplay::Draw(Renderer &renderer, const Tga *key_tex[3], const Tga 
 
 void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int key_count, int key_width, int key_height,
                                     int key_space, int x_offset, int y_offset) const {
-  SDL_Color white = Renderer::ToColor(255, 255, 255);
+  Color white = Renderer::ToColor(255, 255, 255);
 
   char current_white = m_keyboard.GetStartingNote();
   int current_octave = m_keyboard.GetStartingOctave();
@@ -137,7 +137,7 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
     KeyNames::const_iterator find_result = m_active_keys.find(note_name);
     bool active = (find_result != m_active_keys.end());
 
-    SDL_Color c = white;
+    Color c = white;
     if (active)
       c = Track::ColorNoteWhite[find_result->second];
 
@@ -147,7 +147,7 @@ void KeyboardDisplay::DrawWhiteKeys(Renderer &renderer, bool active_only, int ke
       const int key_x = i * (key_width + key_space) + x_offset;
       renderer.DrawQuad(key_x, y_offset, key_width, key_height);
       
-      const SDL_Color text_color1 (Renderer::ToColor(0x50,0x50,0x50));
+      const Color text_color1 (Renderer::ToColor(0x50,0x50,0x50));
       int font_size = GetNoteNameFontSize(key_width);
       TextWriter title(key_x + (key_width - font_size) / 2, y_offset + key_height - font_size - 8, renderer, false, font_size);
       title << Text(note_name.c_str(), text_color1);
@@ -265,8 +265,8 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
   renderer.SetColor(0x60, 0x60, 0x60);
   renderer.DrawQuad(x_offset, y, keyboard_width, y_offset - PixelsOffKeyboard);
 
-  const SDL_Color thick(Renderer::ToColor(0x48,0x48,0x48));
-  const SDL_Color thin(Renderer::ToColor(0x50,0x50,0x50));
+  const Color thick(Renderer::ToColor(0x48,0x48,0x48));
+  const Color thin(Renderer::ToColor(0x50,0x50,0x50));
 
   char current_white = m_keyboard.GetStartingNote() - 1;
   int current_octave = m_keyboard.GetStartingOctave();
@@ -275,7 +275,7 @@ void KeyboardDisplay::DrawGuides(Renderer &renderer, int key_count, int key_widt
     const int key_x = i * (key_width + key_space) + x_offset - 1;
 
     int guide_thickness = 1;
-    SDL_Color guide_color = thin;
+    Color guide_color = thin;
 
     bool draw_guide = true;
     switch (current_white) {
@@ -318,8 +318,8 @@ void KeyboardDisplay::DrawBars(Renderer &renderer, int x, int y, int y_offset,
         const MidiEventMicrosecondList &bar_line_usecs) const {
    int i=0;
    MidiEventMicrosecondList::const_iterator j = bar_line_usecs.begin();
-   const SDL_Color bar_color (Renderer::ToColor(0x50,0x50,0x50));
-   const SDL_Color text_color (Renderer::ToColor(0x50,0x50,0x50));
+   const Color bar_color (Renderer::ToColor(0x50,0x50,0x50));
+   const Color text_color (Renderer::ToColor(0x50,0x50,0x50));
    for (; j != bar_line_usecs.end(); ++j, ++i) {
       renderer.SetColor(bar_color);
       microseconds_t bar_usec = *j;
@@ -485,7 +485,7 @@ void KeyboardDisplay::DrawNotePass(Renderer &renderer, const Tga *tex_white, con
       DrawNote(renderer, (drawing_black ? tex_black : tex_white),
                (drawing_black ? BlackNoteDimensions : WhiteNoteDimensions), left, top, width, height, brush_id);
 
-      //const SDL_Color text_color (Renderer::ToColor(0x90,0x90,0x90));
+      //const Color text_color (Renderer::ToColor(0x90,0x90,0x90));
       //TextWriter note_text(left + 3, y + height - 20, renderer, false, 11);
       //note_text << Text(STRING(i->note_id), text_color);
     }

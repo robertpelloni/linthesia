@@ -31,6 +31,7 @@ public:
 protected:
     virtual void Init();
     virtual void Update();
+    virtual void TextInput(const std::string& text);
     virtual void Resize();
     virtual void Draw(Renderer &renderer) const;
 
@@ -43,7 +44,7 @@ private:
     void GoUpDirectory();
 
     int ContentLeft();
-    int ContentRight();
+    int ContentRight() const;
 
     int m_page_count;
     int m_current_page;
@@ -59,6 +60,7 @@ private:
     string m_base_path;
 
     std::vector<SongTile> m_song_tiles;
+    std::string m_search_query;
 
     SharedState m_state;
     bool m_skip_next_mouse_up;

@@ -67,7 +67,8 @@ enum GameKey {
   KeyVolumeDown  = 0x2000,
 
   KeyLoopA       = 0x4000,
-  KeyLoopB       = 0x8000
+  KeyLoopB       = 0x8000,
+  KeyBackspace   = 0x10000
 };
 
 enum MouseButton {
@@ -124,6 +125,8 @@ protected:
 
   // Called every frame
   virtual void Update() = 0;
+
+  virtual void TextInput(const std::string& text) {}
 
   // Call when state dimesnsions changed
   virtual void Resize() = 0;
@@ -210,6 +213,7 @@ public:
   void SetInitialState(GameState *first_state);
 
   void KeyPress(GameKey key);
+  void TextInput(const std::string& text);
   bool IsKeyPressed(GameKey key) const;
   bool IsKeyReleased(GameKey key) const;
 

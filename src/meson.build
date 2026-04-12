@@ -9,6 +9,7 @@ dependencies = [
   dependency('alsa'),
   dependency('gl'),
   dependency('giomm-2.4'),
+  dependency('gtkmm-3.0'),
   dependency('sqlite3'),
   dependency('SDL2'),
   dependency('SDL2_ttf'),
@@ -28,10 +29,7 @@ executable('linthesia',
            'UserSettings.cpp',
            'TextWriter.cpp',
            'EnumTile.cpp',
-<<<<<<< HEAD
            'SettingsState.cpp',
-=======
->>>>>>> origin/meson
            'PlayingState.cpp',
            'KeyboardDisplay.cpp',
            'TrackSelectionState.cpp',

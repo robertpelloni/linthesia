@@ -2,7 +2,4 @@
 # Please keep this file sorted alphabetically.
 extra/linthesia.desktop
 extra/linthesia.metainfo.xml
-<<<<<<< HEAD
 src/main.cpp
-=======
->>>>>>> origin/meson
