@@ -24,7 +24,7 @@ static bool m_vsync_initialized;
 class Renderer {
 public:
 
-  Renderer(GLContext glcontext, PGContext pangocontext);
+  Renderer(GLContext glcontext = GLContext(), PGContext pangocontext = PGContext());
 
   static Color ToColor(int r, int g, int b, int a = 0xFF);
 

@@ -832,6 +832,7 @@ void PlayingState::Update() {
              if (velocity > 127) velocity = 127;
              if (velocity > 0) {
                  MidiEvent click = MidiEvent::Build(MidiEventSimple(0x90, 9, 76));
+                 click.SetVelocity(velocity);
                  m_state.midi_out->Write(click);
              }
         }

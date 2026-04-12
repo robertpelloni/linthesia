@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: update distro deps
       run: sudo apt-get update -y
     - name: install dependencies
-      run: sudo apt-get install -y libtool-bin build-essential meson ninja-build libasound2-dev libsqlite3-dev libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libglibmm-2.4-dev gettext
+      run: sudo apt-get install -y libtool-bin build-essential meson ninja-build libasound2-dev libsqlite3-dev libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libglibmm-2.4-dev libgtkmm-3.0-dev gettext
     - name: configure
       run: meson build
     - name: build
