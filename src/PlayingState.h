@@ -125,6 +125,8 @@ private:
 
   microseconds_t m_lead_in;
   microseconds_t m_lead_out;
+  microseconds_t m_wait_grace_timer;
+  microseconds_t m_wait_tolerance;
   bool m_metronome_on;
   double m_metronome_vol;
   bool m_metronome_was_on_beat;

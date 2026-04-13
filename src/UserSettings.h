@@ -27,6 +27,7 @@
 #define LEAD_IN_TIME_KEY "lead-in-time"
 #define LEAD_OUT_TIME_KEY "lead-out-time"
 #define SCROLL_SPEED_KEY "scroll-speed"
+#define WAIT_TOLERANCE_KEY "wait-tolerance"
 #define METRONOME_ON_KEY "metronome-on"
 #define METRONOME_VOLUME_KEY "metronome-volume"
 

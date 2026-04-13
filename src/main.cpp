@@ -641,7 +641,6 @@ int main(int argc, char *argv[]) {
       istringstream iss(user_rate);
       if (not (iss >> default_rate)) {
         Compatible::ShowError(_("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload."));
-        Compatible::ShowError("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload.");
         UserSetting::Set(REFRESH_RATE_KEY, "");
       }
     }

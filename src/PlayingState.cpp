@@ -545,12 +545,20 @@ void PlayingState::Update() {
     if (areAllRequiredKeysPressed())
     {
       Play(delta_microseconds);
+      m_wait_grace_timer = 0; // Reset grace timer when keys are pressed
 //    m_should_wait_after_retry = false; // always reset onces pressed
     }
     else
     {
-      m_current_combo = 0;
-      m_add_score = false;
+      if (m_wait_grace_timer < m_wait_tolerance) {
+        // Still within grace period, continue playing normally
+        m_wait_grace_timer += delta_microseconds;
+        Play(delta_microseconds);
+      } else {
+        // Grace period expired, stop and wait
+        m_current_combo = 0;
+        m_add_score = false;
+      }
     }
 
     Listen();

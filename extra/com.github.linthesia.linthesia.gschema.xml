@@ -49,6 +49,10 @@
       <default>"3250000"</default>
     </key>
 
+    <key name="wait-tolerance" type="s">
+      <default>"500000"</default>
+    </key>
+
     <key name="metronome-on" type="s">
       <default>"false"</default>
     </key>
