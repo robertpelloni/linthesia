@@ -362,8 +362,14 @@ void PlayingState::Listen() {
 
       // Calculate precision
       microseconds_t diff = 0;
-      if (cur_time > closest_match->start) diff = cur_time - closest_match->start;
-      else diff = closest_match->start - cur_time;
+      bool early = false;
+      if (cur_time > closest_match->start) {
+          diff = cur_time - closest_match->start;
+          early = false; // Late
+      } else {
+          diff = closest_match->start - cur_time;
+          early = true;
+      }
 
       std::string judge_text = "";
       int r = 255, g = 255, b = 255;
@@ -375,13 +381,13 @@ void PlayingState::Listen() {
           r = 100; g = 255; b = 100; // Green
       } else if (diff < 100000) {
           m_state.stats.good_hits++;
-          judge_text = "Good";
+          judge_text = early ? "Good (Early)" : "Good (Late)";
           r = 100; g = 200; b = 255; // Blue-ish
       } else {
           // Miss logic usually handled when note scrolls past,
           // but if they hit it late/early but validly, count it?
           // For now, let's call it "Ok" if it's in the window but > 100ms
-          judge_text = "Ok";
+          judge_text = early ? "Ok (Early)" : "Ok (Late)";
           r = 255; g = 255; b = 100; // Yellow
       }
 
@@ -396,7 +402,16 @@ void PlayingState::Listen() {
       p.text = judge_text;
       p.r = r; p.g = g; p.b = b;
       p.life = 60; // 1 second roughly at 60fps
-      p.x = GetStateWidth() / 2; // Center for now
+
+      // Calculate visual X position based on the note index / key width
+      int key_index = closest_match->note_id;
+      if (key_index >= MinPlayableNote && key_index <= MaxPlayableNote) {
+          int offset = key_index - MinPlayableNote;
+          int total_keys = MaxPlayableNote - MinPlayableNote + 1;
+          p.x = (GetStateWidth() * offset) / total_keys;
+      } else {
+          p.x = GetStateWidth() / 2; // Fallback
+      }
       p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
       m_popups.push_back(p);
 
@@ -580,6 +595,21 @@ void PlayingState::Update() {
 
         m_state.stats.notes_user_could_have_played++;
         m_state.stats.speed_integral += m_state.song_speed;
+
+        ScorePopup p;
+        p.text = "Miss";
+        p.r = 255; p.g = 100; p.b = 100; // Red
+        p.life = 40;
+        int key_index = note->note_id;
+        if (key_index >= MinPlayableNote && key_index <= MaxPlayableNote) {
+            int offset = key_index - MinPlayableNote;
+            int total_keys = MaxPlayableNote - MinPlayableNote + 1;
+            p.x = (GetStateWidth() * offset) / total_keys;
+        } else {
+            p.x = GetStateWidth() / 2;
+        }
+        p.y = GetStateHeight() - CalcKeyboardHeight() - 50;
+        m_popups.push_back(p);
       }
 
       TranslatedNote history_note = *note;

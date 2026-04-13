@@ -141,6 +141,13 @@ void StatsState::Draw(Renderer &renderer) const {
   combo << STRING(s.longest_combo);
 
   // New Stats (Perfect/Good)
+  TextWriter perfect(left, InstructionsY + 360, renderer, false, 22);
+  perfect << STRING("Perfect: " << s.perfect_hits);
+
+  TextWriter good_txt(left, InstructionsY + 385, renderer, false, 22);
+  good_txt << STRING("Good: " << s.good_hits);
+
+  // New Stats (Perfect/Good)
   // We'll place them below the combo or to the right if space allows.
   // The layout is hardcoded pixel coordinates. Let's put them below combo.
   TextWriter perfect(left, InstructionsY + 360, renderer, false, 22);
