@@ -56,6 +56,7 @@ enum GameKey {
   KeyEnter =   0x0040,
 
   KeyF6 =      0x0080,
+  KeyF7 =      0x0081,
 
   KeyGreater = 0x0100,
   KeyLess =    0x0200,

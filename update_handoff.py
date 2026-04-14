@@ -1,4 +1,7 @@
-# Agent Handoff Document
+with open('HANDOFF.md', 'r') as f:
+    handoff = f.read()
+
+handoff = """# Agent Handoff Document
 
 ## Session Summary
 In this session, we fully implemented the **Sight Reading** (`SheetMusicDisplay`) feature which renders standard procedural grand staff notation (Treble/Bass clef). It is now toggled by pressing F7, replacing the keyboard view while retaining correct coloration. We updated the rendering code, and compilation completes successfully.
@@ -10,3 +13,7 @@ In this session, we fully implemented the **Sight Reading** (`SheetMusicDisplay`
 
 ## Next Agent Instructions
 Please review `TODO.md` and `ROADMAP.md`. We still have to fix some tooltips, and perhaps start work on integrating the built-in synthesizer (`FluidSynth`).
+"""
+
+with open('HANDOFF.md', 'w') as f:
+    f.write(handoff)

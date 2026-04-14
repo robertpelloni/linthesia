@@ -296,6 +296,7 @@ bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
 
   // show FPS
   case SDLK_F6:       state_manager->KeyPress(KeyF6);      break;
+  case SDLK_F7:       state_manager->KeyPress(KeyF7);      break;
 
   // increase/decrease octave
   case SDLK_PERIOD:    state_manager->KeyPress(KeyGreater); break;
