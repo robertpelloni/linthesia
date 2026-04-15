@@ -17,7 +17,6 @@
 #include "SharedState.h"
 #include "GameState.h"
 #include "KeyboardDisplay.h"
-#include "SheetMusicDisplay.h"
 #include "MidiComm.h"
 
 struct ScorePopup {
@@ -92,8 +91,6 @@ private:
   int MaxPlayableNote = 120;
 
   KeyboardDisplay *m_keyboard;
-  SheetMusicDisplay *m_sheet_music;
-  bool m_show_sheet_music;
   microseconds_t m_show_duration;
   TranslatedNoteSet m_notes;
   TranslatedNoteSet m_notes_history;
