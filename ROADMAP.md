@@ -16,7 +16,7 @@ Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It 
 ## Upcoming Features
 
 ### Short Term (v1.0.0)
-*   **[ ] Scoring System**: Implement a scoring algorithm (Perfect, Good, Miss) and Streak popup UI representation.
+*   **[x] Scoring System**: Implement a scoring algorithm (Perfect, Good, Miss) and Streak popup UI representation.
 *   **[x] Wait Mode Polish**: Improve the "Learning" mode grace period logic to handle rolled chords cleanly.
 *   **[x] Sight Reading**: Implement `SheetMusicDisplay` for standard grand staff notation (Treble/Bass clef).
 
