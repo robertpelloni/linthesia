@@ -91,6 +91,8 @@ void PlayingState::ResetSong() {
 PlayingState::PlayingState(const SharedState &state) :
   m_paused(false),
   m_keyboard(0),
+  m_sheet_music(0),
+  m_show_sheet_music(false),
   m_any_you_play_tracks(false),
   m_any_learning_track(false),
   m_first_update(true),
@@ -155,6 +157,10 @@ void PlayingState::Init() {
     printf("Set maximal key to %d\n", MaxPlayableNote);
   }
 
+    delete m_sheet_music;
+  int kb_height = CalcKeyboardHeight();
+  int y_offset = 64;
+  m_sheet_music = new SheetMusicDisplay(800, 600 - kb_height - y_offset);
   m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
   // Hide the mouse cursor while we're playing
@@ -478,7 +484,11 @@ void PlayingState::Listen() {
 
 void PlayingState::Resize() {
     delete  m_keyboard;
-    m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
+      delete m_sheet_music;
+  int kb_height = CalcKeyboardHeight();
+  int y_offset = 64;
+  m_sheet_music = new SheetMusicDisplay(800, 600 - kb_height - y_offset);
+  m_keyboard = new KeyboardDisplay(m_state.keyboard, GetStateWidth() - Layout::ScreenMarginX*2, CalcKeyboardHeight());
 
     int center_x = GetStateWidth() / 2;
     int center_y = GetStateHeight() / 2;
