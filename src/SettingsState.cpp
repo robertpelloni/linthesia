@@ -216,13 +216,13 @@ void SettingsState::Update() {
   }
 
   m_tooltip = "";
-  if (m_back_button.hovering) m_tooltip = "Return to Title Screen.";
-  // Add tooltips for tiles if desired
-  if (m_lead_in_tile && m_lead_in_tile->WholeTile().hovering) m_tooltip = "Time before song starts (Lead-In).";
-  if (m_lead_out_tile && m_lead_out_tile->WholeTile().hovering) m_tooltip = "Time after song ends (Lead-Out).";
-  if (m_scroll_speed_tile && m_scroll_speed_tile->WholeTile().hovering) m_tooltip = "Amount of time visible on screen (Scroll Speed).";
-  if (m_metronome_on_tile && m_metronome_on_tile->WholeTile().hovering) m_tooltip = "Enable visual metronome.";
-  if (m_metronome_vol_tile && m_metronome_vol_tile->WholeTile().hovering) m_tooltip = "Adjust metronome volume.";
+  if (m_back_button.hovering) m_tooltip = "Return to the Title Screen to select another mode.";
+
+  if (m_lead_in_tile && m_lead_in_tile->WholeTile().hovering) m_tooltip = "Lead-In Time: Adjust how much time passes before the first note drops.";
+  if (m_lead_out_tile && m_lead_out_tile->WholeTile().hovering) m_tooltip = "Lead-Out Time: Adjust how long to wait after the last note finishes.";
+  if (m_scroll_speed_tile && m_scroll_speed_tile->WholeTile().hovering) m_tooltip = "Scroll Speed: Controls the speed at which notes fall towards the keys.";
+  if (m_metronome_on_tile && m_metronome_on_tile->WholeTile().hovering) m_tooltip = "Metronome: Toggle a visual and audible metronome tick during gameplay.";
+  if (m_metronome_vol_tile && m_metronome_vol_tile->WholeTile().hovering) m_tooltip = "Metronome Volume: Set how loud the metronome tick should be.";
 }
 
 void SettingsState::Draw(Renderer &renderer) const {

@@ -283,10 +283,10 @@ void TrackSelectionState::Update() {
   m_tooltip = "";
 
   if (m_back_button.hovering)
-    m_tooltip = "Click to return to the title screen.                                      ";
+    m_tooltip = "Return to Song Selection.                                                 ";
 
   if (m_continue_button.hovering)
-    m_tooltip = "Click to begin playing with these settings.                               ";
+    m_tooltip = "Begin Playing: Start the song with the selected track settings.           ";
 
   // Our delta milliseconds on the first frame after we seek down to the
   // first note is extra long because the seek takes a while.  By skipping
@@ -314,31 +314,31 @@ void TrackSelectionState::Update() {
 
       switch (t.GetMode()) {
       case Track::ModeNotPlayed:
-        m_tooltip = "Track won't be played or shown during the game.                           ";
+        m_tooltip = "Hidden Track: Track will not be played or shown during the game.          ";
         break;
 
       case Track::ModePlayedAutomatically:
-        m_tooltip = "Track will be played automatically by the game.                           ";
+        m_tooltip = "Background Track: Played automatically by the game to accompany you.      ";
         break;
 
       case Track::ModePlayedButHidden:
-        m_tooltip = "Track will be played automatically by the game, but also hidden from view.";
+        m_tooltip = "Hidden Background Track: Played automatically, but hidden from view.      ";
         break;
 
       case Track::ModeYouPlay:
-        m_tooltip = "'You Play' means you want to play this track yourself.                    ";
+        m_tooltip = "You Play: You will play this track yourself. Timing is scored.            ";
         break;
 
       case Track::ModeYouPlaySilently:
-        m_tooltip = "Same as 'You Play', do not produce sounds from MIDI.                      ";
+        m_tooltip = "You Play (Silent): Same as 'You Play', but MIDI sound is muted.           ";
         break;
 
       case Track::ModeLearning:
-        m_tooltip = "Wait for you to play.                                                     ";
+        m_tooltip = "Learning Mode (Wait): The game will wait for you to hit the correct note. ";
         break;
 
       case Track::ModeLearningSilently:
-        m_tooltip = "Wait for you to play, do not produce sounds from MIDI.                    ";
+        m_tooltip = "Learning Mode (Wait, Silent): Same as Learning Mode, but MIDI is muted.   ";
         break;
 
       case Track::ModeCount:
@@ -348,14 +348,14 @@ void TrackSelectionState::Update() {
 
     if (t.ButtonPreview().hovering) {
       if (t.IsPreviewOn())
-        m_tooltip = "Turn track preview off.                                                   ";
+        m_tooltip = "Preview: Turn track audio preview off.                                    ";
 
       else
-        m_tooltip = "Preview how this track sounds.                                            ";
+        m_tooltip = "Preview: Listen to a short audio preview of this track.                   ";
     }
 
     if (t.ButtonColor().hovering)
-        m_tooltip = "Pick a color for this track's notes.                                      ";
+        m_tooltip = "Track Color: Pick a color for this track's falling notes.                 ";
 
     if (t.ButtonRetry().hovering) {
       if (t.IsRetryOn())

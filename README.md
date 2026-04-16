@@ -85,3 +85,13 @@ Once the synth is running, select it as the **Output Device** in Linthesia.
 ## Credits
 Based on Synthesia by Nicholas Piegdon.
 Linux port and improvements by the Linthesia team.
+
+### Keyboard Controls During Playback
+- **F1**: Set Loop A (Start point)
+- **F2**: Set Loop B (End point)
+- **F3**: Clear Loop
+- **F4**: Slow down playback
+- **F5**: Speed up playback
+- **F6**: Toggle Rhythm Practice mode (ignore pitch, focus on timing)
+- **F7**: Toggle Sight Reading mode (Standard Grand Staff notation)
+- **Esc**: Pause menu (Resume / Quit to Title)
