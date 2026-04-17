@@ -44,3 +44,17 @@ import('gnome').post_install(
   glib_compile_schemas: true,
   gtk_update_icon_cache: true,
 )
+
+
+# Testing with Google Test
+gtest_dep = dependency('gtest', main : true, required : false)
+if gtest_dep.found()
+  test_src = files('tests/audio_test.cpp')
+  inc = include_directories('src', 'src/libmidi')
+  # We need to compile the test executable linking with libmidi and other components
+  # For now, just a placeholder test to verify integration
+  linthesia_test = executable('linthesia-test', test_src, include_directories: inc, dependencies: [gtest_dep])
+  test('Basic Audio Tests', linthesia_test)
+else
+  message('Google Test not found, skipping tests.')
+endif
