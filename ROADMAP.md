@@ -21,8 +21,8 @@ Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It 
 *   **[x] Sight Reading**: Implement `SheetMusicDisplay` for standard grand staff notation (Treble/Bass clef).
 
 ### Medium Term
-*   **[ ] Built-in Synthesizer**: Integrate FluidSynth for out-of-the-box audio without ALSA dependencies.
-*   **[ ] Cross-Platform Support**: Windows/macOS build instructions and abstraction.
+*   **[x] Built-in Synthesizer**: Integrate FluidSynth for out-of-the-box audio without ALSA dependencies.
+*   **[x] Cross-Platform Support**: Windows/macOS build instructions and abstraction.
 
 ## Submodule Analysis: `pianogame`
 The `pianogame` submodule is the reference implementation (Synthesia 0.6.1a).

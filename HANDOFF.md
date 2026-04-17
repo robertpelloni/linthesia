@@ -6,7 +6,7 @@ In this session, I successfully recovered the codebase from a severely broken st
 After restoring compilation functionality by manually fixing `src/PlayingState.cpp`, `src/FileSelector.cpp`, and `src/main.cpp`, I verified that the **Song Library Search** functionality is fully implemented and hooked up to the `SDL_TEXTINPUT` events. I also fixed the Github Actions CI pipeline by adding the missing `libgtkmm-3.0-dev` dependency and upgrading the checkout action to `v4`.
 
 ## Current Code State
-- **Compilation**: SUCCESS (Meson/Ninja)
+- **Compilation**: SUCCESS (Meson/Ninja/Make)
 - **CI**: Passing
 - **Known Hacks**: In `src/main.cpp`, the `Renderer` is currently instantiated using `Renderer rend(GLContext(), PGContext());` because the actual initialization of the Pango and GL contexts is not yet fully plumbed through from the main SDL window. This is sufficient to compile and run, but will need to be addressed when fully realizing the GTKmm UI overhaul.
 
