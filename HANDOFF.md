@@ -10,4 +10,4 @@ In this session, we fully achieved the **Phase 4 Omniscient Orchestration** mile
 - **Known Hacks**: In `src/main.cpp`, the `Renderer` is currently instantiated using `Renderer rend(GLContext(), PGContext());` because the actual initialization of the Pango and GL contexts is extremely invasive and causes rendering regressions if rushed.
 
 ## Next Agent Instructions
-Please review `ROADMAP.md`. We are extremely stable and ready to continue driving the overall vision forward!
+Please review `ROADMAP.md`. We are extremely stable. A massive brainstorming session was conducted resulting in `IDEAS.md`, laying out the absolute future of the project including RPG pivots, AI co-pilots, and WebAssembly ports.
