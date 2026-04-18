@@ -26,7 +26,7 @@ def find_projects(root_dir):
 
         if 'package.json' in filenames:
             node_projects.append(dirpath)
-        if 'requirements.txt' in filenames or 'setup.py' in filenames:
+        if 'requirements.txt' in filenames or 'setup.py' in filenames or ('tests' in dirnames and dirpath == root_dir):
             python_projects.append(dirpath)
         if 'meson.build' in filenames and dirpath == root_dir: # Main C++ project
             cpp_projects.append(dirpath)
