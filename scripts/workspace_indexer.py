@@ -7,7 +7,7 @@ import fnmatch
 DB_PATH = os.path.join(os.path.dirname(__file__), 'workspace_index.db')
 
 # Files to include/exclude
-INCLUDE_PATTERNS = ['*.cpp', '*.h', '*.c', '*.cc', '*.py', '*.md', '*.txt', '*.xml', '*.json', 'meson.build', 'Makefile']
+INCLUDE_PATTERNS = ['*.cpp', '*.h', '*.c', '*.cc', '*.py', '*.md', '*.txt', '*.xml', '*.json', 'meson.build', 'Makefile', '*.js', '*.ts', '*.tsx']
 EXCLUDE_DIRS = ['.git', 'build', 'node_modules', 'venv', '.env', 'music', 'graphics', 'po']
 
 def init_db():
