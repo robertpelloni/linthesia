@@ -1203,6 +1203,6 @@ void PlayingState::DrawPopups(Renderer &renderer) const {
         if (p.life < 20) alpha = (p.life * 255) / 20;
 
         TextWriter text(p.x, p.y, renderer, true, 18); // Centered
-        text << Text(p.text, Renderer::ToColor(p.r, p.g, p.b, alpha));
+        text << Text(p.text, TextAttributes(Renderer::ToColor(p.r, p.g, p.b, alpha)));
     }
 }
