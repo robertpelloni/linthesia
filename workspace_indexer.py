@@ -61,36 +61,46 @@ def index_commits(root_dir, conn):
         print(f"Error indexing commits: {e}")
     return indexed_count
 
+
+import concurrent.futures
+
+def read_file_content(filepath, root_dir):
+    rel_path = os.path.relpath(filepath, root_dir)
+    try:
+        with open(filepath, 'r', encoding='utf-8') as f:
+            content = f.read()
+        return rel_path, content
+    except UnicodeDecodeError:
+        return rel_path, None
+    except Exception as e:
+        print(f"Error reading {rel_path}: {e}")
+        return rel_path, None
+
 def index_workspace(root_dir, conn):
     c = conn.cursor()
     indexed_count = 0
+    file_paths = []
 
     for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Modify dirnames in-place to skip excluded directories
         dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
-
         for filename in filenames:
             if should_index(filename):
-                filepath = os.path.join(dirpath, filename)
-                rel_path = os.path.relpath(filepath, root_dir)
+                file_paths.append(os.path.join(dirpath, filename))
 
-                try:
-                    with open(filepath, 'r', encoding='utf-8') as f:
-                        content = f.read()
-
-                    c.execute('INSERT INTO file_index (path, content) VALUES (?, ?)', (rel_path, content))
-                    indexed_count += 1
-                except UnicodeDecodeError:
-                    # Skip binary files that slip through or have weird encodings
-                    pass
-                except Exception as e:
-                    print(f"Error reading {rel_path}: {e}")
+    # Parallel processing for file reads
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = {executor.submit(read_file_content, fp, root_dir): fp for fp in file_paths}
+        for future in concurrent.futures.as_completed(futures):
+            rel_path, content = future.result()
+            if content is not None:
+                c.execute('INSERT INTO file_index (path, content) VALUES (?, ?)', (rel_path, content))
+                indexed_count += 1
 
     conn.commit()
     return indexed_count
 
 if __name__ == '__main__':
-    root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    root = os.path.abspath(os.path.dirname(__file__))
     print(f"Initializing workspace index database at {DB_PATH}")
     conn = init_db()
 

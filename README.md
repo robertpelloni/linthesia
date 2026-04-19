@@ -79,7 +79,7 @@ We welcome contributions! Please review the following documentation before submi
 ### Developer Tools
 *   `make format`: Run `clang-format` on the codebase to adhere to Google C++ standards.
 *   `make lint`: Run `clang-tidy` to catch potential warnings and static analysis issues.
-*   `./scripts/workspace_indexer.py`: Build a SQLite FTS5 database to search the massive codebase quickly.
+*   `./workspace_indexer.py`: Build a SQLite FTS5 database to search the massive codebase quickly.
 *   `./build_all.py`: Verify that all nested C++, Python, and Node projects compile successfully before committing.
 
 ## License
