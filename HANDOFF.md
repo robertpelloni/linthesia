@@ -1,7 +1,7 @@
 # Agent Handoff Document
 
 ## Session Summary
-In this session, we fully achieved the **Phase 4 Omniscient Orchestration** milestone by building `workspace_indexer.py` (which traverses the codebase including TS/JS and constructs a SQLite FTS5 database) and `search_api.py` (a FastMCP server wrapping the database for ultra-fast context retrieval). Additionally, we wrapped up any lingering UI polish and documented all previous tasks.
+In this session, I conducted a deep analysis of the project's documentation. I completely standardized the `README.md` to serve as a comprehensive user manual, listing all dependencies and compilation commands. I also reorganized `CHANGELOG.md` to strictly adhere to the *Keep a Changelog* specification.
 
 ## Current Code State
 - **Compilation**: SUCCESS (Meson/Ninja/Make)
@@ -10,4 +10,4 @@ In this session, we fully achieved the **Phase 4 Omniscient Orchestration** mile
 - **Known Hacks**: In `src/main.cpp`, the `Renderer` is currently instantiated using `Renderer rend(GLContext(), PGContext());` because the actual initialization of the Pango and GL contexts is extremely invasive and causes rendering regressions if rushed.
 
 ## Next Agent Instructions
-Please review `ROADMAP.md`. We are extremely stable. The `pianogame` submodule has been fully updated and synchronized to the latest master branch commit without regressions. A massive brainstorming session was conducted resulting in `IDEAS.md`, laying out the absolute future of the project including RPG pivots, AI co-pilots, and WebAssembly ports.
+Please review `TODO.md`. The documentation phase is effectively complete. Future agents should focus entirely on resolving the outstanding GTKmm refactoring or investigating FluidSynth implementations.

@@ -1,97 +1,86 @@
-# Linthesia
+# Linthesia - The Advanced Open-Source MIDI Visualizer
 
 ![Build Status](https://github.com/linthesia/linthesia/actions/workflows/c-cpp.yml/badge.svg)
 
-Linthesia is a fork of the game called Synthesia. It is a game of playing music using a MIDI keyboard (or your PC keyboard), following a MIDI file. It provides a "Piano Hero" style interface where notes fall from the top of the screen to the keys.
+Linthesia is a sophisticated, open-source fork of the classic piano-learning game Synthesia (version 0.6.1a). It provides a "Piano Hero" style interface where users can play music using a MIDI keyboard (or a PC keyboard) by following notes that fall from the top of the screen towards a virtual piano interface.
 
-This project uses the latest source from sourceforge (Synthesia 0.6.1a) and modernizes it for Linux systems.
+The project has evolved significantly to act as a modern, extensible tool for Linux systems (with support architectures for macOS and Windows), offering robust learning features, precise scoring, and seamless visual feedback.
 
-## Installation
+## Features
+* **"Piano Hero" Gameplay**: Falling notes visualizer perfectly synchronized to MIDI events.
+* **Scoring System**: Real-time accuracy metrics including Perfect (<50ms), Good (<100ms), and Miss timing windows, combined with streak combo indicators.
+* **Sight Reading Mode (F7)**: Procedurally rendered standard Grand Staff notation for traditional sheet music learning.
+* **Wait Mode / Learning Mode**: The game pauses until you hit the correct keys, featuring a customizable grace period for rolled chords and natural playing.
+* **Interactive Song Library**: Lightning-fast, real-time text-based search for MIDI files and directories.
+* **Loop Practice**: Isolate difficult sections using A-B repeating loops across the interactive progress bar.
+* **Extensive Customization**: Configurable keyboard sizes (88 to 37 keys), lead-in/lead-out timers, scroll speeds, track colors, and metronome capabilities.
+* **Monorepo Orchestration**: Bundled with Python tools (`workspace_indexer.py`, `search_api.py`, `build_all.py`) for massive monorepo FTS5 indexing, automated testing, and validation.
 
-### Dependencies
-To compile, you need a basic C++ toolchain and the following dependencies:
-*   alsa-lib
-*   gtkmm-3.0 (for glib-compile-schemas)
-*   sdl2
-*   sdl2-image
-*   sdl2-ttf
-*   sqlite3
-*   meson & ninja
+## Installation & Setup
 
-### Build
-    $ meson --prefix /usr build
-    $ ninja -C build
-    $ sudo ninja -C build install
+### Dependencies (Linux)
+To compile Linthesia natively, ensure you have the required toolchains and libraries installed:
+```bash
+sudo apt-get update
+sudo apt-get install -y build-essential meson ninja-build libtool-bin
+sudo apt-get install -y libasound2-dev libsqlite3-dev libsdl2-dev libsdl2-ttf-dev libsdl2-image-dev libglibmm-2.4-dev libgtkmm-3.0-dev gettext libgtest-dev clang-format clang-tidy python3
+```
 
-## Getting Started
+### Build Instructions
+Linthesia uses the modern `Meson` build system. We've included a `Makefile` wrapper for convenience.
 
-1.  Run `linthesia` from your terminal or application menu.
-2.  **First Run**: The game will look for MIDI files. You can place your `.mid` files in your home directory or select a folder in the game.
-3.  **Main Menu**:
-    *   **Song Title**: Click to choose a MIDI file.
-    *   **Output Device**: Select your MIDI synthesizer (e.g., Fluidsynth, Timidity, or a hardware synth). Click the button to cycle through devices. Click the small "Play" icon to test sound.
-    *   **Input Device**: Select your MIDI keyboard. If you don't have one, you can just watch the song play.
-    *   **Keyboard Size**: Choose between 88, 76, 61, 49, or 37 keys to match your instrument.
-    *   **Advanced Settings**: Configure gameplay preferences (Lead-in time, Scroll speed, Metronome).
+```bash
+# Clone the repository and update submodules
+git clone https://github.com/linthesia/linthesia.git
+cd linthesia
+git submodule update --init --recursive
 
-## Features & Configuration
+# Initialize the build directory and compile
+make build
 
-### Advanced Settings
-Click "Advanced Settings" on the title screen to configure:
-*   **Lead-In Time**: How long to wait before the song starts (default 5.5s).
-*   **Lead-Out Time**: How long to wait after the song ends.
-*   **Visible Duration**: Controls the scroll speed (how much of the song is visible at once). Lower values mean faster scrolling.
-*   **Metronome**: Enable a visual metronome that flashes on the beat.
-*   **Metronome Volume**: (Planned) Adjust volume of metronome tick.
+# Run the test suite (Google Test)
+make test
 
-### Track Selection
-After choosing a song, you will see the Track Selection screen.
-*   **Mode**: Click the icon next to a track to change its mode:
-    *   **Played Automatically**: The game plays this track.
-    *   **You Play**: You are expected to play this track. Notes will wait for you in "Learning" mode.
-    *   **Learning**: The game pauses until you hit the correct note.
-    *   **Not Played**: The track is muted and hidden.
-*   **Color**: Click the color square to change the track color.
-*   **Preview**: Click the speaker icon to hear the track.
+# Install to system (requires root)
+sudo ninja -C build install
+```
 
-## Controls
+## Running the Game
 
-### In-Game Keys
-| Key | Action |
-| :--- | :--- |
-| **Space** | Pause / Resume Game |
-| **Esc** | Return to Menu |
-| **Left / Right** | Adjust Playback Speed (-/+ 10%) |
-| **Up / Down** | Adjust Zoom (Visible Duration) |
-| **Keypad +** | Volume Up |
-| **Keypad -** | Volume Down |
-| **< / >** | Octave Shift Down / Up |
-| **Page Up** | Jump Backward 5s |
-| **Page Down** | Jump Forward 5s |
-| **F6** | Toggle FPS Display |
+### Basic Usage
+1. Execute `./build/src/linthesia` from your terminal.
+2. Select a MIDI file (`.mid`) from the Song Library.
+3. Configure your **Output Device** (your synthesizer) and **Input Device** (your MIDI keyboard) in the main menu.
+4. Play!
 
-### Help Overlay
-When the game is paused, a help overlay will appear listing these controls.
-
-## Troubleshooting
-
-### No Sound?
-Linthesia produces MIDI events, not audio. You need a MIDI synthesizer software running to hear sound.
+### Audio Configuration (MIDI Routing)
+Linthesia itself does not synthesize audio; it routes MIDI events to a system synthesizer. You must have a software synthesizer running.
 *   **Fluidsynth**: `fluidsynth -a alsa -m alsa_seq /usr/share/sounds/sf2/FluidR3_GM.sf2`
-*   **Timidity++**: Run as a daemon `timidity -iA`.
+*   **Timidity++**: `timidity -iA`
 
-Once the synth is running, select it as the **Output Device** in Linthesia.
-
-## Credits
-Based on Synthesia by Nicholas Piegdon.
-Linux port and improvements by the Linthesia team.
+Once running, the synthesizer will appear in Linthesia's "Output Device" list.
 
 ### Keyboard Controls During Playback
-- **F1**: Set Loop A (Start point)
-- **F2**: Set Loop B (End point)
-- **F3**: Clear Loop
-- **F4**: Slow down playback
-- **F5**: Speed up playback
-- **F6**: Toggle Rhythm Practice mode (ignore pitch, focus on timing)
-- **F7**: Toggle Sight Reading mode (Standard Grand Staff notation)
-- **Esc**: Pause menu (Resume / Quit to Title)
+*   **Space / Esc**: Pause or Resume the game.
+*   **F1 / F2**: Set Loop A (Start point) and Loop B (End point).
+*   **F3**: Clear Loop.
+*   **F4 / F5**: Slow down or Speed up playback globally.
+*   **F6**: Toggle Rhythm Practice mode (ignore pitch, focus strictly on timing).
+*   **F7**: Toggle Sight Reading mode (Standard Grand Staff notation).
+*   **Page Up / Down**: Jump backward or forward 5 seconds.
+*   **< / >**: Shift octave up/down.
+
+## Contribution Guidelines
+We welcome contributions! Please review the following documentation before submitting pull requests:
+*   [AGENTS.md](AGENTS.md): Master instructions and workflows for AI agents and human contributors.
+*   [VISION.md](VISION.md) & [ROADMAP.md](ROADMAP.md): Our long-term goals and immediate feature requests.
+*   [IDEAS.md](IDEAS.md): A collection of ambitious architectural overhauls (e.g., WebAssembly ports, AI co-pilots).
+
+### Developer Tools
+*   `make format`: Run `clang-format` on the codebase to adhere to Google C++ standards.
+*   `make lint`: Run `clang-tidy` to catch potential warnings and static analysis issues.
+*   `./scripts/workspace_indexer.py`: Build a SQLite FTS5 database to search the massive codebase quickly.
+*   `./build_all.py`: Verify that all nested C++, Python, and Node projects compile successfully before committing.
+
+## License
+Linthesia is open-source software. See the `COPYING` file for detailed licensing information.

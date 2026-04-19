@@ -1,7 +1,6 @@
-# TODO
+# Outstanding Issues & Short-Term Goals
 
-- [x] Implement the Scoring System (Perfect, Good, Miss) and Streak popups as mentioned in the ROADMAP and MEMORY. Ensure hits are visualized correctly (Early vs Late).
-- [x] Polish "Wait Mode" (Learning mode) grace period logic (`WAIT_TOLERANCE_KEY`).
-- [x] Implement "Sight Reading" (Standard notation view/SheetMusicDisplay) toggled via F7 to procedurally render beams, stems, and key signatures.
-- [x] Improve UI/UX with tooltips and more extensive documentation across the user interface.
-- [x] Refactoring: Ensure `Renderer` transition from SDL to GTKmm is completed seamlessly. Currently, `Renderer` is instantiated with an empty `GLContext` and `PGContext` in `main.cpp` just to pass compilation.
+- [ ] Complete GTKmm Rendering Transition: The transition from SDL2 to GTKmm/Pango is incomplete. `Renderer` objects currently rely on dummy `GLContext()` and `PGContext()` structs. Integrate native event loops.
+- [ ] Investigate FluidSynth: `libfluidsynth-dev` is missing from the environment. `FluidSynthMidiDriver` exists as a placeholder. We need to install the package or link to a local static build.
+- [ ] Investigate AppImage/Flatpak: Provide a native Linux bundle.
+- [ ] Add Doxygen: Add Doxygen support to `meson.build` and document all C++ headers to automatically generate `docs/api`.
