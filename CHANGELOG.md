@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-04-19
+### Added
+- **Expanded Search Capabilities**: The workspace indexer now extracts Git commit history and indices it inside the FTS5 database. The FastMCP `search_api.py` exposes a new `search_commits` tool for interrogating project history alongside source code snippets.
+
 ## [0.9.9] - 2026-04-18
 ### Added
 - **README Standardization**: Re-wrote `README.md` to be an extremely comprehensive user manual and development guide with explicit dependency instructions and feature overviews.

@@ -53,6 +53,45 @@ def search_workspace(query: str, limit: int = 10) -> str:
     except sqlite3.Error as e:
         return f"Database error: {str(e)}"
 
+
+@mcp.tool()
+def search_commits(query: str, limit: int = 10) -> str:
+    """
+    Search the workspace commit history using SQLite FTS5.
+    Returns commit hashes, authors, dates, and messages.
+    """
+    if not os.path.exists(DB_PATH):
+        return "Error: Index database not found. Please run workspace_indexer.py first."
+
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+
+        c.execute('''
+            SELECT
+                hash, author, date, message,
+                snippet(commit_index, 3, '[MATCH]', '[/MATCH]', '...', 64) as snippet
+            FROM commit_index
+            WHERE commit_index MATCH ?
+            ORDER BY rank
+            LIMIT ?
+        ''', (query, limit))
+
+        results = c.fetchall()
+        conn.close()
+
+        if not results:
+            return f"No commits found matching '{query}'."
+
+        output = f"Found {len(results)} commits matching '{query}':\n\n"
+        for row in results:
+            output += f"Commit: {row[0]}\nAuthor: {row[1]}\nDate: {row[2]}\nMessage: {row[3]}\nSnippet: {row[4]}\n\n"
+
+        return output
+
+    except sqlite3.Error as e:
+        return f"Database error: {str(e)}"
+
 if __name__ == '__main__':
     # If arguments are provided, run as CLI, otherwise run as MCP server
     if len(sys.argv) > 1:
