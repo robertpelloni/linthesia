@@ -4,7 +4,7 @@ import sqlite3
 import fnmatch
 
 # Database path
-DB_PATH = os.path.join(os.path.dirname(__file__), 'workspace_index.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'workspace_index.db')
 
 # Files to include/exclude
 INCLUDE_PATTERNS = ['*.cpp', '*.h', '*.c', '*.cc', '*.py', '*.md', '*.txt', '*.xml', '*.json', 'meson.build', 'Makefile', '*.js', '*.ts', '*.tsx']
@@ -40,7 +40,6 @@ def should_index(filename):
             return True
     return False
 
-
 import subprocess
 def index_commits(root_dir, conn):
     c = conn.cursor()
@@ -60,7 +59,6 @@ def index_commits(root_dir, conn):
     except Exception as e:
         print(f"Error indexing commits: {e}")
     return indexed_count
-
 
 import concurrent.futures
 
@@ -100,7 +98,7 @@ def index_workspace(root_dir, conn):
     return indexed_count
 
 if __name__ == '__main__':
-    root = os.path.abspath(os.path.dirname(__file__))
+    root = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
     print(f"Initializing workspace index database at {DB_PATH}")
     conn = init_db()
 
