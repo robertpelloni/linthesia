@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.3] - 2026-04-20
+### Added
+- **Doxygen Integration**: Added a configured `Doxyfile` and a custom `doc` run target to `meson.build` to automatically generate C++ API documentation in `docs/api/html`. Output is ignored via `.gitignore` to prevent repo bloat.
+
 ## [0.10.2] - 2026-04-19
 ### Changed
 - **Workspace Indexer Root Move & Optimization**: Relocated `workspace_indexer.py` to the root directory and implemented multithreading via `concurrent.futures` to drastically improve performance when crawling the 100+ nested submodules required by the Phase 4 orchestration pipeline.

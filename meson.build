@@ -58,3 +58,11 @@ if gtest_dep.found()
 else
   message('Google Test not found, skipping tests.')
 endif
+
+# Doxygen target
+doxygen = find_program('doxygen', required : false)
+if doxygen.found()
+  run_target('doc', command : [doxygen, join_paths(meson.source_root(), 'Doxyfile')])
+else
+  message('Doxygen not found, skipping doc target.')
+endif
