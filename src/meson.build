@@ -14,7 +14,8 @@ dependencies = [
   dependency('SDL2'),
   dependency('SDL2_ttf'),
   dependency('SDL2_image'),
-  dependency('threads')
+  dependency('threads'),
+  dependency('fluidsynth', required: false)
 ]
 
 executable('linthesia',
@@ -46,6 +47,8 @@ executable('linthesia',
            'SongLibState.cpp',
            'DpmsThread.cpp',
            'FileSelector.cpp',
+           'drivers/FluidSynthMidiDriver.cpp',
+           cpp_args: ['-DUSE_FLUIDSYNTH'],
            dependencies : dependencies,
            link_with: libmidi,
            install : true)
