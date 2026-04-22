@@ -6,7 +6,7 @@ In this continuous agentic loop, Jules achieved the following critical milestone
 2. **Audio Backend Completion**: Correctly integrated `libfluidsynth-dev`, finalizing the `FluidSynthMidiDriver.cpp` implementation to enable out-of-the-box MIDI synthesis without requiring external ALSA routers.
 3. **Automated Testing Expansion**: Created `tests/test_libmidi.cpp` to validate the core parsing engines, wiring it seamlessly into `meson.build` via Google Test (`gtest`).
 4. **Documentation Orchestration**: Executed a massive documentation sweep, formalizing `README.md`, `CHANGELOG.md`, `ROADMAP.md`, `CONTRIBUTING.md`, `LICENSE.md`, and detailing the GTKmm UI rewrite via `README_GTK_MIGRATION.md` and `docs/ARCHITECTURE.md`.
-5. **Continuous Submodule Synchronization**: Validated the frozen `pianogame` upstream logic and ran `workspace_indexer.py` to maintain an unbroken FTS5 database across the monorepo.
+5. **Continuous Submodule Synchronization**: Validated the frozen `pianogame` upstream logic and ran `workspace_indexer.py` to maintain an unbroken FTS5 database across the monorepo. Confirmed the script already natively supports recursive fuzzy FTS5 indexing of `.cpp`, `.md`, `.js`, etc., acting as the linchpin for cross-domain symbiosis.
 
 ## Current Code State
 - **Compilation**: SUCCESS (Meson/Ninja/Make)
