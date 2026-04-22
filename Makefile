@@ -1,4 +1,4 @@
-.PHONY: all setup build test clean docs format lint run
+.PHONY: all setup build test clean docs format lint run health
 
 # Default target
 all: build
@@ -20,9 +20,9 @@ clean:
 	@if [ -d "build" ]; then rm -rf build; fi
 	@echo "Build directory cleaned."
 
-# Generate/Update Documentation (placeholder if we add doxygen later)
-docs:
-	@echo "Documentation generation not yet automated with doxygen. See /docs for markdown files."
+# Generate/Update Documentation
+docs: build
+	@ninja -C build doc
 
 # Format code using clang-format
 format:
@@ -35,3 +35,7 @@ lint: build
 # Run the application
 run: build
 	@./build/src/linthesia
+
+# Run the workspace health monitor
+health:
+	@python3 scripts/health_check.py
