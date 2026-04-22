@@ -83,4 +83,4 @@ We welcome contributions! Please review the following documentation before submi
 *   `./build_all.py`: Verify that all nested C++, Python, and Node projects compile successfully before committing.
 
 ## License
-Linthesia is open-source software. See the `COPYING` file for detailed licensing information.
+Linthesia is open-source software. See the `LICENSE.md` (or `COPYING`) file for detailed licensing information.
