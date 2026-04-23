@@ -14,7 +14,7 @@ SYSTEM_DEPENDENCIES = [
     "gtkmm-3.0",
     "sqlite3",
     "sdl2",
-
+    "SDL2_ttf",
     "SDL2_image",
     "fluidsynth",
     "gtest"

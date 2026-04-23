@@ -5,6 +5,7 @@ conf_data.set_quoted('PACKAGE_VERSION', meson.project_version())
 config = configure_file(output : 'config.h',
                         configuration : conf_data)
 
+
 dependencies = [
   dependency('alsa'),
   dependency('gl'),
@@ -12,40 +13,54 @@ dependencies = [
   dependency('gtkmm-3.0'),
   dependency('sqlite3'),
   dependency('SDL2'),
-
   dependency('SDL2_image'),
   dependency('threads')
 ]
 
+# Platform specific dependencies
+if host_machine.system() == 'windows'
+  dependencies += meson.get_compiler('cpp').find_library('winmm')
+elif host_machine.system() == 'darwin'
+  dependencies += dependency('appleframeworks', modules : ['CoreFoundation', 'CoreMIDI'])
+endif
+
+
+linthesia_sources = [
+  'MenuLayout.cpp',
+  'CompatibleSystem.cpp',
+  'StringTile.cpp',
+  'TitleState.cpp',
+  'Tga.cpp',
+  'SongTile.cpp',
+  'TrackTile.cpp',
+  'UserSettings.cpp',
+  'TextWriter.cpp',
+  'EnumTile.cpp',
+  'SettingsState.cpp',
+  'SheetMusicDisplay.cpp',
+  'PlayingState.cpp',
+  'KeyboardDisplay.cpp',
+  'TrackSelectionState.cpp',
+  'GameState.cpp',
+  'Keyboard.cpp',
+  'MidiComm.cpp',
+  'Renderer.cpp',
+  'DeviceTile.cpp',
+  'FrameAverage.cpp',
+  'StatsState.cpp',
+  'LinthesiaError.cpp',
+  'main.cpp',
+  'SongLibState.cpp',
+  'DpmsThread.cpp',
+  'FileSelector.cpp',
+  'drivers/WinMMMidiDriver.cpp',
+  'drivers/CoreMidiDriver.cpp'
+]
+
 executable('linthesia',
            config,
-           'MenuLayout.cpp',
-           'CompatibleSystem.cpp',
-           'StringTile.cpp',
-           'TitleState.cpp',
-           'Tga.cpp',
-           'SongTile.cpp',
-           'TrackTile.cpp',
-           'UserSettings.cpp',
-           'TextWriter.cpp',
-           'EnumTile.cpp',
-           'SettingsState.cpp',
-           'SheetMusicDisplay.cpp',
-           'PlayingState.cpp',
-           'KeyboardDisplay.cpp',
-           'TrackSelectionState.cpp',
-           'GameState.cpp',
-           'Keyboard.cpp',
-           'MidiComm.cpp',
-           'Renderer.cpp',
-           'DeviceTile.cpp',
-           'FrameAverage.cpp',
-           'StatsState.cpp',
-           'LinthesiaError.cpp',
-           'main.cpp',
-           'SongLibState.cpp',
-           'DpmsThread.cpp',
-           'FileSelector.cpp',
+           linthesia_sources,
+
            dependencies : dependencies,
            link_with: libmidi,
            install : true)
