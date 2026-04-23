@@ -9,6 +9,8 @@
 #include <string>
 #include <locale>
 #include <libintl.h>
+#include <pangomm/init.h>
+#include <pangomm.h>
 
 #include "OSGraphics.h"
 #include "StringUtil.h"
@@ -453,6 +455,8 @@ int main(int argc, char *argv[]) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
       throw LinthesiaSDLError(_("error initializing SDL"));
 
+    Pango::init();
+
     string file_opt("");
 
     UserSetting::Initialize();
@@ -602,8 +606,8 @@ int main(int argc, char *argv[]) {
     if( !( IMG_Init( imgFlags ) & imgFlags ) )
       throw LinthesiaSDLImageError(_("SDL_image could not initialize! SDL_image Error"));
 
-    if (TTF_Init() == -1)
-      throw LinthesiaSDLTTFError(_("error in TTF_Init"));
+    // if (TTF_Init() == -1)
+      // throw LinthesiaSDLTTFError(_("error in TTF_Init"));
 
     std::string path = GRAPHDIR + std::string("/linthesia.png");
     SDL_Surface* image = IMG_Load(path.c_str());

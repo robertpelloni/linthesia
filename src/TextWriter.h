@@ -20,7 +20,7 @@
 #include "StringUtil.h"
 #include "TrackProperties.h"
 
-#include <SDL_ttf.h>
+#include <pangomm.h>
 
 // A nice ostream-like class for drawing OS-specific (or OpenGL) text to the
 // screen in varying colors, fonts, and sizes.
@@ -56,7 +56,7 @@ private:
   int last_line_height;
   bool centered;
   Renderer renderer;
-  TTF_Font* font;
+  Pango::FontDescription font_desc;
 
   friend class Text;
 };

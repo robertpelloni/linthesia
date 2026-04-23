@@ -12,7 +12,7 @@ dependencies = [
   dependency('gtkmm-3.0'),
   dependency('sqlite3'),
   dependency('SDL2'),
-  dependency('SDL2_ttf'),
+
   dependency('SDL2_image'),
   dependency('threads')
 ]

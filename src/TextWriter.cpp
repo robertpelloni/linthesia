@@ -12,30 +12,23 @@
 #include "OSGraphics.h"
 #include "UserSettings.h"
 
-#include <map>
 #include <iostream>
-
-#include <SDL_ttf.h>
+#include <cairomm/cairomm.h>
+#include <pangomm.h>
+#include <GL/gl.h>
 
 using namespace std;
 
-
-// TODO: This should be deleted at shutdown
-static map<std::pair<int, string>, TTF_Font*> font_map;
-
-static TTF_Font* get_font(int size, string fontname) {
-  auto key = make_pair(size, fontname);
-  TTF_Font* font = font_map[key];
-
-  if (!font) {
-    std::string font_path = GRAPHDIR + std::string("/") + fontname;
-    font = TTF_OpenFont(font_path.c_str(), size);
-    if (!font)
-      throw LinthesiaSDLTTFError("unable to load font " + fontname + " from " + font_path);
-    
-    font_map[key] = font;
-  }
-  return font;
+// Extracting just the font name without path/extension since Pango
+// resolves via fontconfig on Linux rather than direct TTF paths.
+static std::string ExtractFontFamily(const std::string& fontname) {
+    if (fontname == "FreeSans.ttf") return "FreeSans";
+    // basic strip
+    size_t dot = fontname.find_last_of('.');
+    if (dot != std::string::npos) {
+        return fontname.substr(0, dot);
+    }
+    return fontname;
 }
 
 TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer,
@@ -54,9 +47,10 @@ TextWriter::TextWriter(int in_x, int in_y, Renderer &in_renderer,
   y += renderer.m_yoffset;
   point_size = size;
 
-  font = get_font(in_size, fontname);
+  std::string family = ExtractFontFamily(fontname);
+  font_desc.set_family(family);
+  font_desc.set_size(in_size * PANGO_SCALE);
 }
-
 
 int TextWriter::get_point_size() {
   return point_size;
@@ -72,10 +66,38 @@ TextWriter& TextWriter::next_line() {
 
 void Text::DrawText(TextWriter& tw, Color color, int draw_x, int draw_y) const
 {
-  SDL_Surface* sFont = TTF_RenderText_Blended(tw.font, m_text.c_str(), {static_cast<Uint8>(color.r), static_cast<Uint8>(color.g), static_cast<Uint8>(color.b), static_cast<Uint8>(color.a)});
-  if (sFont == nullptr)
-    throw LinthesiaSDLTTFError("error rendering text");
+  // 1. Create a minimal surface to get a layout context for measuring
+  auto temp_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 1, 1);
+  auto temp_cr = Cairo::Context::create(temp_surface);
+  auto layout = Pango::Layout::create(temp_cr);
 
+  layout->set_text(m_text);
+  layout->set_font_description(tw.font_desc);
+
+  int width, height;
+  layout->get_pixel_size(width, height);
+
+  if (width == 0 || height == 0) return;
+
+  // 2. Create the actual surface for rendering
+  auto surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, width, height);
+  auto cr = Cairo::Context::create(surface);
+
+  // Clear with transparent background
+  cr->set_source_rgba(0, 0, 0, 0);
+  cr->set_operator(Cairo::OPERATOR_SOURCE);
+  cr->paint();
+
+  // Draw text
+  cr->set_source_rgba(color.r / 255.0, color.g / 255.0, color.b / 255.0, color.a / 255.0);
+  cr->move_to(0, 0);
+  layout->update_from_cairo_context(cr);
+  layout->show_in_cairo_context(cr);
+
+  surface->flush();
+  unsigned char* pixels = surface->get_data();
+
+  // 3. Upload to OpenGL
   GLuint texture;
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
@@ -83,25 +105,24 @@ void Text::DrawText(TextWriter& tw, Color color, int draw_x, int draw_y) const
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, sFont->pitch / sFont->format->BytesPerPixel);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, sFont->w, sFont->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, sFont->pixels);
+  // Cairo FORMAT_ARGB32 uses pre-multiplied BGRA pixels on little-endian
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, surface->get_stride() / 4);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 
   glPushMatrix();
-  tw.renderer.SetColor(color);
+  tw.renderer.SetColor(White); // Texture contains actual color
   glBegin(GL_QUADS);
   {
     glTexCoord2f(0,0); glVertex2f(draw_x, draw_y);
-    glTexCoord2f(1,0); glVertex2f(draw_x + sFont->w, draw_y);
-    glTexCoord2f(1,1); glVertex2f(draw_x + sFont->w, draw_y + sFont->h);
-    glTexCoord2f(0,1); glVertex2f(draw_x, draw_y + sFont->h);
+    glTexCoord2f(1,0); glVertex2f(draw_x + width, draw_y);
+    glTexCoord2f(1,1); glVertex2f(draw_x + width, draw_y + height);
+    glTexCoord2f(0,1); glVertex2f(draw_x, draw_y + height);
   }
   glEnd();
 
   glPopMatrix();
   glDeleteTextures(1, &texture);
-
-  SDL_FreeSurface(sFont);
 }
 
 TextWriter& Text::operator<<(TextWriter& tw) const {
@@ -118,21 +139,26 @@ TextWriter& Text::operator<<(TextWriter& tw) const {
 
   DrawText(tw, m_attrs.color, draw_x, draw_y);
 
-
   return tw;
 }
 
 void Text::calculate_position_and_advance_cursor(TextWriter &tw, int *out_x, int *out_y) const {
-  int w, h;
-  if(TTF_SizeUTF8(tw.font, m_text.c_str(), &w, &h)) {
-    throw LinthesiaSDLTTFError("TTF_SizeUTF8 returned an error");
-  }
+  auto temp_surface = Cairo::ImageSurface::create(Cairo::FORMAT_ARGB32, 1, 1);
+  auto temp_cr = Cairo::Context::create(temp_surface);
+  auto layout = Pango::Layout::create(temp_cr);
+
+  layout->set_text(m_text);
+  layout->set_font_description(tw.font_desc);
+
+  int width, height;
+  layout->get_pixel_size(width, height);
+
   if (tw.centered) {
-    *out_x = tw.x - w / 2;
+    *out_x = tw.x - width / 2;
   }
   else {
     *out_x = tw.x;
-    tw.x += w;
+    tw.x += width;
   }
   *out_y = tw.y;
 }
