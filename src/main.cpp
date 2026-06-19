@@ -26,6 +26,10 @@
 #include "TitleState.h"
 #include "DpmsThread.h"
 #include "SongLibState.h"
+#include "InputManager.h"
+#include "MainWindow.h"
+#include "InputManager.h"
+#include "MainWindow.h"
 
 #include "libmidi/Midi.h"
 #include "libmidi/MidiUtil.h"
@@ -59,7 +63,7 @@ const static string error_header2 = _(" problem and must close:\n\n");
 const static string error_footer = _("\n\nIf you don't think this should have "
   "happened, please fill a bug report on : \nhttps://github.com/linthesia/linthesia\n\nThank you.");
 
-const static int vsync_interval = 1;
+int vsync_interval = 1;
 
 class EdgeTracker  {
 public:
@@ -96,293 +100,7 @@ private:
 
 static EdgeTracker window_state;
 
-class DrawingArea {
-public:
 
-  DrawingArea(SDL_Window* sdl_window) :
-    m_sdl_window(sdl_window)
-  {
-  }
-
-  bool GameLoop();
-
-  void PollEvent(SDL_Event& event);
-
-  virtual void on_configure_event();
-protected:
-  virtual void on_expose_event(SDL_WindowEvent& event);
-  virtual void on_hide_event(SDL_WindowEvent& event);
-
-  virtual bool on_motion_notify(SDL_MouseMotionEvent& event);
-  virtual bool on_button_press(SDL_MouseButtonEvent& event);
-  virtual bool on_key_press(SDL_KeyboardEvent& event);
-  virtual bool on_key_release(SDL_KeyboardEvent& event);
-
-  virtual void on_window_event(SDL_WindowEvent& event);
-
-  int get_width()  const
-  {
-    int w;
-    SDL_GetWindowSize(m_sdl_window, &w, nullptr);
-    return w;
-  }
-
-  int get_height()  const
-  {
-    int h;
-    SDL_GetWindowSize(m_sdl_window, nullptr, &h);
-    return h;
-  }
-
-
-  SDL_Window* m_sdl_window;
-
-};
-
-void DrawingArea::PollEvent(SDL_Event& event)
-{
-  switch (event.type)
-  {
-    case SDL_MOUSEMOTION:
-      on_motion_notify(event.motion);
-      break;
-    case SDL_MOUSEBUTTONDOWN:
-    case SDL_MOUSEBUTTONUP:
-      on_button_press(event.button);
-      break;
-    case SDL_KEYDOWN:
-      on_key_press(event.key);
-      break;
-    case SDL_KEYUP:
-      on_key_release(event.key);
-      break;
-    case SDL_TEXTINPUT:
-      state_manager->TextInput(event.text.text);
-      break;
-    case SDL_WINDOWEVENT:
-      on_window_event(event.window);
-      break;
-
-    default:
-      break;
-  }
-}
-
-void DrawingArea::on_window_event(SDL_WindowEvent& event)
-{
-  switch (event.event)
-  {
-    case SDL_WINDOWEVENT_EXPOSED:
-      on_expose_event(event);
-      break;
-    case SDL_WINDOWEVENT_HIDDEN:
-      on_hide_event(event);
-      break;
-    case SDL_WINDOWEVENT_RESIZED:
-    case SDL_WINDOWEVENT_SIZE_CHANGED:
-      on_configure_event();
-      break;
-  }
-}
-
-bool DrawingArea::on_motion_notify(SDL_MouseMotionEvent& event) {
-
-  state_manager->MouseMove(event.x, event.y);
-  return true;
-}
-
-bool DrawingArea::on_button_press(SDL_MouseButtonEvent& event) {
-
-  MouseButton b;
-
-  // left and right click allowed
-  if (event.button == SDL_BUTTON_LEFT)
-    b = MouseLeft;
-  else if (event.button == SDL_BUTTON_RIGHT)
-    b = MouseRight;
-
-  // ignore other buttons
-  else
-    return false;
-
-  // press or release?
-  if (event.state == SDL_PRESSED)
-    state_manager->MousePress(b);
-  else if (event.state == SDL_RELEASED)
-    state_manager->MouseRelease(b);
-  else
-    return false;
-
-  return true;
-}
-
-// FIXME: use user settings to do this mapping
-int keyToNote(SDL_KeyboardEvent& event) {
-  const unsigned short oct = 4;
-
-  switch(event.keysym.scancode) {
-  /* no key for C :( */
-  case SDL_SCANCODE_GRAVE:        return 12*oct + 1;      /* C# */
-  case SDL_SCANCODE_TAB:          return 12*oct + 2;      /* D  */
-  case SDL_SCANCODE_1:            return 12*oct + 3;      /* D# */
-  case SDL_SCANCODE_Q:            return 12*oct + 4;      /* E  */
-  case SDL_SCANCODE_W:            return 12*oct + 5;      /* F  */
-  case SDL_SCANCODE_3:            return 12*oct + 6;      /* F# */
-  case SDL_SCANCODE_E:            return 12*oct + 7;      /* G  */
-  case SDL_SCANCODE_4:            return 12*oct + 8;      /* G# */
-  case SDL_SCANCODE_R:            return 12*oct + 9;      /* A  */
-  case SDL_SCANCODE_5:            return 12*oct + 10;     /* A# */
-  case SDL_SCANCODE_T:            return 12*oct + 11;     /* B  */
-
-  case SDL_SCANCODE_Y:            return 12*(oct+1) + 0;  /* C  */
-  case SDL_SCANCODE_7:            return 12*(oct+1) + 1;  /* C# */
-  case SDL_SCANCODE_U:            return 12*(oct+1) + 2;  /* D  */
-  case SDL_SCANCODE_8:            return 12*(oct+1) + 3;  /* D# */
-  case SDL_SCANCODE_I:            return 12*(oct+1) + 4;  /* E  */
-  case SDL_SCANCODE_O:            return 12*(oct+1) + 5;  /* F  */
-  case SDL_SCANCODE_0:            return 12*(oct+1) + 6;  /* F# */
-  case SDL_SCANCODE_P:            return 12*(oct+1) + 7;  /* G  */
-  case SDL_SCANCODE_MINUS:        return 12*(oct+1) + 8;  /* G# */
-  case SDL_SCANCODE_LEFTBRACKET:  return 12*(oct+1) + 9;  /* A  */
-  case SDL_SCANCODE_EQUALS:       return 12*(oct+1) + 10; /* A# */
-  case SDL_SCANCODE_RIGHTBRACKET: return 12*(oct+1) + 11; /* B  */
-  }
-
-  return -1;
-}
-
-typedef set<int> ConnectMap;
-ConnectMap pressed;
-
-bool __sendNoteOff(int note) 
-{
-
-  ConnectMap::iterator it = pressed.find(note);
-  if (it == pressed.end())
-    return false;
-
-  sendNote(note, false);
-  pressed.erase(it);
-
-  return true;
-}
-
-bool DrawingArea::on_key_press(SDL_KeyboardEvent& event) {
-
-  // if is a note...
-  int note = keyToNote(event);
-  if (note >= 0) {
-
-    // if first press, send Note-On
-    ConnectMap::iterator it = pressed.find(note);
-    if (it == pressed.end())
-    {
-      sendNote(note, true);
-      pressed.insert(note);
-    }
-    // otherwise, cancel emission of Note-off
-
-    return true;
-  }
-
-  switch (event.keysym.sym) 
-  {
-  case SDLK_UP:       state_manager->KeyPress(KeyUp);      break;
-  case SDLK_DOWN:     state_manager->KeyPress(KeyDown);    break;
-  case SDLK_LEFT:     state_manager->KeyPress(KeyLeft);    break;
-  case SDLK_RIGHT:    state_manager->KeyPress(KeyRight);   break;
-  case SDLK_SPACE:    state_manager->KeyPress(KeySpace);   break;
-  case SDLK_RETURN:   state_manager->KeyPress(KeyEnter);   break;
-  case SDLK_ESCAPE:   state_manager->KeyPress(KeyEscape);  break;
-  case SDLK_BACKSPACE: state_manager->KeyPress(KeyBackspace); break;
-
-  // show FPS
-  case SDLK_F6:       state_manager->KeyPress(KeyF6);      break;
-  case SDLK_F7:       state_manager->KeyPress(KeyF7);      break;
-
-  // increase/decrease octave
-  case SDLK_PERIOD:    state_manager->KeyPress(KeyGreater); break;
-  case SDLK_COMMA:     state_manager->KeyPress(KeyLess);    break;
-
-  // +/- 5 seconds
-  case SDLK_PAGEDOWN: state_manager->KeyPress(KeyForward);  break;
-  case SDLK_PAGEUP:   state_manager->KeyPress(KeyBackward); break;
-
-  case SDLK_KP_PLUS:  state_manager->KeyPress(KeyVolumeDown); break; // [
-  case SDLK_KP_MINUS: state_manager->KeyPress(KeyVolumeUp);   break; // ]
-
-  default:
-    return false;
-  }
-
-  return true;
-}
-
-bool DrawingArea::on_key_release(SDL_KeyboardEvent& event) {
-
-  // if is a note...
-  int note = keyToNote(event);
-  if (note >= 0) 
-  {
-    ConnectMap::iterator it = pressed.find(note);
-    if (it != pressed.end())
-    {
-      sendNote(note, false);
-      pressed.erase(it);
-    }
-    return true;
-  }
-
-  return false;
-}
-
-void DrawingArea::on_configure_event() {
-  glClearColor(.25, .25, .25, 1.0);
-  glClearDepth(1.0);
-
-  glDisable(GL_DEPTH_TEST);
-  glEnable(GL_TEXTURE_2D);
-
-  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glEnable(GL_BLEND);
-
-  glShadeModel(GL_SMOOTH);
-
-  glViewport(0, 0, get_width(), get_height());
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  glOrtho(0, get_width(), 0, get_height(), -1, 1);
-
-  state_manager->SetStateDimensions(get_width(), get_height());
-  state_manager->Update(window_state.JustActivated());
-
-  glEnd();
-}
-
-void DrawingArea::on_expose_event(SDL_WindowEvent& event) {
-  if (!window_state.IsActive())
-    window_state.Activate();
-}
-
-void DrawingArea::on_hide_event(SDL_WindowEvent& event) {
-  if (window_state.IsActive())
-    window_state.Deactivate();
-}
-
-bool DrawingArea::GameLoop() {
-
-  if (window_state.IsActive()) {
-
-    state_manager->Update(window_state.JustActivated());
-
-    Renderer rend(GLContext(nullptr), PGContext(nullptr));
-    rend.SetVSyncInterval(vsync_interval);
-
-    state_manager->Draw(rend);
-  }
-
-  return true;
-}
 
 char* getCmdOption(char ** begin, char ** end, const std::string & option)
 {
@@ -557,43 +275,11 @@ int main(int argc, char *argv[]) {
 
     const int default_sw = 1280;
     const int default_sh = 720;
-    Uint32 flags = SDL_WINDOW_OPENGL;
 
-    // Lauch fullscreen if asked for it OR if neither fullllscreen and windowed is asked AND we are not in jail.
-    bool injail = true; // FIXME : how to detect we are injail without doing something nasty ?
-                        // Jail is launched by AppImage, within :
-                        //   firejail --quiet --noprofile --net=none --appimage ./"$FILENAME" &
+    // Create GTK App
+    auto app = Gtk::Application::create(argc, argv, "org.linthesia.app", Gio::APPLICATION_HANDLES_COMMAND_LINE);
+    app->signal_command_line().connect([&](const Glib::RefPtr<Gio::ApplicationCommandLine>& cmdline) { return 0; }, false);
 
-    if (fullscreen || ( (!windowed && !fullscreen) && (!injail ) ) ) {
-      flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
-    } else 
-    {
-      flags |= SDL_WINDOW_RESIZABLE;
-    }
-
-    sdl_window = SDL_CreateWindow(
-        friendly_app_name.c_str(),         // window title
-        SDL_WINDOWPOS_UNDEFINED,           // initial x position
-        SDL_WINDOWPOS_UNDEFINED,           // initial y position
-        default_sw,                        // width, in pixels
-        default_sh,                        // height, in pixels
-        flags                              // flags - see below
-    );
-
-    // Check that the window was successfully created
-    if (sdl_window == NULL)
-      throw LinthesiaSDLError(_("Could not create window"));
-
-
-    SDL_GLContext gl_context = SDL_GL_CreateContext(sdl_window);
-    if (gl_context == nullptr)
-      throw LinthesiaSDLError(_("Could not create GL Context"));
-
-    {
-      int w,h;
-      SDL_GetWindowSize(sdl_window, &w, &h);
-      state_manager = new GameStateManager(w, h);
-    }
     struct stat st;
     chdir (getExePath().c_str());  
     
@@ -606,20 +292,11 @@ int main(int argc, char *argv[]) {
     if( !( IMG_Init( imgFlags ) & imgFlags ) )
       throw LinthesiaSDLImageError(_("SDL_image could not initialize! SDL_image Error"));
 
-    // if (TTF_Init() == -1)
-      // throw LinthesiaSDLTTFError(_("error in TTF_Init"));
-
-    std::string path = GRAPHDIR + std::string("/linthesia.png");
-    SDL_Surface* image = IMG_Load(path.c_str());
-    if (image == nullptr)
-      throw LinthesiaSDLImageError(_("Unable to load image ") + path + _("! SDL_image Error"));
-
-    SDL_SetWindowIcon(sdl_window, image);
+    state_manager = new GameStateManager(default_sw, default_sh);
 
     // Init DHMS thread once for the whole program
     DpmsThread* dpms_thread = new DpmsThread();
 
-    // do this after gl context is created (ie. after da realized)
     SharedState state;
     state.dpms_thread = dpms_thread;
     if (midi) {
@@ -628,8 +305,6 @@ int main(int argc, char *argv[]) {
       state_manager->SetInitialState(new TitleState(state));
     }
     else {
-      // if midi couldn't be opened from command line filename or there
-      // simply was no command line filename, use a song-lib.
       state_manager->SetInitialState(new SongLibState(state));
     }
 
@@ -646,6 +321,7 @@ int main(int argc, char *argv[]) {
       istringstream iss(user_rate);
       if (not (iss >> default_rate)) {
         Compatible::ShowError(_("Invalid setting for 'refresh_rate' key.\n\nReset to default value when reload."));
+
         UserSetting::Set(REFRESH_RATE_KEY, "");
       }
     }
@@ -663,33 +339,18 @@ int main(int argc, char *argv[]) {
       UserSetting::Set(MAX_KEY_KEY, max_key);
     }
 
-    DrawingArea da(sdl_window);
-    da.on_configure_event();
-    SDL_StartTextInput();
-    while (main_loop_running)
-    {
-      SDL_Event Event;
-      while (SDL_PollEvent(&Event))
-      {
-        if (Event.type == SDL_QUIT)
-        {
-          main_loop_running = false;
-        } else 
-        {
-          da.PollEvent(Event);
-        }
-      }
-      da.GameLoop();
-    }
+    InputManager input_manager(state_manager);
+    MainWindow main_window(state_manager, &input_manager);
+
+    int result = app->run(main_window);
+
     midiStop();
     window_state.Deactivate();
 
-    SDL_GL_DeleteContext(gl_context);
-    SDL_DestroyWindow(sdl_window);
     delete dpms_thread;
     SDL_Quit();
 
-    return 0;
+    return result;
   }
   catch (const LinthesiaError &e) {
     string wrapped_description = STRING(error_header1 <<

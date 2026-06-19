@@ -2,7 +2,7 @@
 
 This document outlines the planned features, improvements, and known gaps in Linthesia.
 
-## Current Status (v0.9.1)
+## Current Status (v1.0.0)
 Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It supports playing MIDI files, configuring tracks, and extensive customization. The codebase is actively transitioning to GTKmm/Pango for text rendering.
 
 ### Recently Completed
@@ -14,6 +14,11 @@ Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It 
     *   **Pause Menu**: Interactive buttons for Resume/Quit.
 
 ## Upcoming Features
+
+### GTKmm Migration (Phase 3)
+*   **[x] Gtk::Window Swap**: Replace `SDL_Window` with `Gtk::Window` and `Gtk::GLArea`.
+*   **[x] InputManager Abstraction**: Extract SDL input logic to prepare for GTKmm input signals.
+
 
 ### Short Term (v1.0.0)
 *   **[x] Scoring System**: Implement a scoring algorithm (Perfect, Good, Miss) and Streak popup UI representation.
