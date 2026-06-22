@@ -28,8 +28,6 @@
 #include "SongLibState.h"
 #include "InputManager.h"
 #include "MainWindow.h"
-#include "InputManager.h"
-#include "MainWindow.h"
 
 #include "libmidi/Midi.h"
 #include "libmidi/MidiUtil.h"

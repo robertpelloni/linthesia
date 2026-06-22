@@ -44,3 +44,9 @@ Please refer to `AGENTS.md` for instructions on how to contribute.
 
 ## Future Innovations & Pivots
 See `IDEAS.md` for a comprehensive list of ambitious concepts including WebAssembly ports, AI Hand Tracking, Multiplayer Battles, and Procedural Sheet Music engines.
+
+
+## Jules Autopilot (Go Runtime)
+* [x] **Git Diff Monitoring**: Background Shadow Pilot anomaly detection is implementing native git diff monitoring in Go.
+* [x] **CI Pipeline Auto-Fix**: Shadow Pilot anomaly logging requires CI pipeline auto-fix logic.
+* [x] **Submodule Status Check**: Wire real-time submodule git status checks in the Go backend to the `/system/status` UI.

@@ -30,3 +30,4 @@ depcomp
 install-sh
 ltmain.sh
 docs/api/html/
+backend-go/jules-autopilot
