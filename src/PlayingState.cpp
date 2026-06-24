@@ -799,6 +799,33 @@ void PlayingState::Update() {
     }
   }
 
+  if (!m_paused) {
+      MouseInfo mouse = Mouse();
+      if (mouse.newPress.left) {
+          int pb_x = Layout::ScreenMarginX;
+          int pb_y = CalcKeyboardHeight() + 25;
+          int pb_w = GetStateWidth() - Layout::ScreenMarginX * 2;
+          int pb_h = 16;
+          if (mouse.x >= pb_x && mouse.x <= pb_x + pb_w &&
+              mouse.y >= pb_y && mouse.y <= pb_y + pb_h) {
+
+              double pct = float(mouse.x - pb_x) / float(pb_w);
+              microseconds_t seek_time = pct * m_state.midi->GetSongLengthInMicroseconds();
+
+              m_state.midi->GoTo(seek_time);
+              ResetSong();
+
+              m_notes.clear();
+              m_state.stats.score = 0;
+              m_state.stats.longest_combo = 0;
+              m_state.stats.stray_notes = 0;
+              m_state.stats.perfect_hits = 0;
+              m_state.stats.good_hits = 0;
+              m_current_combo = 0;
+          }
+      }
+  }
+
   if (IsKeyPressed(KeySpace))
   {
     m_paused = !m_paused;
