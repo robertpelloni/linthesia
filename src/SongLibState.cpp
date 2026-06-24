@@ -260,6 +260,18 @@ void SongLibState::Update() {
         }
     }
 
+
+    MouseInfo check_mouse = Mouse();
+    if (check_mouse.newPress.left) {
+        // Did we click on the search text bounds?
+        int search_x = ContentRight() - 250;
+        int search_y = Layout::ScreenMarginY / 2 - 6;
+        if (check_mouse.x >= search_x && check_mouse.x <= search_x + 200 &&
+            check_mouse.y >= search_y && check_mouse.y <= search_y + 30) {
+            // Focus search
+            // For now, it's just globally catching keyboard inputs.
+        }
+    }
     if (IsKeyPressed(KeyBackspace)) {
         if (m_search_query.length() > 0) {
             m_search_query.pop_back();
@@ -376,7 +388,12 @@ void SongLibState::Draw(Renderer &renderer) const {
     }
 
     // Draw search text
-    TextWriter search(ContentRight() - 250, Layout::ScreenMarginY / 2 - 6, renderer, false, Layout::ButtonFontSize);
+    int search_x = ContentRight() - 250;
+    int search_y = Layout::ScreenMarginY / 2 - 6;
+    renderer.SetColor(0x30, 0x30, 0x30);
+    renderer.DrawQuad(search_x - 5, search_y - 2, 200, 24);
+    renderer.SetColor(0xFF, 0xFF, 0xFF);
+    TextWriter search(search_x, search_y, renderer, false, Layout::ButtonFontSize);
     search << "Search: ";
     search << m_search_query.c_str();
     search << "_";
