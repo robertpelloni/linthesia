@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 func main() {
@@ -16,6 +19,9 @@ func main() {
 		}
 	}()
 
-	// Block main thread
-	select {}
+	app := fiber.New()
+
+	app.Get("/system/status/submodules", SubmoduleStatusHandler)
+
+	log.Fatal(app.Listen(":8080"))
 }

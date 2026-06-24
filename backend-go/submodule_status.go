@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
-	"net/http"
 	"os/exec"
 	"strings"
+
+	"github.com/gofiber/fiber/v2"
 )
 
 // SubmoduleStatus represents the state of a single git submodule
@@ -60,13 +60,13 @@ func CheckSubmodules() ([]SubmoduleStatus, error) {
 }
 
 // SubmoduleStatusHandler exposes the submodule status via HTTP JSON
-func SubmoduleStatusHandler(w http.ResponseWriter, r *http.Request) {
+func SubmoduleStatusHandler(c *fiber.Ctx) error {
 	statuses, err := CheckSubmodules()
 	if err != nil {
-		http.Error(w, `{"error": "Failed to check submodules"}`, http.StatusInternalServerError)
-		return
+		return c.Status(500).JSON(fiber.Map{
+			"error": "Failed to check submodules",
+		})
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(statuses)
+	return c.JSON(statuses)
 }
