@@ -93,6 +93,14 @@ bool InputManager::on_key_press(GdkEventKey* event) {
       return false;
   }
 
+
+  // Send text input if it's a valid string
+  if (event->string && event->length > 0) {
+      // Basic ascii filtering
+      if (event->keyval >= GDK_KEY_space && event->keyval <= GDK_KEY_asciitilde) {
+          m_state_manager->TextInput(std::string(event->string, event->length));
+      }
+  }
   return true;
 }
 
