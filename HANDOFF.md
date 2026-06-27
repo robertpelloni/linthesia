@@ -25,3 +25,5 @@ Please review `ROADMAP.md` and `README_GTK_MIGRATION.md`. The highest priority o
 * Executed the autonomous process to sync the `pianogame` submodule, analyzed changes, updated documentation, bumped the version to `5.70.0`. No drift found.
 
 - **v5.72.0**: Implemented `--headless` mode in `src/main.cpp` to decouple the game loop from graphical requirements, allowing the project to run in server environments without X11/Wayland/OpenGL.
+
+- **v5.73.0**: Completed protocol and documented headless features and fixed formatting bugs.

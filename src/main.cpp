@@ -698,17 +698,8 @@ int main(int argc, char *argv[]) {
     } else {
       // Headless loop
       while (main_loop_running) {
-        SDL_Event Event;
-        while (SDL_PollEvent(&Event))
-        {
-          if (Event.type == SDL_QUIT)
-          {
-            main_loop_running = false;
-          }
-        }
-
         // Sleep to avoid pegging CPU (simulating 60FPS)
-        SDL_Delay(16);
+        usleep(16666);
         state_manager->Update(false);
       }
       midiStop();
