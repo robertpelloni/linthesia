@@ -50,8 +50,6 @@ linthesia_sources = [
   'StatsState.cpp',
   'LinthesiaError.cpp',
   'main.cpp',
-  'MainWindow.cpp',
-  'InputManager.cpp',
   'SongLibState.cpp',
   'DpmsThread.cpp',
   'FileSelector.cpp',

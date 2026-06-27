@@ -4,19 +4,9 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2026-06-23
+## [5.72.0] - 2026-06-27
 ### Added
-- **Jules Autopilot Integration**: Merged the Go-based Jules Autopilot backend orchestration service into the main repository.
-- **Repository Sync**: Completed full repository synchronization, intelligently merging feature branches, resolving anomalies, and updating all submodule tracking layers.
-
-## [1.0.0] - 2026-06-19
-### Added
-- **GTKmm Phase 3 Migration (Window Swap)**: Successfully replaced `SDL_Window` with `Gtk::Window` and `Gtk::GLArea`. The event loop is now fully managed by `Gtk::Application`. This marks the completion of the GTKmm transition.
-- **Autonomous Protocol Completion**: The Autonomous Linthesia Development Protocol has been fully implemented and marked as completed. Codebase prepared for archiving.
-
-## [0.10.11] - 2026-06-18
-### Added
-- **InputManager Abstraction (Phase 2 GTKmm Migration)**: Abstracted SDL2 event polling logic from `src/main.cpp` and `DrawingArea` into an isolated `InputManager` class to cleanly decouple input handling from the master SDL window as preparation for the final GTKmm Window swap.
+- **Headless Mode**: Added a `--headless` flag to decouple the C++ game loop from graphical OpenGL/GTK initializations, laying the groundwork for a backend/headless server mode for AI or Multiplayer.
 
 ## [0.10.3] - 2026-04-20
 ### Added
