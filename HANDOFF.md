@@ -33,3 +33,7 @@ Please review `ROADMAP.md` and `README_GTK_MIGRATION.md`. The highest priority o
 - **v5.76.0**: Built the Emscripten/WASM Web MIDI API drivers to abstract ALSA dependencies away during web compilations.
 
 - **v5.78.0**: Generated the Emscripten cross-compilation definition file `cross-emscripten.ini`.
+
+- **v5.80.0**: Upgraded Python package dependencies to ensure orchestrator tools remain secure.
+
+- **v5.81.0**: Initialized the Go WebSocket backend in `/backend` using Fiber, setting the stage for Multiplayer logic.
