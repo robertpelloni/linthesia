@@ -2,7 +2,7 @@
 
 This document outlines the planned features, improvements, and known gaps in Linthesia.
 
-## Current Status (v5.71.0)
+## Current Status (v5.74.0)
 Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It supports playing MIDI files, configuring tracks, and extensive customization. The codebase is actively transitioning to GTKmm/Pango for text rendering.
 
 ### Recently Completed
@@ -40,6 +40,12 @@ Please refer to `AGENTS.md` for instructions on how to contribute.
 *   **[x] Omniscient Orchestration (Phase 4)**: Implemented SQLite FTS5 Workspace Indexer (`workspace_indexer.py` (parallel processing)) and FastMCP Search API (`search_api.py`) for "needle-in-a-haystack" analysis.
 *   **[x] Build Verification**: Global `build_all.py` scanner validates monorepo and submodules stability.
 *   **[x] Live Health Monitoring**: Created `health_check.py` to probe the project environment and verify critical system dependencies in real-time.
+
+
+### Long Term: WebAssembly (WASM) Port
+*   **[ ] Web MIDI Backend**: Abstract ALSA/CoreMIDI into a `WebMidiDriver` using `EM_ASM`.
+*   **[ ] WebGL Migration**: Ensure GTKmm/Pango textures translate efficiently via Emscripten's GLES2 wrapper.
+*   **[ ] Emscripten Build Pipeline**: Implement Meson cross-compilation configurations for browser targets.
 
 ## Future Innovations & Pivots
 See `IDEAS.md` for a comprehensive list of ambitious concepts including WebAssembly ports, AI Hand Tracking, Multiplayer Battles, and Procedural Sheet Music engines.

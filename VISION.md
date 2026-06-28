@@ -28,3 +28,6 @@ Linthesia aims to be the premier open-source piano learning and MIDI visualizati
 *   Polishing the UI/UX (Settings, Help, Navigation).
 *   Completing missing features from the original Synthesia codebase.
 *   Documenting the codebase for future contributors.
+
+### The Web Pivot (WASM)
+While native desktop deployment is stable, the ultimate vision requires zero-friction onboarding. We are actively decoupling the engine to support WebAssembly (WASM), allowing Linthesia to run directly in modern browsers via WebGL and the Web MIDI API.

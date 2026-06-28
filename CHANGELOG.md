@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.74.0] - 2026-06-28
+### Added
+- **WASM Pivot Docs**: Added structural notes and architectural boundaries mapping out the Emscripten/WASM pivot for the Web. Identified ALSA and multithreading constraints.
+
 ## [5.73.0] - 2026-06-27
 ### Added
 - **Performance**: Code cleanup, removed redundancy, formatting fixes.
