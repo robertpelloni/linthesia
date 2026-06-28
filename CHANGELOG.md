@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.76.0] - 2026-06-28
+### Added
+- **WASM Drivers**: Added `WebMidiDriver.h` and `WebMidiDriver.cpp` to `src/drivers/` leveraging `EM_ASM` for Web MIDI API support.
+
+## [5.75.0] - 2026-06-28
+### Fixed
+- **Security**: Addressed critical security vulnerabilities.
+- **Sync**: Completed comprehensive repository sync.
+
 ## [5.74.0] - 2026-06-28
 ### Added
 - **WASM Pivot Docs**: Added structural notes and architectural boundaries mapping out the Emscripten/WASM pivot for the Web. Identified ALSA and multithreading constraints.

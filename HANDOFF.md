@@ -27,3 +27,9 @@ Please review `ROADMAP.md` and `README_GTK_MIGRATION.md`. The highest priority o
 - **v5.72.0**: Implemented `--headless` mode in `src/main.cpp` to decouple the game loop from graphical requirements, allowing the project to run in server environments without X11/Wayland/OpenGL.
 
 - **v5.73.0**: Completed protocol and documented headless features and fixed formatting bugs.
+
+- **v5.75.0**: Applied security vulnerability fixes and performed repository sync.
+
+- **v5.76.0**: Built the Emscripten/WASM Web MIDI API drivers to abstract ALSA dependencies away during web compilations.
+
+- **v5.78.0**: Generated the Emscripten cross-compilation definition file `cross-emscripten.ini`.
