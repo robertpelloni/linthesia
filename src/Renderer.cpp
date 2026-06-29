@@ -31,11 +31,10 @@ void SelectTexture(unsigned int texture_id) {
 }
 
 
-Renderer::Renderer(GLContext glcontext, PGContext pangocontext) :
+Renderer::Renderer(GLContext glcontext) :
   m_xoffset(0),
   m_yoffset(0),
-  m_glcontext(glcontext),
-  m_pangocontext(pangocontext) {
+  m_glcontext(glcontext) {
 }
 
 Color Renderer::ToColor(int r, int g, int b, int a) {

@@ -37,3 +37,11 @@ Please review `ROADMAP.md` and `README_GTK_MIGRATION.md`. The highest priority o
 - **v5.80.0**: Upgraded Python package dependencies to ensure orchestrator tools remain secure.
 
 - **v5.81.0**: Initialized the Go WebSocket backend in `/backend` using Fiber, setting the stage for Multiplayer logic.
+
+- **v5.82.0**: Migrated OpenGL Context to WebGL (ES 2.0) for the Emscripten WASM build pipeline.
+
+- **v5.83.0**: Migrated the core game loop away from SDL's infinite while loop to a `Gtk::Application` lifecycle using `Glib::signal_timeout`.
+
+- **v5.72.0**: Ran Executive Protocol 60 to verify submodule drift and correct documentation tags.
+
+- **v5.84.0**: Triggered submodule sync loop and documentation tracking per autonomous protocol.

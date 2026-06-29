@@ -375,7 +375,7 @@ bool DrawingArea::GameLoop() {
 
     state_manager->Update(window_state.JustActivated());
 
-    Renderer rend(GLContext(nullptr), PGContext(nullptr));
+    Renderer rend(GLContext(nullptr));
     rend.SetVSyncInterval(vsync_interval);
 
     state_manager->Draw(rend);
@@ -575,6 +575,12 @@ int main(int argc, char *argv[]) {
     SDL_GLContext gl_context = nullptr;
 
     if (!headless) {
+#ifdef __EMSCRIPTEN__
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+      SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
+
       sdl_window = SDL_CreateWindow(
           friendly_app_name.c_str(),         // window title
           SDL_WINDOWPOS_UNDEFINED,           // initial x position
@@ -669,25 +675,30 @@ int main(int argc, char *argv[]) {
       UserSetting::Set(MAX_KEY_KEY, max_key);
     }
 
+    auto app = Gtk::Application::create("com.github.linthesia.linthesia");
+
     if (!headless) {
       DrawingArea da(sdl_window);
       da.on_configure_event();
       SDL_StartTextInput();
-      while (main_loop_running)
-      {
+
+      sigc::connection timeout_connection = Glib::signal_timeout().connect([&]() {
         SDL_Event Event;
-        while (SDL_PollEvent(&Event))
-        {
-          if (Event.type == SDL_QUIT)
-          {
+        while (SDL_PollEvent(&Event)) {
+          if (Event.type == SDL_QUIT) {
             main_loop_running = false;
-          } else
-          {
+            app->quit();
+          } else {
             da.PollEvent(Event);
           }
         }
         da.GameLoop();
-      }
+        return main_loop_running;
+      }, 16); // ~60 FPS
+
+      app->hold(); // Keep app running manually without a Gtk::Window managed by run()
+      app->run();
+
       midiStop();
       window_state.Deactivate();
 
@@ -696,21 +707,22 @@ int main(int argc, char *argv[]) {
       delete dpms_thread;
       SDL_Quit();
     } else {
-      // Headless loop
-      while (main_loop_running) {
+      // Headless loop using GTKmm signals
+      sigc::connection timeout_connection = Glib::signal_timeout().connect([&]() {
         SDL_Event Event;
-        while (SDL_PollEvent(&Event))
-        {
-          if (Event.type == SDL_QUIT)
-          {
+        while (SDL_PollEvent(&Event)) {
+          if (Event.type == SDL_QUIT) {
             main_loop_running = false;
+            app->quit();
           }
         }
-
-        // Sleep to avoid pegging CPU (simulating 60FPS)
-        SDL_Delay(16);
         state_manager->Update(false);
-      }
+        return main_loop_running;
+      }, 16);
+
+      app->hold();
+      app->run();
+
       midiStop();
       delete dpms_thread;
       SDL_Quit();

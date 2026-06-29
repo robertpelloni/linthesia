@@ -25,6 +25,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **Headless Mode**: Added a `--headless` flag to decouple the C++ game loop from graphical OpenGL/GTK initializations, laying the groundwork for a backend/headless server mode for AI or Multiplayer.
 
+## [5.72.0] - 2026-06-29
+### Changed
+- **Executive Protocol #60 Sync**: Synchronized documentation paths and resolved supervisor versioning desyncs back to `v5.72.0`.
+
 ## [0.10.3] - 2026-04-20
 ### Added
 - **Doxygen Integration**: Added a configured `Doxyfile` and a custom `doc` run target to `meson.build` to automatically generate C++ API documentation in `docs/api/html`. Output is ignored via `.gitignore` to prevent repo bloat.

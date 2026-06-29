@@ -13,7 +13,7 @@
 #include "Tga.h"
 
 typedef Glib::RefPtr<Gdk::GLContext> GLContext;
-typedef Glib::RefPtr<Pango::Context> PGContext;
+
 
 struct Color {
   int r, g, b, a;
@@ -24,7 +24,7 @@ static bool m_vsync_initialized;
 class Renderer {
 public:
 
-  Renderer(GLContext glcontext = GLContext(), PGContext pangocontext = PGContext());
+  Renderer(GLContext glcontext = GLContext());
 
   static Color ToColor(int r, int g, int b, int a = 0xFF);
 
@@ -63,7 +63,7 @@ private:
   int m_yoffset;
 
   GLContext m_glcontext;
-  PGContext m_pangocontext;
+
 
   friend class Text;
   friend class TextWriter;
