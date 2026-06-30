@@ -30,3 +30,6 @@ depcomp
 install-sh
 ltmain.sh
 docs/api/html/
+*.pyc
+__pycache__/
+*.db

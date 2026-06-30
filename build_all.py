@@ -62,6 +62,21 @@ def build_cpp(project_dir):
         return False
     return True
 
+
+def validate_phase4(root_dir):
+    print(f"\n--- Validating Phase 4 Orchestration tools in {root_dir}/scripts ---")
+    scripts_dir = os.path.join(root_dir, 'scripts')
+
+    # 1. Test running the indexer (dry run / reindex)
+    if not run_command(['python3', 'workspace_indexer.py', 'reindex'], cwd=scripts_dir):
+        return False
+
+    # 2. Test the FastMCP Search API syntax via python compile check
+    if not run_command(['python3', '-m', 'py_compile', 'search_api.py'], cwd=scripts_dir):
+        return False
+
+    return True
+
 def main():
     root_dir = os.path.abspath(os.path.dirname(__file__))
     print(f"Scanning workspace: {root_dir}")
@@ -85,6 +100,9 @@ def main():
     for python in python_projects:
         if not build_python(python):
             success = False
+
+    if not validate_phase4(root_dir):
+        success = False
 
     if success:
         print("\\nWorkspace build verification complete: ALL SUCCESSFUL.")

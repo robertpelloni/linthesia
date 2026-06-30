@@ -8,4 +8,4 @@
 
 - [x] Implement Headless Mode for liblinthesia decoupling
 - [x] Implement basic WebSocket infrastructure in Go Backend
-- [ ] Investigate WASM / Emscripten Porting
+- [x] Investigate WASM / Emscripten Porting
