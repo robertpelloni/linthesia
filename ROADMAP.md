@@ -43,9 +43,9 @@ Please refer to `AGENTS.md` for instructions on how to contribute.
 
 
 ### Long Term: WebAssembly (WASM) Port
-*   **[ ] Web MIDI Backend**: Abstract ALSA/CoreMIDI into a `WebMidiDriver` using `EM_ASM`.
-*   **[ ] WebGL Migration**: Ensure GTKmm/Pango textures translate efficiently via Emscripten's GLES2 wrapper.
-*   **[ ] Emscripten Build Pipeline**: Implement Meson cross-compilation configurations for browser targets.
+*   **[x] Web MIDI Backend**: Abstract ALSA/CoreMIDI into a `WebMidiDriver` using `EM_ASM`.
+*   **[x] WebGL Migration**: Ensure GTKmm/Pango textures translate efficiently via Emscripten's GLES2 wrapper.
+*   **[x] Emscripten Build Pipeline**: Implement Meson cross-compilation configurations for browser targets.
 
 ## Future Innovations & Pivots
 See `IDEAS.md` for a comprehensive list of ambitious concepts including WebAssembly ports, AI Hand Tracking, Multiplayer Battles, and Procedural Sheet Music engines.

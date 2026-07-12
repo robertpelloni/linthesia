@@ -22,4 +22,8 @@ This document contains a comprehensive, ambitious list of brainstormed features,
 
 ## 4. Project Pivots
 *   **Pivot: Music Theory Curriculum Sandbox**: Shift from a pure "falling notes" game into a gamified music theory course. The software would generate randomized chord progressions, scales, and intervals on the fly, requiring the user to play them correctly to defeat enemies or progress through RPG-style levels.
-*   **Pivot: Generative AI Co-Pilot**: Integrate an LLM or music generation model (like MusicLM or Audiocraft). If the user starts improvising during "Wait Mode", the system could analyze the key signature and mood, automatically generating an accompanying bassline or drum beat and rendering those notes on-screen dynamically.
+*   **Pivot: Generative AI Co-Pilot**: Integrate an LLM or music generation model (like MusicLM or Audiocraft). If the user starts improvising during "Wait Mode", the system could analyze the key signature and mood, automatically generating an accompanying bassline or drum beat and rendering those notes on-screen dynamically. (Scaffolded `AICoPilot` module)
+
+## 5. Omniscient Orchestration & Autonomous Agent Pipelines (Phase 4/5)
+*   **LLM-Driven Refactoring (FastMCP)**: Now that `workspace_indexer.py` (FTS5 SQLite mapping) and `search_api.py` (FastMCP bridge) are stable, expand these tools to enable fully autonomous agent loops. The LLM can proactively use `analyze_dependencies` and `search_code_patterns` to mass-refactor C++ legacy patterns (like raw pointers to `std::unique_ptr`) without human supervision.
+*   **Proactive CI Agent (`build_all.py`)**: Tie the FastMCP orchestrator directly into a Github Action that analyzes PR logic. If a commit breaks `build_all.py`, the AI should immediately clone the container, use the Search API to identify the dependency drift, and commit the fix automatically.
