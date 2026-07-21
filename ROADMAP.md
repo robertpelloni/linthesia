@@ -49,3 +49,7 @@ Please refer to `AGENTS.md` for instructions on how to contribute.
 
 ## Future Innovations & Pivots
 See `IDEAS.md` for a comprehensive list of ambitious concepts including WebAssembly ports, AI Hand Tracking, Multiplayer Battles, and Procedural Sheet Music engines.
+
+## v5.81.0 Planning Cycle
+- Investigate further architectural improvements post-GTKmm migration.
+- Verify submodules and external dependencies.

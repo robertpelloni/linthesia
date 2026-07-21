@@ -332,3 +332,9 @@ void GameStateManager::TextInput(const std::string& text) {
     m_current_state->TextInput(text);
   }
 }
+
+void GameStateManager::OnMidiEvent(const MidiEvent& ev) {
+  if (m_current_state) {
+    m_current_state->OnMidiEvent(ev);
+  }
+}

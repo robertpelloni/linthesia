@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.85.0] - 2026-06-29
+### Changed
+- **GTKmm Migration**: Completed Phase 2 and 3 of the GTKmm UI rewrite. Abstracted keyboard inputs into `KeyMapper`, generic event polling into `InputManager`, and swapped the main loop from `SDL_Window` to `Gtk::Window` and `Gtk::GLArea` inside `MainWindow`.
+- **Sync**: Forward-merged Executive Protocol #61 and synchronized submodules.
+
 ## [5.76.0] - 2026-06-28
 ### Added
 - **WASM Drivers**: Added `WebMidiDriver.h` and `WebMidiDriver.cpp` to `src/drivers/` leveraging `EM_ASM` for Web MIDI API support.

@@ -1,0 +1,9 @@
+feat: Phase 2 and 3 GTKmm migration (Input Abstraction and Window Swap)
+
+- Created KeyMapper.h/cpp to map PC keyboard to MIDI notes (supporting QWERTY, AZERTY, QWERTZ).
+- Created InputManager.h/cpp to abstract UI events via GDK signals instead of SDL_Event polling.
+- Created MainWindow.h/cpp inheriting from Gtk::Window and using Gtk::GLArea for the main game window context and render loop.
+- Updated main.cpp to remove SDL_Window and the infinite while loop in favor of Gtk::Application::run().
+- Integrated new modules into meson.build and verified tests across the workspace.
+- Forward-merged Executive Protocol #61 and synchronized submodules.
+- Note: This commit is part of an autonomous agentic process.
