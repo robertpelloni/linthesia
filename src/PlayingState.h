@@ -83,6 +83,8 @@ private:
   void ResetSong();
   void Play(microseconds_t delta_microseconds);
   void Listen();
+  void OnMidiEvent(const MidiEvent& ev) override;
+  void ProcessEvent(MidiEvent ev);
 
   double CalculateScoreMultiplier() const;
 

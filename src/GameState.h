@@ -102,6 +102,7 @@ struct MouseInfo {
   MouseButtons released;
 };
 
+#include "libmidi/MidiEvent.h"
 class GameState {
 public:
 
@@ -128,6 +129,7 @@ protected:
   virtual void Update() = 0;
 
   virtual void TextInput(const std::string& text) {}
+  virtual void OnMidiEvent(const MidiEvent& ev) {}
 
   // Call when state dimesnsions changed
   virtual void Resize() = 0;
@@ -215,6 +217,7 @@ public:
 
   void KeyPress(GameKey key);
   void TextInput(const std::string& text);
+  void OnMidiEvent(const MidiEvent& ev);
   bool IsKeyPressed(GameKey key) const;
   bool IsKeyReleased(GameKey key) const;
 

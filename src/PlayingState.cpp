@@ -1206,3 +1206,124 @@ void PlayingState::DrawPopups(Renderer &renderer) const {
         text << Text(p.text, TextAttributes(Renderer::ToColor(p.r, p.g, p.b, alpha)));
     }
 }
+
+void PlayingState::OnMidiEvent(const MidiEvent& ev) {
+  ProcessEvent(ev);
+}
+
+void PlayingState::ProcessEvent(MidiEvent ev) {
+    if (m_paused) return;
+    if (ev.Type() != MidiEventType_NoteOn && ev.Type() != MidiEventType_NoteOff) return;
+
+    ev.ShiftNote(m_note_offset);
+    int note_number = ev.NoteNumber();
+    string note_name = MidiEvent::NoteName(note_number);
+    microseconds_t cur_time = m_state.midi->GetSongPositionInMicroseconds();
+
+    if (ev.Type() == MidiEventType_NoteOff || ev.NoteVelocity() == 0) {
+      for (ActiveNoteSet::iterator i = m_active_notes.begin(); i != m_active_notes.end(); ++i) {
+        if (ev.NoteNumber() != i->note_id) continue;
+        ev.SetChannel(i->channel);
+        if (m_state.midi_out) m_state.midi_out->Write(ev);
+        m_active_notes.erase(i);
+        break;
+      }
+      m_keyboard->SetKeyActive(note_name, false, Track::FlatGray);
+      userPressedKey(note_number, false);
+      return;
+    }
+
+    TranslatedNoteSet::iterator closest_match = m_notes.end();
+    for (TranslatedNoteSet::iterator i = m_notes.begin(); i != m_notes.end(); ++i) {
+      const microseconds_t window_start = i->start - (KeyboardDisplay::NoteWindowLength / 2);
+      const microseconds_t window_end = i->start + (KeyboardDisplay::NoteWindowLength / 2);
+      if (window_start > cur_time) break;
+      if (i->state != UserPlayable) continue;
+
+      if (window_end > cur_time && i->note_id == ev.NoteNumber()) {
+        if (closest_match == m_notes.end()) {
+          closest_match = i;
+          continue;
+        }
+        microseconds_t this_distance = cur_time - i->start;
+        if (i->start > cur_time) this_distance = i->start - cur_time;
+        microseconds_t known_best = cur_time - closest_match->start;
+        if (closest_match->start > cur_time) known_best = closest_match->start - cur_time;
+        if (this_distance < known_best) closest_match = i;
+      }
+    }
+
+    Track::TrackColor note_color = Track::FlatGray;
+    if (closest_match != m_notes.end()) {
+      note_color = m_state.track_properties[closest_match->track_id].color;
+      microseconds_t diff = 0;
+      bool early = false;
+      if (cur_time < closest_match->start) {
+          diff = closest_match->start - cur_time;
+          early = true;
+      } else {
+          diff = cur_time - closest_match->start;
+      }
+
+      TranslatedNote n = *closest_match;
+      n.state = UserHit;
+      m_notes.erase(closest_match);
+      m_notes.insert(n);
+      m_notes_history.insert(n);
+
+      int diff_ms = static_cast<int>(diff / 1000);
+      ScorePopup popup;
+      popup.life = 60;
+
+      int key_x, key_y, key_w, key_h;
+      key_x = GetStateWidth() / 2; key_w = 0; key_y = CalcKeyboardHeight() + 100;
+      popup.x = key_x + (key_w / 2);
+      popup.y = key_y - 20;
+
+      if (diff_ms <= 50) {
+          popup.text = "Perfect!";
+          popup.r = 0; popup.g = 255; popup.b = 0;
+          m_state.stats.perfect_hits++;
+          m_current_combo++;
+          m_state.stats.score += 10.0 * CalculateScoreMultiplier();
+          m_state.stats.notes_user_actually_played++;
+      } else if (diff_ms <= 100) {
+          popup.text = "Good";
+          popup.r = 173; popup.g = 255; popup.b = 47;
+          m_state.stats.good_hits++;
+          m_current_combo++;
+          m_state.stats.score += 5.0 * CalculateScoreMultiplier();
+          m_state.stats.notes_user_actually_played++;
+      } else {
+          if (early) popup.text = "Early";
+          else popup.text = "Late";
+          popup.r = 255; popup.g = 165; popup.b = 0;
+          m_current_combo = 0;
+          m_state.stats.score += 1.0 * CalculateScoreMultiplier();
+          m_state.stats.notes_user_actually_played++;
+      }
+      if (m_current_combo > m_state.stats.longest_combo) {
+          m_state.stats.longest_combo = m_current_combo;
+      }
+      m_popups.push_back(popup);
+    } else {
+      m_state.stats.stray_notes++;
+      m_current_combo = 0;
+    }
+
+    if (m_state.midi_out) {
+      if (note_color != Track::FlatGray) {
+        m_keyboard->SetKeyActive(note_name, true, note_color);
+      } else {
+        m_keyboard->SetKeyActive(note_name, true, Track::FlatGray);
+      }
+    } else {
+      if (note_color != Track::FlatGray) {
+        m_keyboard->SetKeyActive(note_name, true, note_color);
+      } else {
+        m_keyboard->SetKeyActive(note_name, true, Track::FlatGray);
+      }
+    }
+
+    userPressedKey(note_number, true);
+}
