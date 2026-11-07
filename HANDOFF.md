@@ -54,3 +54,9 @@ Please review `ROADMAP.md` and `README_GTK_MIGRATION.md`. The highest priority o
 - v5.88.0 prep.
 - No new submodules found.
 - Documented v5.87.0 MarbleBlast Svelte UI forward merge changes.
+
+## Executive Protocol Advancement (v5.89.0)
+- **Unified Mission Control Dashboard**: Redesigned `dashboard.html` into prioritized tiers with rich tooltips, status badges, and consolidated UI.
+- **Process Supervisor & Tray Integration**: Added `/api/tray/notify` and `/api/supervisor/cycle` endpoints with full frontend triggers.
+- **Build & Verification Automation**: Built self-created tool `/home/jules/self_created_tools/verify_all_components.py` testing C++ Linthesia, Python unit tests, and multi-language harnesses (Rust, Go, C#, Java, TypeScript) with zero failures.
+- **Submodule Sync**: `pianogame` synchronized to commit `f51d4bc`.

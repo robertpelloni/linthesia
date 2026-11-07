@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.89.0] - 2026-11-06
+### Added
+- **Unified Mission Control Dashboard**: Redesigned and consolidated `dashboard.html` into intuitive priority tiers (Mission Control & Multi-Agent Orchestration, AST & MCP Engine, Tray Supervisor & Process Lifecycle, Persistent Memory Store, and Live SSE Event Telemetry).
+- **System Tray Notification & Cycle API**: Added `/api/tray/notify` and `/api/supervisor/cycle` endpoints for tray notification triggers and process cycle validation.
+- **Build & Verification Automation**: Added self-created tool `/home/jules/self_created_tools/verify_all_components.py` and updated `pianogame/typescript/package.json` with dedicated build, test, and start scripts.
+- **Submodule State Sync**: Synchronized `pianogame` submodule cleanly with commit `f51d4bc`.
+
 ## [5.85.0] - 2026-06-29
 ### Changed
 - **GTKmm Migration**: Completed Phase 2 and 3 of the GTKmm UI rewrite. Abstracted keyboard inputs into `KeyMapper`, generic event polling into `InputManager`, and swapped the main loop from `SDL_Window` to `Gtk::Window` and `Gtk::GLArea` inside `MainWindow`.
