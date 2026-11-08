@@ -6,7 +6,7 @@ This dashboard provides an overview of the Linthesia project structure, dependen
 
 | Submodule | Path | Version/Commit | Purpose | Status |
 | :--- | :--- | :--- | :--- | :--- |
-| `pianogame` | `pianogame/` | `f51d4bc` | Synthesia legacy & Multi-Language Agentic Harness | Active/Synced |
+| `pianogame` | `pianogame/` | `2d3ba15` | Synthesia legacy & Multi-Language Agentic Harness | Active/Synced |
 
 ## Dependencies
 
