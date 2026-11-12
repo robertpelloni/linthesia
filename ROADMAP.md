@@ -2,7 +2,7 @@
 
 This document outlines the planned features, improvements, and known gaps in Linthesia.
 
-## Current Status (v5.89.0)
+## Current Status (v5.91.0)
 Linthesia is a fully functional MIDI visualizer and learning tool for Linux. It supports playing MIDI files, configuring tracks, and extensive customization. The codebase is actively transitioning to GTKmm/Pango for text rendering.
 
 ### Recently Completed
@@ -50,7 +50,8 @@ Please refer to `AGENTS.md` for instructions on how to contribute.
 ## Future Innovations & Pivots
 See `IDEAS.md` for a comprehensive list of ambitious concepts including WebAssembly ports, AI Hand Tracking, Multiplayer Battles, and Procedural Sheet Music engines.
 
-## v5.89.0 Planning Cycle
+## v5.91.0 Planning Cycle
+- [x] Forward-merge upstream changes from `pianogame` (adaptive routing, RAG indexer, worktree racer, browser CDP, audio analyzer).
 - [x] Unified Mission Control Dashboard redesign and multi-tiered UI consolidation.
 - [x] Integrate Desktop Tray notification and daemon lifecycle controls into WebUI.
 - [x] Validate cross-language harness builds (Rust, Go, C#, Java, TypeScript) and C++ Linthesia.
